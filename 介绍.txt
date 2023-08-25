@@ -1,1 +1,8 @@
-无介绍
+主函数在main中
+util.py是废稿，可以用来做些测试
+fileUtil处理文件系统
+processUtil执行进程管理
+spilitUtil分发任务
+
+目前主要任务在：spilitUtil中读取不同的文件，进行统一的string类型返回
+下一步通过各种手段进行敏感词提取
