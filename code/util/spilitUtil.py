@@ -1,4 +1,7 @@
 from fileUtil import File
+from unrar import rarfile
+import globalVar
+
 
 # 各个文件的提取
 def process_txt_file(filename):
@@ -12,6 +15,9 @@ def process_excel_file(filename):
 
 def process_rar_file(filename):
     print("Processing rar file:",filename)
+    rf = rarfile.RarFile(filename)
+    rf.extractall(globalVar.get_value("code_path")+'/workspace')
+    
 
 # 后缀匹配解析函数
 extension_switch = {
@@ -31,7 +37,7 @@ def spilit_process_file(file,root_directory):
 
     # 读取文件进行处理
     if process_function:
-        process_function(root_directory + File.get_parent_directory(file))
+        process_function(root_directory +'/'+ File.get_parent_directory(file))
     else:
         print("Unsupported file format.",file.name)
 

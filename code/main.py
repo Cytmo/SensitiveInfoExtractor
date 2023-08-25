@@ -10,9 +10,13 @@ import fileUtil
 from fileUtil import File
 import processUtil
 import spilitUtil
+import globalVar
+
+globalVar._init()
+globalVar.set_value("code_path","/home/sakucy/networkCopitation/2023")
 
 # 需要扫描的文件夹列表
-scan_folder = ['/home/sakucy/networkCopitation/2023/data']
+scan_folder = ['/home/sakucy/networkCopitation/2023/data/rar']
 
 # 进程处理函数
 def process_function(arg,file):
@@ -45,16 +49,19 @@ while not root_folder_list.empty():
     # 可以通过下方该指令输出文件树
     # direct_controller.print_directory_tree(direct_controller.head_directory)
     
+    
     # 逐个文件执行
     while not direct_controller.fileList.empty():
         # 获取一个文件File类型
         file = direct_controller.fileList.get()
+
+        
         # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
-        process_manager.add_process(callback_func,process_function, args=(folder,),kwargs={"file":file,})
+        # process_manager.add_process(callback_func,process_function, args=(folder,),kwargs={"file":file,})
 
         # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
-        # spilitUtil.spilit_process_file(file,folder)
+        spilitUtil.spilit_process_file(file,folder)
 
     # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
-    process_manager.close_process_pool()
+    # process_manager.close_process_pool()
 

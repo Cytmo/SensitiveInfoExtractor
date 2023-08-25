@@ -1,0 +1,9 @@
+# maker_folder
+maker_folder/unrar
+
+# workspace
+workspace
+
+# running package
+code/util/__pycache__
+

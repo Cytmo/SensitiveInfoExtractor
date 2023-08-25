@@ -59,7 +59,7 @@ class DirectController:
                     parent.subdirectories.append(directory)
                 self.build_directory_tree(item_path, parent=directory)
             else:
-                file = File(item, parent=directory)
+                file = File(item, parent=parent)
                 self.fileList.put(file)
                 # path_tmp = get_parent_directory(file)
                 # print(path_tmp)
