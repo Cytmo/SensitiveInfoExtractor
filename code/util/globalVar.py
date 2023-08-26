@@ -1,6 +1,10 @@
+import multiprocessing
+
 def _init():  # 初始化
     global _global_dict
     _global_dict = {}
+    global root_folder_list
+    root_folder_list = multiprocessing.Manager().Queue()
 
 def set_value(key, value):
     #定义一个全局变量

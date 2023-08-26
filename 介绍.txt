@@ -6,3 +6,5 @@ spilitUtil分发任务
 
 目前主要任务在：spilitUtil中读取不同的文件，进行统一的string类型返回
 下一步通过各种手段进行敏感词提取
+
+运行结束后./clean.sh一下

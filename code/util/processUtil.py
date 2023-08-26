@@ -1,6 +1,8 @@
 import os
 import multiprocessing
 
+
+
 # 进程管理类
 # 管理进程池，更为方便的添加进程到指定位置
 class ProcessManager:
@@ -25,6 +27,10 @@ class ProcessManager:
         if self._process_pool is not None:
             self._process_pool.close()
             self._process_pool.join()
+
+    def release_process_pool(self):
+        if self._process_pool is not None:
+            self._process_pool = None
 
     # def could_add_process(self):
     #     return self._process_count<self._cpu_count

@@ -32,15 +32,12 @@ class File:
     def get_parent_directory(cls,file):
         directory = file.parent
         result = file.name
-        while directory is not None:
+        while directory.parent is not None:
             result = directory.name + '/' +result
             directory = directory.parent
         return result
     
-    # 类方法：获取文件名后缀
-    @classmethod
-    def spilit_file_name(cls,file):
-        return os.path.splitext(file.name)[1]
+
 
 # 目录树类：存储根目录类和其下所有子文件队列
 class DirectController:
@@ -59,7 +56,7 @@ class DirectController:
                     parent.subdirectories.append(directory)
                 self.build_directory_tree(item_path, parent=directory)
             else:
-                file = File(item, parent=parent)
+                file = File(item, parent=directory)
                 self.fileList.put(file)
                 # path_tmp = get_parent_directory(file)
                 # print(path_tmp)
