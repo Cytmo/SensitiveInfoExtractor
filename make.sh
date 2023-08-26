@@ -31,3 +31,7 @@
 # pip install Pillow==9.5.0
 
 # pip install PyMuPDF     
+# pip install eml_parser
+# pip install beautifulsoup4
+# pip install tabulate
+# pip install spacy
