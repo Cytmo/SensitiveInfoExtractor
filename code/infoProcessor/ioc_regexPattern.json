@@ -42,7 +42,10 @@
     "Vulnerability": [
         "\\b(cve\\-[0-9]{4}\\-[0-9]{4,6})\\b"
     ],
-    "Arguments": [
-        "\\s[-/\\\\][0-9a-z]+\\s"
+    "Argu_with_port": [
+        "-p\\s+(\\d+)"
+    ],
+    "Argu_with_password": [
+        "-p(\\d+)"
     ]
 }

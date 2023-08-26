@@ -1,0 +1,29 @@
+assphrase[=:](.*)
+assword[=:](.*)
+PASSWORD[=:](.*)
+secret[=:](.*)
+AWS_ACCESS_KEY_ID[=:](.*)
+AWS_SECRET_ACCESS_KEY[=:](.*)
+ASS_KEY_SECRET[=:](.*)
+ACCESS_KEY_ID[=:](.*)
+PYPI_PASSOWRD[=:](.*)
+GITHUB_ACCESS_TOKEN[=:](.*)
+NPM_PASSWORD[=:](.*)
+API_KEY[=:](.*)
+SECRET_KEY[=:](.*)
+TOKEN[=:](.*)
+token[=:](.*)
+DB_PASSWORD[=:](.*)
+MYSQL_PASSWORD[=:](.*)
+S3_KEY[=:](.*)
+S3_USER_SECRET[=:](.*)
+S3_SECRET_KEY[=:](.*)
+S3_ACCESS_KEY_ID[=:](.*)
+WITTER_CONSUMER_SECRET[=:](.*)
+API_SECRET[=:](.*)
+-----BEGIN PRIVATE KEY-----
+-----BEGIN DSA PRIVATE KEY-----
+-----BEGIN EC PRIVATE KEY-----
+-----BEGIN RSA PRIVATE KEY-----
+-----BEGIN OPENSSH PRIVATE KEY-----
+-----BEGIN PGP PRIVATE KEY BLOCK-----

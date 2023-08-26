@@ -135,8 +135,11 @@ class IoCIdentifier:
         return output
 
     def display_iocs(self):
+        ioc_total = []
         for ioc in self.ioc_list:
             print("--".join([ioc.ioc_type, ioc.ioc_string]))
+            ioc_total.append("--".join([ioc.ioc_type, ioc.ioc_string]))
+        return ioc_total
 
     def check_replace_result(self):
         print("---ioc protection: Checking IoC replace result!---")

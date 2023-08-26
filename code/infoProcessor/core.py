@@ -1,9 +1,11 @@
+import os
+import shutil
 import spacy
 from spacy.matcher import Matcher
 import info_protection
 from info_protection import IoCIdentifier
-import info_parser
-from info_parser import parsingModel_training, IoCNer
+# import info_parser
+# from info_parser import parsingModel_training, IoCNer
 from spacy.tokens import Doc
 from typing import Tuple
 
@@ -24,8 +26,8 @@ def text_parse(file_path):
     matcher = Matcher(nlp.vocab)
 
 
-    octet_rx = r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
-    ip_pattern= [ {"TEXT": {"REGEX": r"^{0}(?:\.{0}){{3}}$".format(octet_rx)}}]
+    # octet_rx = r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+    # ip_pattern= [ {"TEXT": {"REGEX": r"^{0}(?:\.{0}){{3}}$".format(octet_rx)}}]
     # 添加规则来匹配IP地址
     ip_pattern = [[
         {"TEXT": {"REGEX": r"^(?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}|(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})$"}}
@@ -58,14 +60,14 @@ def text_parse(file_path):
 
 
 
-def report_parsing(text: str) -> Tuple[IoCIdentifier, Doc]:
-    iid = ioc_protection(text)
-    text_without_ioc = iid.replaced_text
+# def report_parsing(text: str) -> Tuple[IoCIdentifier, Doc]:
+#     iid = ioc_protection(text)
+#     text_without_ioc = iid.replaced_text
 
-    ner_model = IoCNer("./new_cti.model")
-    doc = ner_model.parse(text_without_ioc)
+#     ner_model = IoCNer("./new_cti.model")
+#     doc = ner_model.parse(text_without_ioc)
 
-    return iid, doc
+#     return iid, doc
 
 
 
@@ -76,20 +78,37 @@ def ioc_protection(text: str):
     return iid
 
 if __name__ == '__main__':
-    file = open(".bash_history", "r")
+    file = open("test/email", "r")
     text = file.read()
     text = ioc_protection(text)
     # text.check_replace_result()
     # text.display_iocs()
     # text.check_replace_result()
     # text.display_iocs()
-    print(text.replaced_text)
-    output_file = open("output.json", "w")
-    output_file.write(text.to_jsonl())
+
+    #删除临时文件夹
+    if os.path.exists("temp"):
+        shutil.rmtree("temp")
+    #创建临时文件夹
+    os.mkdir("temp")
+
+    # 保存替换后的文本
+    with open("temp/replaced.txt", "w") as f:
+        f.write(text.replaced_text)
+
+    # 保存替换结果
+    with open("temp/ioc_list.txt", "w") as f:
+        for ioc in text.replaced_ioc_list:
+            f.write(str(ioc) + "\n")
+    #保存结果为json
+    with open("temp/ioc_list.json", "w") as f:
+        f.write(text.to_jsonl())
+    #保存感兴趣的内容
+    print(text.display_iocs())
 
 
 
-    cti_doc = report_parsing(text.replaced_text)
-    # print(cti_doc[1])
-    for ent in cti_doc[1].ents:
-        print(ent.text, ent.label_)
+    # cti_doc = report_parsing(text.replaced_text)
+    # # print(cti_doc[1])
+    # for ent in cti_doc[1].ents:
+    #     print(ent.text, ent.label_)

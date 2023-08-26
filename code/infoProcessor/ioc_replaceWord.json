@@ -16,5 +16,7 @@
     "Registry": "registry",
 
     "Vulnerability": "vulnerability",
-    "Arguments": " "
+    "Arguments": " ",
+    "Argu_with_port": " ",
+    "Argu_with_password": " "
 }

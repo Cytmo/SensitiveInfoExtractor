@@ -1,0 +1,3 @@
+regipy
+tabulate
+spacy
