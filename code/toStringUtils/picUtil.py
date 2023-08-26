@@ -3,8 +3,13 @@ import easyocr
 from paddleocr import PaddleOCR
 import textract
 
+"""
+picUtil: 图片OCR
+* 主流OCR: https://www.jianshu.com/p/d19dba26f275
+"""
 
-# 主流OCR： https://www.jianshu.com/p/d19dba26f275
+
+# 图片OCR识别
 def pic_file(file):
     starttime = datetime.now()
 

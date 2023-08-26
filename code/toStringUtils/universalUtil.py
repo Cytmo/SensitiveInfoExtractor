@@ -1,5 +1,9 @@
 import textract
 
+"""
+universalUtil: 通用读取
+"""
+
 
 # 使用texttract通用提取文件中文本信息
 #  .csv, .doc, .docx, .eml, .epub, .gif, .htm, .html, .jpeg, .jpg, .json, .log, .mp3, .msg, .odt,
