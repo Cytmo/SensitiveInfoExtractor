@@ -2,6 +2,8 @@ from fileUtil import File
 from unrar import rarfile
 import globalVar
 import os
+import zipfile
+
 
 
 # 各个文件的提取
@@ -21,6 +23,9 @@ def process_rar_file(filename,nameclean):
     print("Processing rar file:",filename)
     
 def process_zip_file(filename,nameclean):
+    zip_file = zipfile.ZipFile(filename)
+    zip_file.extractall(globalVar.get_value("code_path")+'/workspace')
+    globalVar.root_folder_list.put(globalVar.get_value("code_path")+'/workspace/'+nameclean)
     print("Processing zip file:",filename)
 
 # 后缀匹配解析函数
