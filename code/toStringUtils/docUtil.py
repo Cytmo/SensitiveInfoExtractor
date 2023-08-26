@@ -34,7 +34,7 @@ def read_docx_text_and_pic(file_path, result_path):
 
 
 # docx_file_path = 'data/office/test_pic_txt.docx'  # 替换为实际的 .docx 文件路径
-# result_image_path = 'data/office/image'  # 替换为实际的图片保存路径
+# result_image_path = 'test/image'  # 替换为实际的图片保存路径
 # docx_text = read_docx_text_and_pic(docx_file_path, result_image_path)
 # print("Text Content:")
 # print(docx_text)
