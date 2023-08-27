@@ -1,10 +1,14 @@
 import json
 import yaml
 import json
+import os
+from regipy.registry import RegistryHive
 import xml.etree.ElementTree as ET
 
 """
-configUtil: 解析 xml/yml
+configUtil: 解析一些特殊配置文件 
+1. xml/yml
+2. Windows sam.hiv/system.hiv
 """
 
 
@@ -35,7 +39,7 @@ def xml_file(file_path):
 
 
 # 解析yml文件
-def yml_file(file):
+def yml_file(file_path):
     # 将 YAML 转换为 JSON
     def yml_to_json(yaml_content):
         try:
@@ -46,10 +50,32 @@ def yml_file(file):
             return str(e)
 
     # 开始解析
-    with open(file, 'r') as file:
+    with open(file_path, 'r') as file:
         yml_content = file.read()
     return yml_to_json(yml_content)
 
 
+# 解析 windows registry file: sam.hiv/system.hiv/sam/system
+def win_reg_file(file_path, res_path):
+    reg_path = file_path
+    reg = RegistryHive(reg_path)
+
+    # 逐行打印注册表文件的内容
+    # for entry in reg.recurse_subkeys(as_json=True):
+    #     print(entry)
+
+    # 导出为json
+    output_folder = os.path.dirname(res_path)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    output_file = res_path + ".json"
+    os.system("registry-dump {} -o {}".format(reg_path, output_file))
+
+
 # print(xml_file("data/linux/applicationContext.xml"))
 # print(yml_file("data/linux/application-dev.yml"))
+win_reg_file("data/windwos/sam.hiv", "test/win_reg/sam_hiv")
+win_reg_file("data/windwos/system.hiv", "test/win_reg/system_hiv")
+win_reg_file("data/windwos/sam/sam/sam", "test/win_reg/sam")
+win_reg_file("data/windwos/sam/sam/system", "test/win_reg/system")
