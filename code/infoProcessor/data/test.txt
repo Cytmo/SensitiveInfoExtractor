@@ -1,0 +1,28 @@
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql --tabels", "result_list": [{"text": "http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470", "start": 11, "end": 62}], "prompt": "url"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T mysql --columns", "result_list": [{"text": "http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470", "start": 11, "end": 62}], "prompt": "url"}
+{"content": "第六步：点击填写您所登录的服务器地址219.26.10.120，点击“确定” ", "result_list": [{"text": "219.26.10.120", "start": 18, "end": 31}], "prompt": "ip_address"}
+{"content": "kppublic@163.com", "result_list": [{"text": "kppublic@163.com", "start": 0, "end": 16}], "prompt": "user"}
+{"content": "passwd zther0", "result_list": [{"text": "zther0", "start": 7, "end": 13}], "prompt": "password"}
+{"content": "默认密码：admin@1234567890（请及时修改）", "result_list": [{"text": "admin@1234567890", "start": 5, "end": 21}], "prompt": "password"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql --tabels", "result_list": [], "prompt": "ip_address"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql --tabels", "result_list": [], "prompt": "password"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql --tabels", "result_list": [], "prompt": "user"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T mysql --columns", "result_list": [], "prompt": "ip_address"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T mysql --columns", "result_list": [], "prompt": "password"}
+{"content": "sqlmap -u \"http://127.0.0.1:8888/vul/sqli/sqli_del.php?id=1470\" --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T mysql --columns", "result_list": [], "prompt": "user"}
+{"content": "AID0006794\t计算机\t192.168.0.7\tuser7\t7GMXOgUE2PNzyUkR3zWuxsF8b0YUUZlS\t张三\t销售部\t在用\txx公司", "result_list": [], "prompt": "ip_address"}
+{"content": "AID0006794\t计算机\t192.168.0.7\tuser7\t7GMXOgUE2PNzyUkR3zWuxsF8b0YUUZlS\t张三\t销售部\t在用\txx公司", "result_list": [], "prompt": "password"}
+{"content": "AID0006794\t计算机\t192.168.0.7\tuser7\t7GMXOgUE2PNzyUkR3zWuxsF8b0YUUZlS\t张三\t销售部\t在用\txx公司", "result_list": [], "prompt": "url"}
+{"content": "AID0006794\t计算机\t192.168.0.7\tuser7\t7GMXOgUE2PNzyUkR3zWuxsF8b0YUUZlS\t张三\t销售部\t在用\txx公司", "result_list": [], "prompt": "user"}
+{"content": "第六步：点击填写您所登录的服务器地址219.26.10.120，点击“确定” ", "result_list": [], "prompt": "password"}
+{"content": "第六步：点击填写您所登录的服务器地址219.26.10.120，点击“确定” ", "result_list": [], "prompt": "url"}
+{"content": "第六步：点击填写您所登录的服务器地址219.26.10.120，点击“确定” ", "result_list": [], "prompt": "user"}
+{"content": "kppublic@163.com", "result_list": [], "prompt": "ip_address"}
+{"content": "kppublic@163.com", "result_list": [], "prompt": "password"}
+{"content": "kppublic@163.com", "result_list": [], "prompt": "url"}
+{"content": "passwd zther0", "result_list": [], "prompt": "ip_address"}
+{"content": "passwd zther0", "result_list": [], "prompt": "url"}
+{"content": "passwd zther0", "result_list": [], "prompt": "user"}
+{"content": "默认密码：admin@1234567890（请及时修改）", "result_list": [], "prompt": "ip_address"}
+{"content": "默认密码：admin@1234567890（请及时修改）", "result_list": [], "prompt": "url"}
+{"content": "默认密码：admin@1234567890（请及时修改）", "result_list": [], "prompt": "user"}

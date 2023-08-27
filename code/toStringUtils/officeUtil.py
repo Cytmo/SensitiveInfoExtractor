@@ -1,9 +1,9 @@
 import os
 import docx
-import fitz
+# import fitz
 from docx import Document
 from datetime import datetime
-
+import subprocess
 """
 officeUtil: 解析 docx/pdf
 """
@@ -38,6 +38,22 @@ def docx_file_text_and_img(file_path, result_path):
         print("Error:", e)
 
 
+
+# 提取doc中的文本
+def doc_file_text(doc_file_path):
+    #使用antiword将doc转换为docx
+    command = "antiword {}".format(doc_file_path)
+    print("Running "+command)
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # 打印标准输出
+    print("标准输出：")
+    print(result.stdout)
+    if result.stderr != "":
+        print("标准错误：")
+        print(result.stderr)
+    return result.stdout
+
+
 # 提取pdf文档中的文本和图片
 def pdf_file_text_and_img(pdf_file_path, result_image_path):
     doc = fitz.open(pdf_file_path)
@@ -61,6 +77,11 @@ def pdf_file_text_and_img(pdf_file_path, result_image_path):
     doc.close()
     return text
 
+
+
+
+if __name__ == '__main__':
+    doc_file_text("data/office/SSLVPNWindows.doc")
 
 # docx_file_path = 'test/test_pic_txt.docx'  # 替换为实际的 .docx 文件路径
 # result_image_path = 'test/image'  # 替换为实际的图片保存路径

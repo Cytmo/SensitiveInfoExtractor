@@ -61,7 +61,7 @@ def yml_file(file_path):
 def win_reg_file(file_path, res_path):
     #使用samdump2解析
     command = "samdump2 {} {}".format(file_path, res_path)
-    print(command)
+    print("Running"+command)
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     # 打印标准输出
     print("标准输出：")
