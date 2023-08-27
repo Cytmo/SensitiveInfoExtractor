@@ -4,6 +4,8 @@ import json
 import os
 from regipy.registry import RegistryHive
 import xml.etree.ElementTree as ET
+import subprocess
+
 
 """
 configUtil: 解析一些特殊配置文件 
@@ -57,25 +59,31 @@ def yml_file(file_path):
 
 # 解析 windows registry file: sam.hiv/system.hiv/sam/system
 def win_reg_file(file_path, res_path):
-    reg_path = file_path
-    reg = RegistryHive(reg_path)
+    #使用samdump2解析
+    command = "samdump2 {} {}".format(file_path, res_path)
+    print(command)
+    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # 打印标准输出
+    print("标准输出：")
+    print(result.stdout)
+    # reg_path = file_path
+    # reg = RegistryHive(reg_path)
 
-    # 逐行打印注册表文件的内容
-    # for entry in reg.recurse_subkeys(as_json=True):
-    #     print(entry)
+    # # 逐行打印注册表文件的内容
+    # # for entry in reg.recurse_subkeys(as_json=True):
+    # #     print(entry)
 
-    # 导出为json
-    output_folder = os.path.dirname(res_path)
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    # # 导出为json
+    # output_folder = os.path.dirname(res_path)
+    # if not os.path.exists(output_folder):
+    #     os.makedirs(output_folder)
 
-    output_file = res_path + ".json"
-    os.system("registry-dump {} -o {}".format(reg_path, output_file))
+    # output_file = res_path + ".json"
+    # os.system("registry-dump {} -o {}".format(reg_path, output_file))
 
 
 # print(xml_file("data/linux/applicationContext.xml"))
 # print(yml_file("data/linux/application-dev.yml"))
-win_reg_file("data/windwos/sam.hiv", "test/win_reg/sam_hiv")
-win_reg_file("data/windwos/system.hiv", "test/win_reg/system_hiv")
-win_reg_file("data/windwos/sam/sam/sam", "test/win_reg/sam")
-win_reg_file("data/windwos/sam/sam/system", "test/win_reg/system")
+win_reg_file("data/windwos/system.hiv","data/windwos/sam.hiv")
+win_reg_file("data/windwos/sam/sam/system", "data/windwos/sam/sam/sam")
+
