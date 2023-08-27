@@ -140,3 +140,4 @@ cython_debug/
 .idea
 modes/ocr
 test
+*.pptx

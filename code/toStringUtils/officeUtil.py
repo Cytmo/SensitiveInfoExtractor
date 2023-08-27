@@ -89,10 +89,14 @@ def et_file_text(et_file_path):
     return decoded_text
 
 
-# 提取ppt中的文本和图片
-def ppt_file(ppt_file_path, result_image_path):
+# 提取.ppt和.wps中的文本和图片
+def ppt_and_dps_file(ppt_file_path, result_image_path):
+    if ppt_file_path.endswith(".ppt"):
+        ppt_pptx_path = ppt_file_path.replace(".ppt", ".pptx")
 
-    ppt_pptx_path = ppt_file_path.replace(".ppt", ".pptx")
+    if ppt_file_path.endswith(".dps"):
+        ppt_pptx_path = ppt_file_path.replace(".dps", ".pptx")
+
     ppt_pptx_name = ppt_file_path.split("/")[-1]
     with slides.Presentation(ppt_file_path) as presentation:
         presentation.save(ppt_pptx_path, slides.export.SaveFormat.PPTX)
@@ -145,5 +149,8 @@ def ppt_file(ppt_file_path, result_image_path):
 # print("提取的文本：")
 # print(extracted_text)
 
-# print(ppt_file("data/office/20180327081403010127.ppt", "test/image"))
-# print(ppt_file("data/office/学生信息管理系统使用介绍.ppt", "test/image"))
+# print(ppt_and_dps_file("data/office/20180327081403010127.ppt", "test/image/ppt"))
+# print(ppt_and_dps_file("data/office/学生信息管理系统使用介绍.ppt", "test/image/ppt"))
+
+# print(ppt_and_dps_file("data/wps/学生信息管理系统使用介绍.dps", "test/image/dps"))
+# print(ppt_and_dps_file("data/wps/20180327081403010127.dps", "test/image/dps"))
