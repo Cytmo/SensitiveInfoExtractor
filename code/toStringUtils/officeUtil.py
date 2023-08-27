@@ -1,9 +1,11 @@
+import aspose.pydrawing as drawing
+from pptx import Presentation
+import aspose.slides as slides
 import os
 import docx
 import fitz
 from docx import Document
 from datetime import datetime
-import subprocess
 import textract
 """
 officeUtil: 解析 docx/pdf/wps/et
@@ -87,6 +89,47 @@ def et_file_text(et_file_path):
     return decoded_text
 
 
+# 提取ppt中的文本和图片
+def ppt_file(ppt_file_path, result_image_path):
+
+    ppt_pptx_path = ppt_file_path.replace(".ppt", ".pptx")
+    ppt_pptx_name = ppt_file_path.split("/")[-1]
+    with slides.Presentation(ppt_file_path) as presentation:
+        presentation.save(ppt_pptx_path, slides.export.SaveFormat.PPTX)
+
+    presentation = Presentation(ppt_pptx_path)
+    slide_text = ""
+    for slide_number, slide in enumerate(presentation.slides, start=1):
+        # 提取文本内容
+        for shape in slide.shapes:
+            if hasattr(shape, "text"):
+                slide_text += shape.text + "\n"
+
+        image_count = 0
+        for shape in slide.shapes:
+            if shape.shape_type == 13:  # 13 表示图片
+                # 提取图片
+                image_dir = f"{result_image_path}/{ppt_pptx_name}/"
+                os.makedirs(image_dir, exist_ok=True)
+                image_count += 1
+                image = shape.image
+                image_bytes = image.blob
+                image_ext = image.ext
+                image_filename = image_dir + \
+                    f"{ppt_pptx_name}_slide_{slide_number}_image_{image_count}.{image_ext}"
+
+                with open(image_filename, "wb") as img_file:
+                    img_file.write(image_bytes)
+
+    # 去除水印文字
+    slide_text = slide_text.replace("Evaluation only.", "")
+    slide_text = slide_text.replace(
+        "Created with Aspose.Slides for .NET Standard 2.0 23.8.", "")
+    slide_text = slide_text.replace("Copyright 2004-2023Aspose Pty Ltd.", "")
+
+    return slide_text
+
+
 # print(wps_file_text("data/wps/Android手机VPN安装指南.wps"))
 # print(et_file_text("data/wps/资产梳理.et"))
 
@@ -101,3 +144,6 @@ def et_file_text(et_file_path):
 # extracted_text = pdf_file_text_and_img(pdf_file_path, result_image_path)
 # print("提取的文本：")
 # print(extracted_text)
+
+# print(ppt_file("data/office/20180327081403010127.ppt", "test/image"))
+# print(ppt_file("data/office/学生信息管理系统使用介绍.ppt", "test/image"))

@@ -35,3 +35,6 @@
 # pip install beautifulsoup4
 # pip install tabulate
 # pip install spacy
+# pip install aspose.slides
+# sudo apt install libc6-dev 
+# sudo apt install libgdiplus
