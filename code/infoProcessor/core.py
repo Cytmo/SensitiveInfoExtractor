@@ -77,9 +77,15 @@ def ioc_protection(text: str):
     # iid.check_replace_result()
     return iid
 
+import argparse
 if __name__ == '__main__':
-    file = open("test/email", "r")
-    text = file.read()
+    # file = open("test/.bash_history", "r")
+    # file = open("test/windows/system.hiv.json", "r")
+    argparse = argparse.ArgumentParser()
+    argparse.add_argument("-f", "--file", required=True,help="The file to be parsed")
+    args = argparse.parse_args()
+    with open(args.file, "r") as f:
+        text = f.read()
     text = ioc_protection(text)
     # text.check_replace_result()
     # text.display_iocs()

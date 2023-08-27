@@ -18,5 +18,7 @@
     "Vulnerability": "vulnerability",
     "Arguments": " ",
     "Argu_with_port": " ",
-    "Argu_with_password": " "
+    "Argu_with_password": " ",
+    "Access_key": " ",
+    "Secret_key": " "
 }
