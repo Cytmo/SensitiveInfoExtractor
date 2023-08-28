@@ -11,10 +11,10 @@ import spacy
 import random
 import json
 import logging
-import coreferee
 
 
-ner_labels = ["actor", "executable", "file", "network", "registry", "vulnerability", "system"]
+ner_labels = ["actor", "executable", "file",
+              "network", "registry", "vulnerability", "system"]
 
 
 def read_labeled_data(path: str) -> list:
@@ -36,7 +36,8 @@ def load_ner_regexPattern(ner_regexPattern_path: str = "./ner_regexPattern.json"
     ner_regexPatterns = []
     for label, pattern_list in pattern_dict.items():
         for pattern in pattern_list:
-            ner_regexPatterns.append({"label": label, "pattern": [{"TEXT": {"REGEX": pattern}}]})
+            ner_regexPatterns.append(
+                {"label": label, "pattern": [{"TEXT": {"REGEX": pattern}}]})
 
     return ner_regexPatterns
 
@@ -70,7 +71,8 @@ class IoCNer:
         # https://stackoverflow.com/questions/57667710/using-regex-for-phrase-pattern-in-entityruler
         # https://python.plainenglish.io/a-closer-look-at-entityruler-in-spacy-rule-based-matching-44d01c43fb6
         logging.info("---Add Regex-based NER Pipe!---")
-        ruler = self.nlp.add_pipe("entity_ruler", config=self.config, before="ner")
+        ruler = self.nlp.add_pipe(
+            "entity_ruler", config=self.config, before="ner")
         ner_regexPatterns = load_ner_regexPattern()
         ruler.add_patterns(ner_regexPatterns)
 
@@ -91,7 +93,8 @@ class IoCNer:
             for e in entry['label']:
                 entities.append((e[0], e[1], e[2]))
             try:
-                spacy_data.append(Example.from_dict(self.nlp.make_doc(entry['data']), {"entities": entities}))
+                spacy_data.append(Example.from_dict(
+                    self.nlp.make_doc(entry['data']), {"entities": entities}))
             except:
                 logging.warning("Wrong format: %s!" % entry['data'])
         return spacy_data
@@ -127,11 +130,13 @@ class IoCNer:
                 # Batch the examples
                 for batch in spacy.util.minibatch(spacy_data, size=2):
                     # Update the model
-                    self.nlp.update(batch, sgd=self.optimizer)  # , drop=0.35, losses=losses
+                    # , drop=0.35, losses=losses
+                    self.nlp.update(batch, sgd=self.optimizer)
                     print('Losses', losses)
 
         self.nlp.to_disk(new_model_location)
-        logging.info("---report parsing: Save model to %s!---" % new_model_location)
+        logging.info("---report parsing: Save model to %s!---" %
+                     new_model_location)
 
     def test_model(self,
                    sample: str = "APT3 has used PowerShell on victim systems to download and run payloads after exploitation."):

@@ -3,10 +3,13 @@ from util import processUtil
 from util import spilitUtil
 from util.fileUtil import File
 from util import fileUtil
+from informationEngine import info_core
 import time
+from util.log_utils import LoggerSingleton
+logger = LoggerSingleton().get_logger()
 
+logger.info("Info ************************ start *****************************")
 # 添加依赖
-
 T1 = time.perf_counter()
 
 globalVar._init()
@@ -67,5 +70,6 @@ while not globalVar.root_folder_list.empty():
 
 
 T2 = time.perf_counter()
-print('程序运行时间:%s毫秒' % ((T2 - T1)*1000))
+logger.info('程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒
+logger.info("Info ************************* end ******************************")
