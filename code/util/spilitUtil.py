@@ -28,17 +28,19 @@ def process_excel_file(filename, nameclean):
 
 def process_rar_file(filename, nameclean):
     rf = rarfile.RarFile(filename)
-    rf.extractall(globalVar.get_value("code_path")+'/workspace')
+    rf.extractall(globalVar.get_value("code_path")+'../workspace')
     globalVar.root_folder_list.put(
-        globalVar.get_value("code_path")+'/workspace/'+nameclean)
+        globalVar.get_value("code_path")+'../workspace/'+nameclean)
     print("Processing rar file:", filename)
 
 
 def process_zip_file(filename, nameclean):
+    print("---------------"+filename+"  "+nameclean)
+    print(globalVar.get_value("code_path"))
     zip_file = zipfile.ZipFile(filename)
-    zip_file.extractall(globalVar.get_value("code_path")+'/workspace')
+    zip_file.extractall(globalVar.get_value("code_path")+'../workspace')
     globalVar.root_folder_list.put(
-        globalVar.get_value("code_path")+'/workspace/'+nameclean)
+        globalVar.get_value("code_path")+'../workspace/'+nameclean)
     print("Processing zip file:", filename)
 
 
@@ -180,10 +182,10 @@ def spilit_process_file(file, root_directory):
 
     file_name = root_directory + '/' + File.get_parent_directory(file)
     # 读取文件进行处理
-    # if process_function:
-    #     process_function(file_name, file_spilit[0])
-    # else:
+    if process_function:
+        process_function(file_name, file_spilit[0])
+    else:
         # if if_passwd_file(file_name, file_spilit[0]):
         #     process_passwd_file(file_name)
 
-        # print("Unsupported file format.", file.name)
+        print("Unsupported file format.", file.name)
