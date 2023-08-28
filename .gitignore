@@ -141,3 +141,12 @@ cython_debug/
 modes/ocr
 test
 *.pptx
+# maker_folder
+maker_folder/unrar
+
+# workspace
+workspace
+
+# running package
+code/util/__pycache__
+
