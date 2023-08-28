@@ -12,7 +12,7 @@ def testPass(cryptPass):
     return 
 
 def main():
-    passFile=open('/home/sakucy/networkCopitation/2023/data/linux/etc/shadow')
+    passFile=open('../data/linux/etc/shadow')
     for line in passFile.readlines():      ## 读取文件中的所有内容
         if ":" in line:
             user=line.split(":")[0]                     ## 获得用户名

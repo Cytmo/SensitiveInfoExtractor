@@ -8,3 +8,5 @@ spilitUtil分发任务
 下一步通过各种手段进行敏感词提取
 
 运行结束后./clean.sh一下
+
+python 文件夹需要加添加 __init__.py 文件标识为python代码包

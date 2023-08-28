@@ -2,3 +2,9 @@
 ## Requirements
 antiword
 samdump2
+
+## Execute path
+`security-text-detect-825/code`
+
+## Model path
+`model/model_name/`

@@ -1,30 +1,31 @@
-import sys
-sys.path.append('/home/sakucy/networkCopitation/2023/code/util')
+from util import globalVar
+from util import processUtil
+from util import spilitUtil
+from util.fileUtil import File
+from util import fileUtil
 import time
 
-
-#添加依赖
-import fileUtil
-from fileUtil import File
-import processUtil
-import spilitUtil
-import globalVar
+# 添加依赖
 
 T1 = time.perf_counter()
 
 globalVar._init()
-globalVar.set_value("code_path","/home/sakucy/networkCopitation/2023")
+globalVar.set_value("code_path", "")
 
 # 需要扫描的文件夹列表
-scan_folder = ['/home/sakucy/networkCopitation/2023/data']
+scan_folder = ['../data']
 
 # 进程处理函数
-def process_function(arg,file):
-    spilitUtil.spilit_process_file(file,arg)
-   
+
+
+def process_function(arg, file):
+    spilitUtil.spilit_process_file(file, arg)
+
 # 进程回调函数
+
+
 def callback_func(result):
-    return 
+    return
 
 
 # 将初始目录压进根目录队列
@@ -43,19 +44,19 @@ while not globalVar.root_folder_list.empty():
     # 取出第一个根目录
     folder = globalVar.root_folder_list.get()
     # 构建根目录的文件树
-    direct_controller.head_directory = direct_controller.build_directory_tree(folder)
+    direct_controller.head_directory = direct_controller.build_directory_tree(
+        folder)
     # 可以通过下方该指令输出文件树
     # direct_controller.print_directory_tree(direct_controller.head_directory)
-    
-    
+
     # 逐个文件执行
     while not direct_controller.fileList.empty():
         # 获取一个文件File类型
         file = direct_controller.fileList.get()
 
-        
         # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
-        process_manager.add_process(callback_func,process_function, args=(folder,),kwargs={"file":file,})
+        process_manager.add_process(
+            callback_func, process_function, args=(folder,), kwargs={"file": file, })
 
         # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
         # spilitUtil.spilit_process_file(file,folder)
@@ -64,6 +65,6 @@ while not globalVar.root_folder_list.empty():
     process_manager.close_process_pool()
     process_manager.release_process_pool()
 
-T2 =time.perf_counter()
+T2 = time.perf_counter()
 print('程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒

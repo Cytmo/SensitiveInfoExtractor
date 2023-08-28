@@ -150,3 +150,5 @@ workspace
 # running package
 code/util/__pycache__
 
+
+*.pyc

@@ -38,12 +38,15 @@
 # pip install aspose.slides
 # sudo apt install libc6-dev 
 # sudo apt install libgdiplus
-# pip install unrar
-cd maker_folder
-# tar -xzvf unrarsrc-5.4.5.tar.gz
-cd unrar
-sudo make lib
-sudo make install-lib
 
-# vim ~/.bashrc
-# export UNRAR_LIB_PATH=/usr/lib/libunrar.so
+# 具体见code/lib/readme.md
+# pip install unrar  #直接pip install即可
+# cd lib (code/lib)
+# wget http://www.rarlab.com/rar/unrarsrc-5.4.5.tar.gz
+# # tar -xzvf unrarsrc-5.4.5.tar.gz
+# cd unrar
+# sudo make lib
+# sudo make install-lib
+
+# # vim ~/.bashrc
+# # export UNRAR_LIB_PATH=/usr/lib/libunrar.so
