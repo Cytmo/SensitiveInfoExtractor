@@ -8,7 +8,10 @@ from spacy.tokens import Doc
 from typing import Any, Tuple
 import re
 
+
+# 添加日志模块
 from util.log_utils import LoggerSingleton
+TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
 
 
@@ -208,11 +211,9 @@ def extract_paired_info(text):
 # 输入：处理过后的字符串
 # 输出：成对信息列表
 def begin_info_extraction(text: str) -> list:
-
     if has_chinese(text):
         text = text_preprocessing(text)
     # print(text)
     paired_info = extract_paired_info(text)
-    logger.info('Info extraction finished...')
-    logger.info('Info extraction result: '+str(paired_info))
+    logger.info(TAG + 'Info extraction result: '+str(paired_info))
     return paired_info

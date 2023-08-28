@@ -6,9 +6,13 @@ from util import fileUtil
 from informationEngine import info_core
 import time
 from util.log_utils import LoggerSingleton
-logger = LoggerSingleton().get_logger()
 
-logger.info("Info ************************ start *****************************")
+# 添加日志模块
+logger = LoggerSingleton().get_logger()
+TAG = "main.py: "
+logger.info(TAG + "************************ start *****************************")
+
+
 # 添加依赖
 T1 = time.perf_counter()
 
@@ -70,6 +74,6 @@ while not globalVar.root_folder_list.empty():
 
 
 T2 = time.perf_counter()
-logger.info('程序运行时间:%s毫秒' % ((T2 - T1)*1000))
+logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒
-logger.info("Info ************************* end ******************************")
+logger.info(TAG+"************************* end ******************************")
