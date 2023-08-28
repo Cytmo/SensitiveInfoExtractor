@@ -10,6 +10,11 @@ from spacy.tokens import Doc
 from typing import Any, Tuple
 import re
 
+import log_utils
+logger = log_utils.GetLog().get_log()
+
+logger.info('Info extraction start...')
+
 def text_parse(file_path):
     # 加载英语语言模型
     nlp = spacy.load("en_core_web_sm")
@@ -103,7 +108,7 @@ def text_preprocessing(text: str) -> str:
             cleaned_text = cleaned_text.replace(keyword, ' {'+replacement_dict[keyword]+'} ')
     # 移除空行
     cleaned_text = '\n'.join([line for line in cleaned_text.splitlines() if line.strip()])
-    print(cleaned_text)
+    logger.debug(cleaned_text)
     return cleaned_text
 
 def has_chinese(text: str) -> bool:
@@ -189,6 +194,20 @@ def extract_paired_info(text):
         result_pair.append(last_output)       
     return result_pair
 
+
+
+# 从处理过后的字符串中提取成对信息
+# 输入：处理过后的字符串
+# 输出：成对信息列表
+def begin_info_extraction(text:str) -> list:
+    if has_chinese(text):
+        text = text_preprocessing(text)
+    # print(text)
+    paired_info = extract_paired_info(text)
+    logger.info('Info extraction finished...')
+    logger.info('Info extraction result: '+str(paired_info))
+    return paired_info
+
 import argparse
 if __name__ == '__main__':
     # file = open("test/.bash_history", "r")
@@ -198,12 +217,7 @@ if __name__ == '__main__':
     args = argparse.parse_args()
     with open(args.file, "r") as f:
         text = f.read()
-    if has_chinese(text):
-        text = text_preprocessing(text)
-    # print(text)
-    paired_info = extract_paired_info(text)
-
-    print(paired_info)
+    begin_info_extraction(text)
     exit(0)
     # yara_str_scan(text)
     # exit(0)

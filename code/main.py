@@ -65,6 +65,7 @@ while not globalVar.root_folder_list.empty():
     process_manager.close_process_pool()
     process_manager.release_process_pool()
 
+
 T2 = time.perf_counter()
 print('程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒
