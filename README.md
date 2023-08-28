@@ -1,7 +1,9 @@
 # securityTextDetect825
 ## Requirements
 `apt-get install antiword`
+
 `apt-get install samdump2`
+
 `pip install colorlog`
 
 ## Execute path
