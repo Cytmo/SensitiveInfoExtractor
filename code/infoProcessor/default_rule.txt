@@ -1,0 +1,25 @@
+/*
+    Rule to scan files on shares for sensitive content.
+    E.g. passwords, certificates, ...
+*/
+rule sensitive_information_on_share
+{
+    meta:
+        description  = "File accessible on share contains sensitive information."
+        threat_level = 5
+        in_the_wild  = true
+
+    strings:
+        $pass1  = /[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd](\W|_)/
+        $pass2  = /\-[Pp][Aa][Ss][Ss]\s/
+        $pass3  = /\-[Pp][Ww]\s/
+        $putty1 = "PuTTY Configuration Manager export file"
+        $putty2 = "PuTTY-User-Key-File"
+        $creds1 = /[Cc][Rr][Ee][Dd][Ee][Nn][Tt][Ii][Aa][Ll][Ss]/
+        $key1   = /-----BEGIN\s+(\S+\s+)?PRIVATE/
+        $key2   = /-----BEGIN\s+(\S+\s+)?ENCRYPTED\s+PRIVATE/
+        $basic1 = "Authorization: Basic"
+
+    condition:
+        any of them
+}
