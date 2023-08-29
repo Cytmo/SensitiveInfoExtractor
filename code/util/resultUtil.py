@@ -9,6 +9,7 @@ class ResOut:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            cls._instance.res_json = []
         return cls._instance
 
     def add_new_json(self, file_path, sensitive_data):
@@ -28,5 +29,10 @@ class ResOut:
         directory = os.path.dirname(filename)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        with open(filename, 'w') as file:
+        # append mode
+        with open(filename, 'a+') as file:
             json.dump(self.res_json, file, indent=4, ensure_ascii=False)
+
+    def clean(self,filename):
+        if os.path.exists(filename):
+            os.remove(filename)
