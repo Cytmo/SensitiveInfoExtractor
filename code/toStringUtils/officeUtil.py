@@ -145,11 +145,11 @@ def ppt_and_dps_file(ppt_file_path):
         if not len(image_info) == 0:
             image_string = "\n".join(image_info)
             image_all_text = image_all_text+"\n"+image_string
-            # logger.info(TAG+"ppt_and_dps_file(): handle " +
-            #             image_path + " is not none, str len is "+str(len(image_all_text)))
+        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
+        #                 image_path + " is not none, str len is "+str(len(image_all_text)))
         # else:
-            # logger.info(TAG+"ppt_and_dps_file(): handle " +
-            #             image_path + " is none")
+        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
+        #                 image_path + " is none")
 
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")

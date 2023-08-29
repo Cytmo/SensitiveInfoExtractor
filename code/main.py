@@ -19,9 +19,10 @@ res_out = ResOut()
 res_out.add_new_json(
     "main.py", "************************ start *****************************")
 
-# 添加依赖
+# 计时
 T1 = time.perf_counter()
 
+# 添加依赖
 globalVar._init()
 globalVar.set_value("code_path", "")
 
@@ -68,15 +69,15 @@ while not globalVar.root_folder_list.empty():
         file = direct_controller.fileList.get()
 
         # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
-        process_manager.add_process(
-            callback_func, process_function, args=(folder,), kwargs={"file": file, })
+        # process_manager.add_process(
+        #     callback_func, process_function, args=(folder,), kwargs={"file": file, })
 
         # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
-        # spilitUtil.spilit_process_file(file, folder)
+        spilitUtil.spilit_process_file(file, folder)
 
     # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
-    process_manager.close_process_pool()
-    process_manager.release_process_pool()
+    # process_manager.close_process_pool()
+    # process_manager.release_process_pool()
 
 
 T2 = time.perf_counter()

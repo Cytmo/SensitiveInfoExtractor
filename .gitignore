@@ -143,6 +143,7 @@ test
 *.pptx
 # maker_folder
 maker_folder/unrar
+maker_folder/john-1.9.0-jumbo-1
 
 # workspace
 workspace
