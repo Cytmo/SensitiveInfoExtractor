@@ -151,3 +151,4 @@ workspace
 code/util/__pycache__
 
 *.pyc
+code/output/output.json

@@ -7,6 +7,10 @@ import zipfile
 import os
 from informationEngine.info_core import begin_info_extraction
 
+# 添加结果输出模块
+from util.resultUtil import ResOut
+res_out = ResOut()
+
 
 def convert_format_time(time_days):
     start_date = datetime.datetime(1970, 1, 1)
@@ -192,4 +196,7 @@ def spilit_process_file(file, root_directory):
     #     process_passwd_file(file_name)
     # print(file_name)
     # print("=>Unsupported file format.", file.name)
-    begin_info_extraction("第六步：点击填写您所登录的服务器地址219.26.10.120，点击“确定” ")
+    res_sensitive_data = begin_info_extraction(
+        "第六步:点击填写您所登录的服务器地址219.26.10.120,点击“确定” ")
+
+    res_out.add_new_json(file.name, res_sensitive_data)

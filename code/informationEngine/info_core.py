@@ -10,7 +10,7 @@ import re
 
 
 # 添加日志模块
-from util.log_utils import LoggerSingleton
+from util.logUtils import LoggerSingleton
 TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
 

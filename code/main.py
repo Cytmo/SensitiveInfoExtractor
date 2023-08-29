@@ -1,3 +1,4 @@
+from util.resultUtil import ResOut
 from util import globalVar
 from util import processUtil
 from util import spilitUtil
@@ -5,13 +6,17 @@ from util.fileUtil import File
 from util import fileUtil
 from informationEngine import info_core
 import time
-from util.log_utils import LoggerSingleton
+from util.logUtils import LoggerSingleton
+from util.resultUtil import ResOut
 
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
 TAG = "main.py: "
 logger.info(TAG + "************************ start *****************************")
 
+# 添加结果输出模块
+res_out = ResOut()
+res_out.add_new_json("main.py", "start")
 
 # 添加依赖
 T1 = time.perf_counter()
@@ -77,3 +82,4 @@ T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒
 logger.info(TAG+"************************* end ******************************")
+# res_out.add_new_json("main.py", "end")
