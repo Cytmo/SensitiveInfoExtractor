@@ -16,8 +16,8 @@ logger.info(TAG + "************************ start *****************************"
 
 # 添加结果输出模块
 res_out = ResOut()
-res_out.clean("output/output.json")
-res_out.add_new_json("main.py", "start")
+res_out.add_new_json(
+    "main.py", "************************ start *****************************")
 
 # 计时
 T1 = time.perf_counter()
@@ -84,4 +84,7 @@ T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒
 logger.info(TAG+"************************* end ******************************")
-res_out.add_new_json("main.py", "end")
+res_out.add_new_json(
+    "main.py", "************************* end ******************************")
+res_out.save_to_file("output/output.json")
+logger.info(TAG+"result is saved to: output/output.json")
