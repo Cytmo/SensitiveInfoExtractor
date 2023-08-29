@@ -1,19 +1,20 @@
+import argparse
 import os
 import shutil
 import spacy
 from spacy.matcher import Matcher
-# from informationEngine import info_protection
-from info_protection import IoCIdentifier
+from informationEngine import info_protection
+from informationEngine.info_protection import IoCIdentifier
 from spacy.tokens import Doc
 from typing import Any, Tuple
 import re
 
 
-
 # 添加日志模块
-from logUtils import LoggerSingleton
+from util.logUtils import LoggerSingleton
 TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
+
 
 def text_parse(file_path):
     # 加载英语语言模型
@@ -87,28 +88,28 @@ def ioc_protection(text: str):
 #     pass
 
 
-
-
 # 防止文件名等并识别为关键字，如user.txt
 def fuzz_prevention(text: str) -> str:
     # 文件后缀列表
     file_extensions = ['sys', 'htm', 'html', 'jpg', 'png', 'vb', 'scr', 'pif', 'chm',
-                          'zip', 'rar', 'cab', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
-                          'xls', 'xlsx', 'swf', 'gif','txt','csv','sh','c','d','conf','exe']
-    
+                       'zip', 'rar', 'cab', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
+                       'xls', 'xlsx', 'swf', 'gif', 'txt', 'csv', 'sh', 'c', 'd', 'conf', 'exe']
+
     # 构建正则表达式模式，匹配文件名及其后缀
     extensions_pattern = '|'.join(file_extensions)
     file_pattern = r'\w+\.(?:' + extensions_pattern + r')\b'
-    
+
     # 使用正则替换
     result = re.sub(file_pattern, 'file', text)
-    
+
     return result
 
 
-keywords_list = ["-uroot","-p","IP", "port", "user", "password", "address", "name", '\n']
-replacement_dict = {"-p":"password","port": "port","-uroot":"userroot" ,"user": "user", "password": "password",
+keywords_list = ["-uroot", "-p", "IP", "port",
+                 "user", "password", "address", "name", '\n']
+replacement_dict = {"-p": "password", "port": "port", "-uroot": "userroot", "user": "user", "password": "password",
                     "address": "address", "name": "name"}
+
 
 def text_preprocessing(text: str) -> str:
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
@@ -127,16 +128,20 @@ def text_preprocessing(text: str) -> str:
     # 移除空行
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
-    cleaned_text = cleaned_text.replace("{ {","{").replace("} }","}")
+    cleaned_text = cleaned_text.replace("{ {", "{").replace("} }", "}")
     logger.debug("Cleaned text: "+cleaned_text)
     return cleaned_text
 
+
 # 中文关键字列表
-chn_keywords_list = ["IP", "端口", "名称", "地址", "姓名", "学号", "用户名", "密码", "密钥为", '\n']
+chn_keywords_list = ["IP", "端口", "名称", "地址",
+                     "姓名", "学号", "用户名", "密码", "密钥为", '\n']
 # 中文替换列表
 chn_replacement_dict = {"端口": "port", "名称": "user", "学号": "user", "用户名": "user",
-                    "密钥为": "password", "密码": "password", "地址": "address", "姓名": "name"}
+                        "密钥为": "password", "密码": "password", "地址": "address", "姓名": "name"}
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
+
+
 def chn_text_preprocessing(text: str) -> str:
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(chn_keywords_list)}|[a-zA-Z0-9,.;@?!\"'()])+"
@@ -267,47 +272,47 @@ def begin_info_extraction(text: str) -> list:
     return paired_info
 
 
-import argparse
-if __name__ == '__main__':
-    # file = open("test/.bash_history", "r")
-    # file = open("test/windows/system.hiv.json", "r")
-    argparse = argparse.ArgumentParser()
-    argparse.add_argument("-f", "--file", required=True,help="The file to be parsed")
-    args = argparse.parse_args()
-    with open(args.file, "r") as f:
-        text = f.read()
-    begin_info_extraction(text)
-    exit(0)
-    if has_chinese(text):
-        text = chn_text_preprocessing(text)
-    # print(text)
-    paired_info = extract_paired_info(text)
+# if __name__ == '__main__':
+#     # file = open("test/.bash_history", "r")
+#     # file = open("test/windows/system.hiv.json", "r")
+#     argparse = argparse.ArgumentParser()
+#     argparse.add_argument("-f", "--file", required=True,
+#                           help="The file to be parsed")
+#     args = argparse.parse_args()
+#     with open(args.file, "r") as f:
+#         text = f.read()
+#     begin_info_extraction(text)
+#     exit(0)
+#     if has_chinese(text):
+#         text = chn_text_preprocessing(text)
+#     # print(text)
+#     paired_info = extract_paired_info(text)
 
-    logger.info(paired_info)
-    # yara_str_scan(text)
-    # exit(0)
-    text = ioc_protection(text)
-    # text.check_replace_result()
-    # text.display_iocs()
-    # text.check_replace_result()
-    # text.display_iocs()
+#     logger.info(paired_info)
+#     # yara_str_scan(text)
+#     # exit(0)
+#     text = ioc_protection(text)
+#     # text.check_replace_result()
+#     # text.display_iocs()
+#     # text.check_replace_result()
+#     # text.display_iocs()
 
-    #删除临时文件夹
-    if os.path.exists("temp"):
-        shutil.rmtree("temp")
-    #创建临时文件夹
-    os.mkdir("temp")
+#     # 删除临时文件夹
+#     if os.path.exists("temp"):
+#         shutil.rmtree("temp")
+#     # 创建临时文件夹
+#     os.mkdir("temp")
 
-    # 保存替换后的文本
-    with open("temp/replaced.txt", "w") as f:
-        f.write(text.replaced_text)
+#     # 保存替换后的文本
+#     with open("temp/replaced.txt", "w") as f:
+#         f.write(text.replaced_text)
 
-    # 保存替换结果
-    with open("temp/ioc_list.txt", "w") as f:
-        for ioc in text.replaced_ioc_list:
-            f.write(str(ioc) + "\n")
-    #保存结果为json
-    with open("temp/ioc_list.json", "w") as f:
-        f.write(text.to_jsonl())
-    #保存感兴趣的内容
-    print(text.display_iocs())
+#     # 保存替换结果
+#     with open("temp/ioc_list.txt", "w") as f:
+#         for ioc in text.replaced_ioc_list:
+#             f.write(str(ioc) + "\n")
+#     # 保存结果为json
+#     with open("temp/ioc_list.json", "w") as f:
+#         f.write(text.to_jsonl())
+#     # 保存感兴趣的内容
+#     print(text.display_iocs())

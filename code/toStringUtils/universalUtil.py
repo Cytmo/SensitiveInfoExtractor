@@ -1,5 +1,9 @@
 import textract
 
+from util.logUtils import LoggerSingleton
+TAG = "util.logUtils.py: "
+logger = LoggerSingleton().get_logger()
+
 """
 universalUtil: 通用读取
 """
@@ -9,6 +13,8 @@ universalUtil: 通用读取
 #  .csv, .doc, .docx, .eml, .epub, .gif, .htm, .html, .jpeg, .jpg, .json, .log, .mp3, .msg, .odt,
 # .ogg, .pdf, .png, .pptx, .ps, .psv, .rtf, .tab, .tff, .tif, .tiff, .tsv, .txt, .wav, .xls, .xlsx
 # doc文件需要 apt-get install antiword
+
+
 def universal_textract(file):
     text = textract.process(filename=file, encoding='utf-8')
     decoded_text = text.decode('utf-8')
@@ -17,6 +23,7 @@ def universal_textract(file):
 
 # 直接读取,适用于可直接查看的文件
 def universal_file(file):
+    logger.info(TAG+"universal_file()-file")
     try:
         with open(file, 'r') as file:
             content = file.read()
@@ -25,3 +32,5 @@ def universal_file(file):
         return "File not found"
     except Exception as e:
         return str(e)
+
+# 各个文件的提取

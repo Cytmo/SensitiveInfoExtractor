@@ -2,6 +2,7 @@ from datetime import datetime
 import easyocr
 from paddleocr import PaddleOCR
 import textract
+import os
 
 """
 picUtil: 图片OCR
@@ -14,8 +15,8 @@ def pic_file(file):
     starttime = datetime.now()
 
     # 选择识别方式
-    # res = ocr_textract(file)
-    res = ocr_paddleocr(file)
+    res = ocr_textract(file)
+    # res = ocr_paddleocr(file)
     # res = ocr_easyocr(file)
 
     endtime = datetime.now()
@@ -66,6 +67,20 @@ def ocr_easyocr(file):
     result = reader.readtext(
         image=file, decoder='greedy', batch_size=20, detail=0)
     return result
+
+
+def read_all_pic(folder_path, image_extensions=None):
+    if image_extensions is None:
+        image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
+
+    image_paths = []
+
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            if any(file.lower().endswith(ext) for ext in image_extensions):
+                image_paths.append(os.path.join(root, file))
+
+    return image_paths
 
 
 # print(pic_file("data/HCC维护信息.png"))

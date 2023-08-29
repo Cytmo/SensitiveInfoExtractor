@@ -13,9 +13,9 @@ class ResOut:
             cls._instance.res_json = cls._instance.manager.list()  # 使用 Manager 创建共享列表
         return cls._instance
 
-    def add_new_json(self, file_path, sensitive_data):
+    def add_new_json(self, file_path, sensitive_info):
         single_info = {"file_path": file_path,
-                       "sensitive_data": sensitive_data}
+                       "sensitive_info": sensitive_info}
         self.res_json.append(single_info)
 
     def get_res_json(self):
@@ -28,7 +28,6 @@ class ResOut:
         directory = os.path.dirname(filename)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        # Check if the file already exists and delete it if it does
         if os.path.exists(filename):
             os.remove(filename)
 

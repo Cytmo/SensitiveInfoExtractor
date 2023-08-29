@@ -86,4 +86,5 @@ logger.info(TAG+"************************* end ******************************")
 res_out.add_new_json(
     "main.py", "************************* end ******************************")
 res_out.save_to_file("output/output.json")
-logger.info(TAG+"result is saved to: output/output.json")
+logger.info(TAG+"result is saved to: output/output.json , total is " +
+            str(len(res_out.res_json)-2) + " file")

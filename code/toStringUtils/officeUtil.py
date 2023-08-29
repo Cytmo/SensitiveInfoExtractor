@@ -7,9 +7,14 @@ import fitz
 from docx import Document
 from datetime import datetime
 import textract
+from toStringUtils.picUtil import *
 """
 officeUtil: 解析 docx/pdf/wps/et
 """
+# 日志模块
+from util.logUtils import LoggerSingleton
+TAG = "toStringUtils.officeUtil.py-"
+logger = LoggerSingleton().get_logger()
 
 
 # 提取docx里面的文本与图片
@@ -79,8 +84,6 @@ def wps_file_text(wps_file_path):
 
 # 提取.et中的文本
 def et_file_text(et_file_path):
-    if not et_file_path.endswith(".et"):
-        return "not .wps file"
     et_doc_name = et_file_path.replace(".et", ".xlsx")
     os.rename(et_file_path, et_doc_name)
     text = textract.process(filename=et_doc_name, encoding='utf-8')
@@ -89,14 +92,20 @@ def et_file_text(et_file_path):
     return decoded_text
 
 
+def read_image_by_ocr(image_bytes):
+    return ocr_textract(image_bytes)
+
+
 # 提取.ppt和.wps中的文本和图片
-def ppt_and_dps_file(ppt_file_path, result_image_path):
+def ppt_and_dps_file(ppt_file_path):
     if ppt_file_path.endswith(".ppt"):
         ppt_pptx_path = ppt_file_path.replace(".ppt", ".pptx")
 
     if ppt_file_path.endswith(".dps"):
         ppt_pptx_path = ppt_file_path.replace(".dps", ".pptx")
 
+    result_image_path = "../workspace/image"
+    os.makedirs(result_image_path, exist_ok=True)
     ppt_pptx_name = ppt_file_path.split("/")[-1]
     with slides.Presentation(ppt_file_path) as presentation:
         presentation.save(ppt_pptx_path, slides.export.SaveFormat.PPTX)
@@ -125,13 +134,31 @@ def ppt_and_dps_file(ppt_file_path, result_image_path):
                 with open(image_filename, "wb") as img_file:
                     img_file.write(image_bytes)
 
+    # 解析图片信息
+    image_all_text = ""
+    image_paths = read_all_pic(f"{result_image_path}/{ppt_pptx_name}/")
+    # print(f"{result_image_path}/{ppt_pptx_name}/")
+    # print(len(image_paths))
+    for image_path in image_paths:
+        logger.info(TAG+"ppt_and_dps_file(): "+image_path)
+        image_info = ocr_textract(image_path)
+        if not len(image_info) == 0:
+            image_string = "\n".join(image_info)
+            image_all_text = image_all_text+"\n"+image_string
+            # logger.info(TAG+"ppt_and_dps_file(): handle " +
+            #             image_path + " is not none, str len is "+str(len(image_all_text)))
+        # else:
+            # logger.info(TAG+"ppt_and_dps_file(): handle " +
+            #             image_path + " is none")
+
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")
     slide_text = slide_text.replace(
         "Created with Aspose.Slides for .NET Standard 2.0 23.8.", "")
-    slide_text = slide_text.replace("Copyright 2004-2023Aspose Pty Ltd.", "")
+    slide_text = slide_text.replace(
+        "Copyright 2004-2023Aspose Pty Ltd.", "")
 
-    return slide_text
+    return slide_text+"\n"+image_all_text
 
 
 # print(wps_file_text("data/wps/Android手机VPN安装指南.wps"))

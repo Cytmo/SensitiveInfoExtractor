@@ -13,10 +13,15 @@ emlUtil: 解析邮件
 2. 解析正文格式: "text/html", "text/plain"
 3. 解析附件: xlsx
 """
+from util.logUtils import LoggerSingleton
+TAG = "toStringUtils.emlUtil.py-"
+logger = LoggerSingleton().get_logger()
 
 
 # 读取eml中的文本和附件
-def eml_file(eml_file_path, result_image_path):
+def eml_file(eml_file_path):
+    result_image_path = "../workspace/eml"
+    os.makedirs(result_image_path, exist_ok=True)
     # 读取eml文件内容
     with open(eml_file_path, 'r', encoding='utf-8') as eml_file:
         eml_content = eml_file.read()
@@ -37,9 +42,6 @@ def eml_file(eml_file_path, result_image_path):
         "X-Pm-Recipient-Authentication": msg["X-Pm-Recipient-Authentication"],
         "X-Pm-Recipient-Encryption": msg["X-Pm-Recipient-Encryption"]
     }
-
-    # 创建文件夹
-    os.makedirs('test/eml/', exist_ok=True)
 
     # 提取正文和保存附件
     for part in msg.walk():
@@ -65,8 +67,7 @@ def eml_file(eml_file_path, result_image_path):
                 # 为了确保文件名只包含合法字符，去除非法字符
                 attachment_filename = re.sub(
                     r'[\/:*?"<>|]', '', attachment_filename)
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                attachment_filename = timestamp+"_"+attachment_filename.replace(
+                attachment_filename = attachment_filename.replace(
                     ".xl", ".xlsx")
                 result_image_path += "/"
                 attachment_path = os.path.join(
@@ -76,12 +77,13 @@ def eml_file(eml_file_path, result_image_path):
                 attachment_data = part.get_payload(decode=True)
                 with open(attachment_path, 'wb') as attachment_file:
                     attachment_file.write(attachment_data)
-                print(f"Saved attachment: {attachment_path}")
+                logger.info(TAG+f"Saved attachment: {attachment_path}")
 
     # print(body)
     email_info["body"] = body
     # 转换为JSON格式
-    return json.dumps(email_info, indent=4, ensure_ascii=False)
+    # return json.dumps(email_info, indent=4, ensure_ascii=False)
+    return body
 
 
 def html_extract(body):

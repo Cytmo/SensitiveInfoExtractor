@@ -5,12 +5,7 @@ import datetime
 import queue
 import zipfile
 import os
-from informationEngine.info_core import begin_info_extraction
-from toStringUtils.universalUtil import *
-
-# 添加结果输出模块
-from util.resultUtil import ResOut
-res_out = ResOut()
+from util.extractInfo import *
 
 
 def convert_format_time(time_days):
@@ -19,35 +14,22 @@ def convert_format_time(time_days):
     return target_date.strftime('%Y-%m-%d')
 
 
-# 各个文件的提取
-def process_txt_file(filename, nameclean):
-    print("Processing text file:", filename)
-
-
-def process_csv_file(filename, nameclean):
-    print("Processing CSV file:", filename)
-
-
-def process_excel_file(filename, nameclean):
-    print("Processing Excel file:", filename)
-
-
 def process_rar_file(filename, nameclean):
     rf = rarfile.RarFile(filename)
     rf.extractall(globalVar.get_value("code_path")+'../workspace')
     globalVar.root_folder_list.put(
         globalVar.get_value("code_path")+'../workspace/'+nameclean)
-    print("Processing rar file:", filename)
+    # print("Processing rar file:", filename)
 
 
 def process_zip_file(filename, nameclean):
-    print("---------------"+filename+"  "+nameclean)
-    print(globalVar.get_value("code_path"))
+    # print("---------------"+filename+"  "+nameclean)
+    # print(globalVar.get_value("code_path"))
     zip_file = zipfile.ZipFile(filename)
     zip_file.extractall(globalVar.get_value("code_path")+'../workspace')
     globalVar.root_folder_list.put(
         globalVar.get_value("code_path")+'../workspace/'+nameclean)
-    print("Processing zip file:", filename)
+    # print("Processing zip file:", filename)
 
 
 def if_passwd_file(filename, nameclean):
@@ -138,8 +120,6 @@ def process_passwd_file(filename):
         SensitiveInformation(1, [1], line.split(":")).print_sensitive()
 
 
-# process_passwd_file("/home/sakucy/networkCopitation/2023/data/linux/etc/passwd")
-
 def process_shadow_file(filename):
     shadow_file = open(filename)
     for line in shadow_file.readlines():
@@ -163,19 +143,21 @@ def process_shadow_file(filename):
         sensitiveInformation.print_sensitive()
 
 
-# process_shadow_file(
-#     "../data/linux/etc/shadow")
-
 # 后缀匹配解析函数
 extension_switch = {
-    ".txt": process_txt_file,
-    ".csv": process_csv_file,
-    ".xlsx": process_excel_file,
     ".rar": process_rar_file,
-    ".zip": process_zip_file
+    ".zip": process_zip_file,
+    ".txt": extract_universal,
+    ".doc": extract_universal,
+    ".ppt": extract_ppt_dps,
+    ".dps": extract_ppt_dps,
+    ".xlsx": extract_xlsx,
+    ".wps": extract_wps,
+    ".et": extract_et,
+    ".eml": extract_eml,
+    ".png": extract_pic,
+    ".jpg": extract_pic
 }
-
-# 分发各个文件提取处理
 
 
 def spilit_process_file(file, root_directory):
@@ -189,16 +171,14 @@ def spilit_process_file(file, root_directory):
     file_name = root_directory + '/' + File.get_parent_directory(file)
 
     # 读取文件进行处理
-    # if process_function:
-    #     print("==>"+file_name+ ": "+ file_spilit[0])
-    #     process_function(file_name, file_spilit[0])
-    # else:
-    # if if_passwd_file(file_name, file_spilit[0]):
-    #     process_passwd_file(file_name)
-    # print(file_name)
-    # print("=>Unsupported file format.", file.name)
-    res_sensitive_data = begin_info_extraction(
-        "第六步:点击填写您所登录的服务器地址219.26.10.120,点击“确定” ")
+    if process_function:
+        logger.info(TAG+"spilit_process_file(): " +
+                    file_name + ": " + file_spilit[0])
+        process_function(file_name, file_spilit[0])
 
-    res_out.add_new_json(file_name, res_sensitive_data)
-    universal_file("data/环境信息.txt")
+    else:
+        # if if_passwd_file(file_name, file_spilit[0]):
+        #     process_passwd_file(file_name)
+
+        # print(file_name)
+        logger.info(TAG+"=>Unsupported file format: "+file_name)

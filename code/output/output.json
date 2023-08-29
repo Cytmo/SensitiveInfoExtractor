@@ -1,0 +1,267 @@
+[
+    {
+        "file_path": "main.py",
+        "sensitive_info": "************************ start *****************************"
+    },
+    {
+        "file_path": "../data/office/资产梳理.xlsx",
+        "sensitive_info": [
+            {
+                "user": "2.0",
+                "password": null,
+                "address": "4.0",
+                "port": null
+            },
+            {
+                "user": "5.0",
+                "password": "6.0",
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "1",
+                "password": null,
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/office/Android手机VPN安装指南.doc",
+        "sensitive_info": [
+            {
+                "user": "l2tp",
+                "password": null,
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "pic",
+                "password": "123456",
+                "address": "219.26.10.120",
+                "port": null
+            },
+            {
+                "user": "2021140822",
+                "password": "123456",
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/office/SSLVPNWindows.doc",
+        "sensitive_info": [
+            {
+                "user": "admin",
+                "password": "admin@1234567890",
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/wps/麒麟SSL+VPN+Windows客户端使用手册.wps",
+        "sensitive_info": [
+            {
+                "user": "admin",
+                "password": "admin@1234567890",
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/wps/资产梳理.et",
+        "sensitive_info": [
+            {
+                "user": "2.0",
+                "password": null,
+                "address": "4.0",
+                "port": null
+            },
+            {
+                "user": "5.0",
+                "password": "6.0",
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "1",
+                "password": null,
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/xxx部门弱口令漏洞问题和整改 2023-05-25T17_27_32+08_00.eml",
+        "sensitive_info": [
+            {
+                "user": null,
+                "password": "\",",
+                "address": "\"",
+                "port": null
+            },
+            {
+                "user": null,
+                "password": "\",",
+                "address": "\"",
+                "port": null
+            },
+            {
+                "user": null,
+                "password": "'admin'\",",
+                "address": "\"",
+                "port": null
+            },
+            {
+                "user": null,
+                "password": "'ubuntu'\",",
+                "address": "\"",
+                "port": null
+            },
+            {
+                "user": null,
+                "password": "\",",
+                "address": "\"",
+                "port": null
+            },
+            {
+                "user": null,
+                "password": "\",",
+                "address": "\"",
+                "port": null
+            },
+            {
+                "user": null,
+                "password": "\",",
+                "address": "\"",
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/wps/Android.wps",
+        "sensitive_info": [
+            {
+                "user": "l2tp",
+                "password": null,
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "pic",
+                "password": "123456",
+                "address": "219.26.10.120",
+                "port": null
+            },
+            {
+                "user": "2021140822",
+                "password": "123456",
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/环境信息.txt",
+        "sensitive_info": []
+    },
+    {
+        "file_path": "../data/wps/学生信息管理系统使用介绍.dps",
+        "sensitive_info": [
+            {
+                "user": "{name}",
+                "password": "000000",
+                "address": "http",
+                "port": null
+            },
+            {
+                "user": "excel",
+                "password": null,
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "excel",
+                "password": null,
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "1",
+                "password": null,
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/office/学生信息管理系统使用介绍.ppt",
+        "sensitive_info": [
+            {
+                "user": "{name}",
+                "password": "000000",
+                "address": "http",
+                "port": null
+            },
+            {
+                "user": "excel",
+                "password": null,
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "excel",
+                "password": null,
+                "address": null,
+                "port": null
+            },
+            {
+                "user": "1",
+                "password": null,
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/HCC维护信息.png",
+        "sensitive_info": []
+    },
+    {
+        "file_path": "../data/carbon.jpg",
+        "sensitive_info": [
+            {
+                "user": "'",
+                "password": null,
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "../data/office/20180327081403010127.ppt",
+        "sensitive_info": []
+    },
+    {
+        "file_path": "../data/wps/20180327081403010127.dps",
+        "sensitive_info": []
+    },
+    {
+        "file_path": "../workspace/zr/木马程序合集/木马1-sensitivePacketThief/readme.txt",
+        "sensitive_info": [
+            {
+                "user": "sensitivePacketThief",
+                "password": null,
+                "address": null,
+                "port": null
+            }
+        ]
+    },
+    {
+        "file_path": "main.py",
+        "sensitive_info": "************************* end ******************************"
+    }
+]

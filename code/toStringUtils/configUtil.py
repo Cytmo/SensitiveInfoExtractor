@@ -59,31 +59,17 @@ def yml_file(file_path):
 
 # 解析 windows registry file: sam.hiv/system.hiv/sam/system
 def win_reg_file(file_path, res_path):
-    #使用samdump2解析
+    # 使用samdump2解析
     command = "samdump2 {} {}".format(file_path, res_path)
     print("Running"+command)
-    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     # 打印标准输出
     print("标准输出：")
     print(result.stdout)
-    # reg_path = file_path
-    # reg = RegistryHive(reg_path)
-
-    # # 逐行打印注册表文件的内容
-    # # for entry in reg.recurse_subkeys(as_json=True):
-    # #     print(entry)
-
-    # # 导出为json
-    # output_folder = os.path.dirname(res_path)
-    # if not os.path.exists(output_folder):
-    #     os.makedirs(output_folder)
-
-    # output_file = res_path + ".json"
-    # os.system("registry-dump {} -o {}".format(reg_path, output_file))
 
 
 # print(xml_file("data/linux/applicationContext.xml"))
 # print(yml_file("data/linux/application-dev.yml"))
-win_reg_file("data/windwos/system.hiv","data/windwos/sam.hiv")
-win_reg_file("data/windwos/sam/sam/system", "data/windwos/sam/sam/sam")
-
+# win_reg_file("../data/windwos/system.hiv", "../data/windwos/sam.hiv")
+# win_reg_file("../data/windwos/sam/sam/system", "../data/windwos/sam/sam/sam")
