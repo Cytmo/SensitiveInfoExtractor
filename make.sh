@@ -48,5 +48,10 @@
 # sudo make lib
 # sudo make install-lib
 
+#Jhon安装
+cd lib
+wget https://www.openwall.com/john/k/john-1.9.0-jumbo-1.tar.gz
+tar -xzvf john-1.9.0-jumbo-1.tar.gz
+
 # # vim ~/.bashrc
 # # export UNRAR_LIB_PATH=/usr/lib/libunrar.so

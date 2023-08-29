@@ -1,4 +1,4 @@
-from util import globalVar
+import util.globalVar
 from util.fileUtil import File
 from unrar import rarfile
 import datetime
@@ -6,6 +6,7 @@ import queue
 import zipfile
 import os
 from informationEngine.info_core import begin_info_extraction
+import re
 
 # 添加结果输出模块
 from util.resultUtil import ResOut
@@ -54,7 +55,18 @@ def if_passwd_file(filename, nameclean):
         return True
     else:
         return False
+    
+def if_shadow_file(filename,nameclean):
+    if nameclean == "shadow":
+        return True
+    else:
+        return False
 
+def if_authorized_keys_file(filename,nameclean):
+    if nameclean == "authorized_keys":
+        return True
+    else:
+        return False
 
 sensitive_data_pairs = {
     "0": "",
@@ -74,7 +86,10 @@ sensitive_data_pairs = {
     "14": "密码失效提前警告天数",
     "15": "密码过期后被禁用天数",
     "16": "用户的到期时间",
-    "17": "用户状态"
+    "17": "用户状态",
+    "18": "已授权公钥",
+    "19": "该公钥所允许执行的命令",
+    "20": "所允许使用该公钥的IP"
 
 }
 
@@ -82,6 +97,7 @@ sensitive_data_type = {
     "0": "",
     "1": "Linux用户信息",
     "2": "Linux密码信息",
+    "3": "公钥授权信息",
 }
 
 sensitive_data_templete = {
@@ -90,7 +106,11 @@ sensitive_data_templete = {
     "2": [1, 17],  # linux密码伪用户
     "3": [1, 8, 9, 10],  # linux密码模板
     "4": [11, 13],  # linux密码无限期模板
-    "5": [11, 12, 13, 14, 15, 16]  # linux密码有限期模板
+    "5": [11, 12, 13, 14, 15, 16],  # linux密码有限期模板
+    "6": [18,4], #公钥及说明
+    "7": [19], #公钥允许执行的命令
+    "8": [20], #公钥所允许的IP
+
 }
 
 shadow_passwd_type = {
@@ -159,6 +179,31 @@ def process_shadow_file(filename):
             sensitiveInformation.add_templete(
                 [5], [convert_format_time(int(data_tmp[2]))]+data_tmp[3:7])
 
+        sensitiveInformation.print_sensitive()
+
+option_pattern = r'(?<=\")\s*,\s*(?=\")'
+
+#公钥认证文件匹配
+def process_authorized_keys_file(filename):
+    authorized_file = open(filename)
+    for line in authorized_file.readlines():
+        sensitiveInformation = SensitiveInformation(3)
+        authorized_tmp = line.split(" ")
+        clean_authorized_tmp = [[s for s in authorized_tmp if s != ""]]
+        if clean_authorized_tmp[0] == "ssh-rsa":
+            sensitiveInformation.add_templete(
+                [6], authorized_tmp[1:2])
+        elif clean_authorized_tmp[1] == "ssh-rsa":
+            sensitiveInformation.add_templete(
+                [6], authorized_tmp[2:3])
+            options = re.split(option_pattern,clean_authorized_tmp[0])
+            for items in options:
+                if items[:5] == "comma":
+                    sensitiveInformation.add_templete(
+                        [7],[re.search(r'"(.*?)"', items).group(1)])
+                elif items[:5] == "from=":
+                    sensitiveInformation.add_templete(
+                        [8],[re.search(r'"(.*?)"', items).group(1)])
         sensitiveInformation.print_sensitive()
 
 
