@@ -6,6 +6,7 @@ import queue
 import zipfile
 import os
 from informationEngine.info_core import begin_info_extraction
+from toStringUtils.universalUtil import *
 
 # 添加结果输出模块
 from util.resultUtil import ResOut
@@ -199,4 +200,5 @@ def spilit_process_file(file, root_directory):
     res_sensitive_data = begin_info_extraction(
         "第六步:点击填写您所登录的服务器地址219.26.10.120,点击“确定” ")
 
-    res_out.add_new_json(file.name, res_sensitive_data)
+    res_out.add_new_json(file_name, res_sensitive_data)
+    universal_file("data/环境信息.txt")

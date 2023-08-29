@@ -16,8 +16,8 @@ logger.info(TAG + "************************ start *****************************"
 
 # 添加结果输出模块
 res_out = ResOut()
-res_out.clean("output/output.json")
-res_out.add_new_json("main.py", "start")
+res_out.add_new_json(
+    "main.py", "************************ start *****************************")
 
 # 添加依赖
 T1 = time.perf_counter()
@@ -72,7 +72,7 @@ while not globalVar.root_folder_list.empty():
             callback_func, process_function, args=(folder,), kwargs={"file": file, })
 
         # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
-        # spilitUtil.spilit_process_file(file,folder)
+        # spilitUtil.spilit_process_file(file, folder)
 
     # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
     process_manager.close_process_pool()
@@ -83,4 +83,7 @@ T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 # 程序运行时间:0.27023641716203606毫秒
 logger.info(TAG+"************************* end ******************************")
-res_out.add_new_json("main.py", "end")
+res_out.add_new_json(
+    "main.py", "************************* end ******************************")
+res_out.save_to_file("output/output.json")
+logger.info(TAG+"result is saved to: output/output.json")

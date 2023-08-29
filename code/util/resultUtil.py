@@ -1,23 +1,22 @@
 import json
 import os
+from multiprocessing import Manager
 
 
 class ResOut:
     _instance = None
-    res_json = []
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.res_json = []
+            cls._instance.manager = Manager()
+            cls._instance.res_json = cls._instance.manager.list()  # 使用 Manager 创建共享列表
         return cls._instance
 
     def add_new_json(self, file_path, sensitive_data):
         single_info = {"file_path": file_path,
                        "sensitive_data": sensitive_data}
         self.res_json.append(single_info)
-        # TODO: 在main.py结束以后调用save_to_file()会导致只能写入main.py中调用add_new_json()的内容,无法写入在其他地方调用的add_new_json()
-        self.save_to_file("output/output.json")
 
     def get_res_json(self):
         return self.res_json
@@ -29,10 +28,9 @@ class ResOut:
         directory = os.path.dirname(filename)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        # append mode
-        with open(filename, 'a+') as file:
-            json.dump(self.res_json, file, indent=4, ensure_ascii=False)
-
-    def clean(self,filename):
+        # Check if the file already exists and delete it if it does
         if os.path.exists(filename):
             os.remove(filename)
+
+        with open(filename, 'w') as file:
+            json.dump(list(self.res_json), file, indent=4, ensure_ascii=False)
