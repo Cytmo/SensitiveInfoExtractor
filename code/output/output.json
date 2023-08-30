@@ -26,7 +26,7 @@
         "file_path": "../data/office/Android手机VPN安装指南.doc",
         "sensitive_info": [
             {
-                "user": "pic",
+                "user": "l2tp",
                 "password": "123456",
                 "address": "219.26.10.120"
             },
@@ -121,7 +121,7 @@
         "file_path": "../data/wps/Android.wps",
         "sensitive_info": [
             {
-                "user": "pic",
+                "user": "l2tp",
                 "password": "123456",
                 "address": "219.26.10.120"
             },

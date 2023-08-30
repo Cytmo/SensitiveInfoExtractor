@@ -301,6 +301,8 @@ def extract_paired_info(text):
 # 输入：处理过后的字符串
 # 输出：成对信息列表
 def begin_info_extraction(text: str) -> list:
+    # 移除doc提取的[pic]
+    text = text.replace("[pic]", "")
     logger.debug(TAG + 'Text before IoC protection: '+text)
     if has_chinese(text):
         logger.info(TAG + 'Chinese text detected.')
