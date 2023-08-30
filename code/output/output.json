@@ -7,18 +7,9 @@
         "file_path": "../data/office/学生信息管理系统使用介绍.ppt",
         "sensitive_info": [
             {
-                "user": "{name}",
+                "user": "zhangsan@xxx.edu.cn",
                 "password": "000000",
-                "address": "http"
-            },
-            {
-                "user": "excel"
-            },
-            {
-                "user": "excel"
-            },
-            {
-                "user": "1"
+                "address": "http://xxx.xxx.cn:9980/student"
             }
         ]
     },
@@ -26,24 +17,14 @@
         "file_path": "../data/office/资产梳理.xlsx",
         "sensitive_info": [
             {
-                "user": "2.0",
-                "address": "4.0"
-            },
-            {
                 "user": "5.0",
                 "password": "6.0"
-            },
-            {
-                "user": "1"
             }
         ]
     },
     {
         "file_path": "../data/office/Android手机VPN安装指南.doc",
         "sensitive_info": [
-            {
-                "user": "l2tp"
-            },
             {
                 "user": "pic",
                 "password": "123456",
@@ -111,25 +92,14 @@
     },
     {
         "file_path": "../data/carbon.jpg",
-        "sensitive_info": [
-            {
-                "user": "'"
-            }
-        ]
+        "sensitive_info": []
     },
     {
         "file_path": "../data/wps/资产梳理.et",
         "sensitive_info": [
             {
-                "user": "2.0",
-                "address": "4.0"
-            },
-            {
                 "user": "5.0",
                 "password": "6.0"
-            },
-            {
-                "user": "1"
             }
         ]
     },
@@ -141,27 +111,15 @@
         "file_path": "../data/wps/学生信息管理系统使用介绍.dps",
         "sensitive_info": [
             {
-                "user": "{name}",
+                "user": "zhangsan@xxx.edu.cn",
                 "password": "000000",
-                "address": "http"
-            },
-            {
-                "user": "excel"
-            },
-            {
-                "user": "excel"
-            },
-            {
-                "user": "1"
+                "address": "http://xxx.xxx.cn:9980/student"
             }
         ]
     },
     {
         "file_path": "../data/wps/Android.wps",
         "sensitive_info": [
-            {
-                "user": "l2tp"
-            },
             {
                 "user": "pic",
                 "password": "123456",
@@ -184,11 +142,7 @@
     },
     {
         "file_path": "../workspace/zr/木马程序合集/木马1-sensitivePacketThief/readme.txt",
-        "sensitive_info": [
-            {
-                "user": "sensitivePacketThief"
-            }
-        ]
+        "sensitive_info": []
     },
     {
         "file_path": "main.py",
