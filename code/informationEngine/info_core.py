@@ -251,6 +251,13 @@ def extract_paired_info(text):
     last_output = a_paired_info.output()
     if last_output["user"] != None or last_output["address"] != None:
         result_pair.append(last_output)
+    for item in result_pair:
+        if item["user"] == None and item["address"] == None:
+            result_pair.remove(item)
+        # remove None attr
+        for key in list(item.keys()):
+            if item[key] == None:
+                del item[key]
     return result_pair
 
 
