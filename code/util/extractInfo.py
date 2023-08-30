@@ -57,8 +57,11 @@ def extract_et(file_path, nameclean):
 
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
-    text = ocr_textract(file_path)
+    # text = ocr_textract(file_path)
+    text = ocr_paddleocr(file_path)
     text_string = "\n".join(text)
+    logger.info(TAG+"extract_pic(): picture information")
+    logger.info(TAG+"extract_pic(): " + text_string)
     sensitive_info_detect(file_path, text_string)
 
 

@@ -153,3 +153,5 @@ code/util/__pycache__
 
 *.pyc
 code/modes/*
+code/output/*
+code/test.py
