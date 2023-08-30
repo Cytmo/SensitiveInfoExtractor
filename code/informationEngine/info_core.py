@@ -88,6 +88,30 @@ def ioc_protection(text: str):
 #     pass
 
 
+# 保存email地址 url ip地址等内容，防止被替换
+def item_protection(text: str) -> Tuple[str, dict]:
+    placeholders = {}  # This dictionary will store placeholders and their corresponding content
+    placeholders_counter = 1  # Counter for generating placeholders
+
+    # Define regular expressions for different types of items you want to replace
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+
+    patterns = [email_pattern, url_pattern, ip_pattern]
+
+    for pattern in patterns:
+        matches = re.finditer(pattern, text)
+        for match in matches:
+            item = match.group()
+            placeholder = f'?{placeholders_counter}?'
+            placeholders[placeholder] = item
+            text = text.replace(item, placeholder, 1)  # Replace only the first occurrence
+            placeholders_counter += 1
+
+    return text, placeholders
+
+
 # 防止文件名等并识别为关键字，如user.txt
 def fuzz_prevention(text: str) -> str:
     # 文件后缀列表
@@ -134,15 +158,18 @@ def text_preprocessing(text: str) -> str:
 
 
 # 中文关键字列表
-chn_keywords_list = ["IP", "端口", "名称", "地址",
+chn_keywords_list = ["账号","IP", "端口", "名称", "地址",
                      "姓名", "学号", "用户名", "密码", "密钥为", '\n']
 # 中文替换列表
-chn_replacement_dict = {"端口": "port", "名称": "user", "学号": "user", "用户名": "user",
+chn_replacement_dict = {"账号":"user","端口": "port", "名称": "user", "学号": "user", "用户名": "user",
                         "密钥为": "password", "密码": "password", "地址": "address", "姓名": "name"}
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
 
-
+item_protection_dict = {}
 def chn_text_preprocessing(text: str) -> str:
+    text, item_protection_dict1 = item_protection(text)
+    global item_protection_dict 
+    item_protection_dict = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(chn_keywords_list)}|[a-zA-Z0-9,.;@?!\"'()])+"
 
@@ -251,13 +278,22 @@ def extract_paired_info(text):
     last_output = a_paired_info.output()
     if last_output["user"] != None or last_output["address"] != None:
         result_pair.append(last_output)
+    # Filter out dictionaries based on conditions
+    filtered_result_pair = []
     for item in result_pair:
-        if item["user"] == None and item["address"] == None:
-            result_pair.remove(item)
-        # remove None attr
-        for key in list(item.keys()):
-            if item[key] == None:
-                del item[key]
+        if ("user" in item and "address" in item and "password" in item) and \
+        (item["user"] is not None or item["address"] is not None) and \
+        item["password"] is not None:
+            # Remove None attributes
+            filtered_item = {key: value for key, value in item.items() if value is not None}
+            filtered_result_pair.append(filtered_item)
+
+    result_pair = filtered_result_pair
+    # 还原被替换的内容
+    for item in result_pair:
+        for key, value in item.items():
+            if value in item_protection_dict:
+                item[key] = item_protection_dict[value]
     return result_pair
 
 
@@ -265,6 +301,9 @@ def extract_paired_info(text):
 # 输入：处理过后的字符串
 # 输出：成对信息列表
 def begin_info_extraction(text: str) -> list:
+    # 移除doc提取的[pic]
+    text = text.replace("[pic]", "")
+    logger.debug(TAG + 'Text before IoC protection: '+text)
     if has_chinese(text):
         logger.info(TAG + 'Chinese text detected.')
         text = chn_text_preprocessing(text)
@@ -279,17 +318,17 @@ def begin_info_extraction(text: str) -> list:
     return paired_info
 
 
-# if __name__ == '__main__':
-#     # file = open("test/.bash_history", "r")
-#     # file = open("test/windows/system.hiv.json", "r")
-#     argparse = argparse.ArgumentParser()
-#     argparse.add_argument("-f", "--file", required=True,
-#                           help="The file to be parsed")
-#     args = argparse.parse_args()
-#     with open(args.file, "r") as f:
-#         text = f.read()
-#     begin_info_extraction(text)
-#     exit(0)
+if __name__ == '__main__':
+    # file = open("test/.bash_history", "r")
+    # file = open("test/windows/system.hiv.json", "r")
+    argparse = argparse.ArgumentParser()
+    argparse.add_argument("-f", "--file", required=True,
+                          help="The file to be parsed")
+    args = argparse.parse_args()
+    with open(args.file, "r") as f:
+        text = f.read()
+    begin_info_extraction(text)
+    exit(0)
 #     if has_chinese(text):
 #         text = chn_text_preprocessing(text)
 #     # print(text)
