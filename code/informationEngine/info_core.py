@@ -3,6 +3,7 @@ import os
 import shutil
 import spacy
 from spacy.matcher import Matcher
+import yaml
 from informationEngine import info_protection
 from informationEngine.info_protection import IoCIdentifier
 from spacy.tokens import Doc
@@ -129,13 +130,16 @@ def fuzz_prevention(text: str) -> str:
     return result
 
 
-keywords_list = ["-uroot", "-p", "IP", "port",
+keywords_list = ["-u", "-p", "IP", "port","-h",
                  "user", "password", "address", "name", '\n']
-replacement_dict = {"-p": "password", "port": "port", "-uroot": "userroot", "user": "user", "password": "password",
-                    "address": "address", "name": "name"}
+replacement_dict = {"-p": "password", "port": "port", "-u": "user", "user": "user", "password": "password",
+                    "-h":"address","address": "address", "name": "name"}
 
 
 def text_preprocessing(text: str) -> str:
+    text, item_protection_dict1 = item_protection(text)
+    global item_protection_dict 
+    item_protection_dict = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(keywords_list)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
 
@@ -216,8 +220,8 @@ class paired_info():
         self.password = password
 
     def setter(self, name: str, value: Any) -> None:
-        if self.__dict__.get(name) != None and self.__dict__.get(name) != value:
-            return False
+        # if self.__dict__.get(name) != None and self.__dict__.get(name) != value:
+        #     return False
         attr_switch = {
             "port": lambda x: self.set_port(x),
             "address": lambda x: self.set_address(x),
@@ -239,14 +243,51 @@ class paired_info():
         }
         self.__init__()
         return result
+    def getter (self,name:str):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        else:
+            return None
 
     def if_same_attr(self, name: str, value: Any) -> bool:
         return self.__dict__.get(name) == value
 
+    def is_None(self):
+        return self.__dict__.get("user") == None and self.__dict__.get("password") == None and self.__dict__.get("address") == None and self.__dict__.get("port") == None
 
 info_pattern = {"user": "user", "password": "password",
                 "address": "address", "port": "port"}
 replaced_keyword_list = ["{user}", "{password}", "{address}"]
+
+
+
+
+# def if_reduntant(text: str,filter_dict: dict) -> bool:
+#     if filter_dict[text] > 0:
+#         if text == "{user}":
+#            if filter_dict["{password}"] > 0:
+#                filter_dict["{password}"] -= 1
+#                filter_dict["{user}"] -= 1
+#         if text == "{password}":
+#             if filter_dict["{user}"] > 0:
+#                 filter_dict["{password}"] -= 1
+#                 filter_dict["{user}"] -= 1
+#     if filter_dict[text] > 0:
+#         filter_dict = {"{user}": 0, "{password}": 0, "{address}": 0, "{port}": 0}
+#         return True
+#     else:
+#         filter_dict[text] += 1
+#         return False
+            
+# # 过滤多余的属性
+# def filter_reduntant(text: list) -> str:
+#     filter_dict = {"{user}": 0, "{password}": 0, "{address}": 0, "{port}": 0}
+#     for i in range(len(text)-1):
+#         if text[i] in filter_dict:
+#             filter_dict[text[i]] += 1
+#             # remove redundant attributes
+#             if if_reduntant(text[i],filter_dict):
+#                 text[i] = "{removed_reduntant_{}}".format(text[i].replace('{','').replace('}',''))
 
 
 def extract_paired_info(text):
@@ -257,13 +298,25 @@ def extract_paired_info(text):
     # print(text)
     has_user = False
     has_address = False
+  
+
+
+
+
     for i in range(len(text)-1):
-        # print(text[i], text[i+1])
+        # print(text[i], text[i+1]) 
+        # 密码不会最先出现
+        if text[i].strip() == "{password}" and a_paired_info.is_None():
+            continue
         if text[i].strip() in replaced_keyword_list and text[i+1] not in replaced_keyword_list:
             # print(text[i], text[i+1])
             if (text[i] == "{user}" and has_user) or (text[i] == "{address}" and has_address):
-                # if not a_paired_info.if_same_attr(info_pattern[text[i].replace('{','').replace('}','')], text[i+1]):
-                result_pair.append(a_paired_info.output())
+                if a_paired_info.getter("password") != None:
+                    # if not a_paired_info.if_same_attr(info_pattern[text[i].replace('{','').replace('}','')], text[i+1]):
+                    result_pair.append(a_paired_info.output())
+                else:
+                    a_paired_info.setter(info_pattern[text[i].replace(
+                        '{', '').replace('}', '')], text[i+1])
                 # print("Same,current result:"+str(result_pair))
                 has_user = False
                 has_address = False
@@ -279,6 +332,7 @@ def extract_paired_info(text):
     if last_output["user"] != None or last_output["address"] != None:
         result_pair.append(last_output)
     # Filter out dictionaries based on conditions
+    logger.debug(TAG + 'Paired info before filtering: '+str(result_pair))
     filtered_result_pair = []
     for item in result_pair:
         if ("user" in item and "address" in item and "password" in item) and \
@@ -295,6 +349,15 @@ def extract_paired_info(text):
             if value in item_protection_dict:
                 item[key] = item_protection_dict[value]
     return result_pair
+
+
+# 英文通用处理
+
+eng_keywords_list = ["user", "password", "address", "name", "port",'key']
+def eng_text_preprocessing(text: str) -> str:
+    text = fuzz_prevention(text)
+    print(text.split('\n'))
+
 
 
 # 从处理过后的字符串中提取成对信息
@@ -316,6 +379,44 @@ def begin_info_extraction(text: str) -> list:
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
     return paired_info
+
+
+# # 对于代码，配置文件等的处理
+# def find_sensitive_information(text, patterns):
+#     sensitive_info = []
+
+#     for pattern in patterns:
+#         matches = re.findall(pattern["regex"], text)
+#         for match in matches:
+#             sensitive_info.append({
+#                 "name": pattern["name"],
+#                 "confidence": pattern["confidence"],
+#                 "match": match
+#             })
+
+#     return sensitive_info
+
+
+# # 从YAML文件加载模式
+# with open("rules-stable.yml", "r") as yaml_file:
+#     yaml_content = yaml.safe_load(yaml_file)
+
+# # 示例文本
+# sample_text = """
+#     User: admin
+#     Password: mysecretpassword123
+#     API Gateway: abc123.execute-api.us-west-1.amazonaws.com
+# """
+
+# # 在示例文本中查找敏感信息
+# sensitive_info_found = find_sensitive_information(sample_text, yaml_content["patterns"])
+
+# # 打印识别到的敏感信息
+# for info in sensitive_info_found:
+#     print("Name:", info["name"])
+#     print("Confidence:", info["confidence"])
+#     print("Match:", info["match"])
+#     print()
 
 
 if __name__ == '__main__':

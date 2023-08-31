@@ -18,7 +18,8 @@
         "sensitive_info": [
             {
                 "user": "5.0",
-                "password": "6.0"
+                "password": "AID0006788",
+                "address": "4.0"
             }
         ]
     },
@@ -61,11 +62,11 @@
         "file_path": "../data/xxx部门弱口令漏洞问题和整改 2023-05-25T17_27_32+08_00.eml",
         "sensitive_info": [
             {
-                "password": "\",",
+                "password": "'123456'\",",
                 "address": "\""
             },
             {
-                "password": "\",",
+                "password": "'root'\",",
                 "address": "\""
             },
             {
@@ -77,16 +78,26 @@
                 "address": "\""
             },
             {
-                "password": "\",",
+                "password": "'root'\",",
                 "address": "\""
             },
             {
-                "password": "\",",
+                "password": "'admin'\",",
                 "address": "\""
             },
             {
-                "password": "\",",
+                "password": "'root'\",",
                 "address": "\""
+            }
+        ]
+    },
+    {
+        "file_path": "../data/KKK.txt",
+        "sensitive_info": [
+            {
+                "user": "root",
+                "password": "123456999",
+                "address": "192.168.10.100"
             }
         ]
     },
@@ -99,7 +110,8 @@
         "sensitive_info": [
             {
                 "user": "5.0",
-                "password": "6.0"
+                "password": "AID0006788",
+                "address": "4.0"
             }
         ]
     },
