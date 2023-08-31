@@ -8,6 +8,7 @@ from informationEngine import info_core
 import time
 from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut
+from datetime import datetime
 
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
@@ -86,6 +87,8 @@ logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 logger.info(TAG+"************************* end ******************************")
 res_out.add_new_json(
     "main.py", "************************* end ******************************")
-res_out.save_to_file("output/output.json")
-logger.info(TAG+"result is saved to: output/output.json , total is " +
+output_tile_path = "output/"+datetime.now().strftime("%Y%m%d%H%M%S%f") + \
+    "_output.json"
+res_out.save_to_file(output_tile_path)
+logger.info(TAG+"result is saved to: "+output_tile_path+" , total is " +
             str(len(res_out.res_json)-2) + " file")

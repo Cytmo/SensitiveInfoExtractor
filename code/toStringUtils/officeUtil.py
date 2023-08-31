@@ -135,21 +135,12 @@ def ppt_and_dps_file(ppt_file_path):
                     img_file.write(image_bytes)
 
     # 解析图片信息
-    image_all_text = ""
-    image_paths = read_all_pic(f"{result_image_path}/{ppt_pptx_name}/")
-    # print(f"{result_image_path}/{ppt_pptx_name}/")
-    # print(len(image_paths))
-    for image_path in image_paths:
-        logger.info(TAG+"ppt_and_dps_file(): "+image_path)
-        image_info = ocr_textract(image_path)
-        if not len(image_info) == 0:
-            image_string = "\n".join(image_info)
-            image_all_text = image_all_text+"\n"+image_string
-        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
-        #                 image_path + " is not none, str len is "+str(len(image_all_text)))
-        # else:
-        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
-        #                 image_path + " is none")
+    image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
+
+    image_all_text = ocr_batch_paddle(image_folder_path)
+    # image_all_text = ocr_batch_textract(image_folder_path)
+    logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
+    logger.info(TAG+"ppt_and_dps_file(): "+image_all_text)
 
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")

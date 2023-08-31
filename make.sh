@@ -25,10 +25,6 @@
 # sudo ln -s /usr/local/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
 # pip uninstall opencv-python
 # pip install opencv-python-headless
-#(3)
-# pip install easyocr  
-# pip uninstall Pillow
-# pip install Pillow==9.5.0
 
 # pip install PyMuPDF     
 # pip install eml_parser
