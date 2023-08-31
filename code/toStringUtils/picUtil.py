@@ -49,16 +49,6 @@ def ocr_paddleocr(file):
     return res
 
 
-# 3rd OCR method: 使用EasyOCR
-# 效果：较为均衡，处于1th,2nd之间
-def ocr_easyocr(file):
-    reader = easyocr.Reader(['ch_sim', 'en'], False)  # False为不使用GPU
-    # decoder 为引擎，detail 为是否显示位置信息 batch_size 设置越大，占用内存越高，识别速度越快
-    result = reader.readtext(
-        image=file, decoder='greedy', batch_size=20, detail=0)
-    return result
-
-
 def read_all_pic(folder_path, image_extensions=None):
     if image_extensions is None:
         image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
@@ -71,20 +61,6 @@ def read_all_pic(folder_path, image_extensions=None):
                 image_paths.append(os.path.join(root, file))
 
     return image_paths
-
-
-# 图片OCR识别
-def pic_file(file):
-    starttime = datetime.now()
-
-    # 选择识别方式
-    res = ocr_textract(file)
-    # res = ocr_paddleocr(file)
-    # res = ocr_easyocr(file)
-
-    endtime = datetime.now()
-    print('Speed time', (endtime-starttime).seconds, 's')
-    return res
 
 
 def ocr_batch_paddle(folder_path):

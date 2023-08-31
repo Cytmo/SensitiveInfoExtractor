@@ -137,8 +137,8 @@ def ppt_and_dps_file(ppt_file_path):
     # 解析图片信息
     image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
 
-    # image_all_text = ocr_batch_paddle(image_folder_path)
-    image_all_text = ocr_batch_textract(image_folder_path)
+    image_all_text = ocr_batch_paddle(image_folder_path)
+    # image_all_text = ocr_batch_textract(image_folder_path)
     logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
     logger.info(TAG+"ppt_and_dps_file(): "+image_all_text)
 

@@ -31,16 +31,16 @@ def eml_file(eml_file_path):
 
     # 提取关键信息到一个字典
     email_info = {
-        "X-Pm-Content-Encryption": msg["X-Pm-Content-Encryption"],
-        "X-Pm-Origin": msg["X-Pm-Origin"],
-        "Subject": msg["Subject"],
-        "From": msg["From"],
-        "Date": msg["Date"],
-        "Mime-Version": msg["Mime-Version"],
-        "To": msg["To"],
-        "X-Pm-Scheduled-Sent-Original-Time": msg["X-Pm-Scheduled-Sent-Original-Time"],
-        "X-Pm-Recipient-Authentication": msg["X-Pm-Recipient-Authentication"],
-        "X-Pm-Recipient-Encryption": msg["X-Pm-Recipient-Encryption"]
+        # "X-Pm-Content-Encryption": decode_header(msg["X-Pm-Content-Encryption"]),
+        # "X-Pm-Origin": decode_header(msg["X-Pm-Origin"]),
+        "Subject": decode_header(msg["Subject"]),
+        "From": decode_header(msg["From"]),
+        "Date": decode_header(msg["Date"]),
+        # "Mime-Version": decode_header(msg["Mime-Version"]),
+        "To": decode_header(msg["To"]),
+        "X-Pm-Scheduled-Sent-Original-Time": decode_header(msg["X-Pm-Scheduled-Sent-Original-Time"]),
+        "X-Pm-Recipient-Authentication": decode_header(msg["X-Pm-Recipient-Authentication"]),
+        "X-Pm-Recipient-Encryption": decode_header(msg["X-Pm-Recipient-Encryption"])
     }
 
     # 提取正文和保存附件
@@ -80,10 +80,9 @@ def eml_file(eml_file_path):
                 logger.info(TAG+f"Saved attachment: {attachment_path}")
 
     # print(body)
-    email_info["body"] = body
+    # email_info["body"] = body
     # 转换为JSON格式
-    # return json.dumps(email_info, indent=4, ensure_ascii=False)
-    return body
+    return [json.dumps(email_info, ensure_ascii=False), body]
 
 
 def html_extract(body):
@@ -128,6 +127,10 @@ def html_extract(body):
                 row_dict[column_name] = value
             json_data.append(row_dict)
 
+        for item in json_data:
+            if "编号" in item:
+                del item["编号"]
+
         result = {
             'text': p_text_string,
             'table': json_data
@@ -137,8 +140,14 @@ def html_extract(body):
             'text': p_text_string
         }
 
-    return json.dumps(result, indent=4, ensure_ascii=False)
+    return json.dumps(result, ensure_ascii=False)
 
 
-# res = eml_file("data/xxx部门弱口令漏洞问题和整改 2023-05-25T17_27_32+08_00.eml", "test/eml")
-# print(res)
+def decode_header(header_value):
+    decoded_parts = []
+    for part, charset in email.header.decode_header(header_value):
+        if isinstance(part, bytes):
+            decoded_parts.append(part.decode(charset or 'utf-8'))
+        else:
+            decoded_parts.append(part)
+    return ' '.join(decoded_parts)
