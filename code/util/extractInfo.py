@@ -31,8 +31,8 @@ def extract_universal(file_path, nameclean):
 
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    text = ppt_and_dps_file(file_path)
-    sensitive_info_detect(file_path, text)
+    # text = ppt_and_dps_file(file_path)
+    # sensitive_info_detect(file_path, text)
 
 
 def extract_xlsx(file_path, nameclean):
@@ -83,3 +83,56 @@ def extract_eml(file_path, nameclean):
     eml_header["body"] = sensitive_info
 
     res_out.add_new_json(file_path, eml_header)
+
+
+def is_code_file(code_dir_or_file):
+    target_substring = "python_fasts3-main"
+
+    if not target_substring in code_dir_or_file:
+        return False
+
+    result_stdout, result_stderr = source_code_file(code_dir_or_file)
+
+    if len(result_stderr) == 0:
+        logger.info(TAG+"is_code_file(): " + code_dir_or_file +
+                    " , but none")
+        return True
+
+    logger.info(TAG+"is_code_file(): " + code_dir_or_file +
+                " , has sensitive information.")
+
+    result_stdout_json = json.loads(result_stdout)
+
+    # 只保留 key和value
+    result_stdout = [{"key": item["key"], "value": item["value"]}
+                     for item in result_stdout_json]
+    # 去重
+    result_stdout_set = {tuple(item.items()) for item in result_stdout}
+    result_stdout = [dict(item) for item in result_stdout_set]
+
+    result_stdout_copy = result_stdout
+    extract_out = []
+    ak_sk = {}
+
+    for item in result_stdout:
+        if item["key"] == "ACCESSKEY":
+            ak_sk["ACCESSKEY"] = item["value"]
+            result_stdout_copy = [_item for _item in result_stdout_copy if not (
+                _item["key"] == "ACCESSKEY" and _item["value"] == item["value"])]
+            if not len(ak_sk) == 2:
+                continue
+        if item["key"] == "SECRETKEY":
+            ak_sk["SECRETKEY"] = item["value"]
+            result_stdout_copy = [_item for _item in result_stdout_copy if not (
+                _item["key"] == "SECRETKEY" and _item["value"] == item["value"])]
+            if not len(ak_sk) == 2:
+                continue
+        if len(ak_sk) == 2:
+            one_ak_sk = json.dumps(ak_sk)
+            ak_sk = {}
+            extract_out.append(one_ak_sk)
+
+    # 特殊处理的项结果(ak与sk)+未特殊处理的原有项
+    res = extract_out+result_stdout_copy
+    res_out.add_new_json(code_dir_or_file, res)
+    return True

@@ -234,8 +234,11 @@ def spilit_process_file(file, root_directory):
         process_function(file_name, file_spilit[0])
 
     else:
+        # 判断是代码目录或者代码文件
+        if is_code_file(file_name):
+            return
+
         # if if_passwd_file(file_name, file_spilit[0]):
         #     process_passwd_file(file_name)
 
-        # print(file_name)
         logger.info(TAG+"=>Unsupported file format: "+file_name)
