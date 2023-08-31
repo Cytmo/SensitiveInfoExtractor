@@ -238,6 +238,10 @@ def spilit_process_file(file, root_directory):
         if is_code_file(file_name):
             return
 
+        # 判断文件是win reg 文件
+        if is_win_reg_file(file_name):
+            return
+
         # if if_passwd_file(file_name, file_spilit[0]):
         #     process_passwd_file(file_name)
 

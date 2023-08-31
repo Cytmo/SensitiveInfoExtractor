@@ -136,3 +136,21 @@ def is_code_file(code_dir_or_file):
     res = extract_out+result_stdout_copy
     res_out.add_new_json(code_dir_or_file, res)
     return True
+
+
+def is_win_reg_file(file_path):
+
+    if "system.hiv" in file_path or "sam/system" in file_path:
+        logger.info(TAG+"is_win_reg_file(): " + file_path)
+        reg_info = win_reg_file(
+            file_path, file_path.replace("/system", "/sam"))
+        data_list = [line for line in reg_info.split('\n') if line.strip()]
+        cleaned_list = [line.replace('\x14', '') for line in data_list]
+        file_path_tip = file_path+" "+" with " + \
+            file_path.split("/")[-1].replace("/system", "/sam")
+        res_out.add_new_json(file_path_tip, cleaned_list)
+        return True
+
+    if "sam.hiv" in file_path or "sam/sam" in file_path:
+        return True
+    return False
