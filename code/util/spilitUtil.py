@@ -5,9 +5,9 @@ import datetime
 import queue
 import zipfile
 import os
-from util.extractInfo import *
+# from util.extractInfo import *
 from informationEngine.info_core import begin_info_extraction
-from toStringUtils.universalUtil import *
+# from toStringUtils.universalUtil import *
 import re
 
 # 添加结果输出模块
@@ -58,6 +58,14 @@ def if_authorized_keys_file(filename, nameclean):
         return True
     else:
         return False
+    
+def if_private_keys_file(filename, nameclean):
+    with open(filename, 'r') as f:
+        first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
+    if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
+        return True
+    else:
+        return False
 
 
 sensitive_data_pairs = {
@@ -81,7 +89,9 @@ sensitive_data_pairs = {
     "17": "用户状态",
     "18": "已授权公钥",
     "19": "该公钥所允许执行的命令",
-    "20": "所允许使用该公钥的IP"
+    "20": "所允许使用该公钥的IP",
+    "21": "公钥",
+    "22": "私钥"
 
 }
 
@@ -90,6 +100,8 @@ sensitive_data_type = {
     "1": "Linux用户信息",
     "2": "Linux密码信息",
     "3": "公钥授权信息",
+    "4": "公钥信息",
+    "5": "私钥信息"
 }
 
 sensitive_data_templete = {
@@ -102,6 +114,9 @@ sensitive_data_templete = {
     "6": [18, 4],  # 公钥及说明
     "7": [19],  # 公钥允许执行的命令
     "8": [20],  # 公钥所允许的IP
+    "9": [21], #公钥
+    "10": [22], #私钥
+    "11": [21,22] #公钥私钥对
 
 }
 
@@ -145,6 +160,8 @@ sensitive_information_que = queue.Queue()
 def process_passwd_file(filename):
     passwd_file = open(filename)
     for line in passwd_file.readlines():
+        if line == "\n":
+            continue
         # sensitive_information_que.put(SensitiveInformation(1,1,line.split(":")))
         SensitiveInformation(1, [1], line.split(":")).print_sensitive()
 
@@ -152,6 +169,8 @@ def process_passwd_file(filename):
 def process_shadow_file(filename):
     shadow_file = open(filename)
     for line in shadow_file.readlines():
+        if line == "\n":
+            continue
         data_tmp = line.split(":")
         sensitiveInformation = SensitiveInformation(2)
         if data_tmp[1].count('$') < 4:
@@ -175,20 +194,20 @@ def process_shadow_file(filename):
 option_pattern = r'(?<=\")\s*,\s*(?=\")'
 
 # 公钥认证文件匹配
-
-
 def process_authorized_keys_file(filename):
     authorized_file = open(filename)
     for line in authorized_file.readlines():
+        if line == "\n":
+            continue
         sensitiveInformation = SensitiveInformation(3)
         authorized_tmp = line.split(" ")
-        clean_authorized_tmp = [[s for s in authorized_tmp if s != ""]]
+        clean_authorized_tmp = [s for s in authorized_tmp if s != ""]
         if clean_authorized_tmp[0] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [6], authorized_tmp[1:2])
+                [6], [clean_authorized_tmp[1],clean_authorized_tmp[2] if len(clean_authorized_tmp) >= 3 else ''])
         elif clean_authorized_tmp[1] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [6], authorized_tmp[2:3])
+                [6], [clean_authorized_tmp[2],clean_authorized_tmp[3] if len(clean_authorized_tmp) >= 4 else ''])
             options = re.split(option_pattern, clean_authorized_tmp[0])
             for items in options:
                 if items[:5] == "comma":
@@ -200,42 +219,68 @@ def process_authorized_keys_file(filename):
         sensitiveInformation.print_sensitive()
 
 
-# 后缀匹配解析函数
-extension_switch = {
-    ".rar": process_rar_file,
-    ".zip": process_zip_file,
-    ".txt": extract_universal,
-    ".doc": extract_universal,
-    ".ppt": extract_ppt_dps,
-    ".dps": extract_ppt_dps,
-    ".xlsx": extract_xlsx,
-    ".wps": extract_wps,
-    ".et": extract_et,
-    ".eml": extract_eml,
-    ".png": extract_pic,
-    ".jpg": extract_pic
-}
+# 公钥文件
+def process_pub_file(filename,nameclean):
+    pub_file = open(filename)
+    for line in pub_file.readlines():
+        if line == "\n":
+            continue
+        sensitiveInformation = SensitiveInformation(4)
+        pub_tmp = line.split(" ")
+        clean_pub_tmp = [s for s in pub_tmp if s != ""]
+        if clean_pub_tmp[0] == "ssh-rsa":
+            sensitiveInformation.add_templete(
+                [9],[clean_pub_tmp[1]])
+        sensitiveInformation.print_sensitive()
+
+# 私钥文件
+def process_priv_file(filename):
+    priv_file = open(filename)
+    sensitiveInformation = SensitiveInformation(5)
+    sensitiveInformation.add_templete(
+        [10],[''.join(priv_file.readlines()[1:-1])])
+    sensitiveInformation.print_sensitive()
 
 
-def spilit_process_file(file, root_directory):
-    # 获取文件的后缀
-    # 类方法：获取文件名后缀
-    file_spilit = os.path.splitext(file.name)
+# # 后缀匹配解析函数
+# extension_switch = {
+#     ".rar": process_rar_file,
+#     ".zip": process_zip_file,
+#     ".txt": extract_universal,
+#     ".doc": extract_universal,
+#     ".ppt": extract_ppt_dps,
+#     ".dps": extract_ppt_dps,
+#     ".xlsx": extract_xlsx,
+#     ".wps": extract_wps,
+#     ".et": extract_et,
+#     ".eml": extract_eml,
+#     ".png": extract_pic,
+#     ".jpg": extract_pic,
+#     ".pub": process_pub_file,
+# }
 
-    # 从字典中获取相应的处理函数，默认为 None
-    process_function = extension_switch.get(file_spilit[1], None)
 
-    file_name = root_directory + '/' + File.get_parent_directory(file)
+# def spilit_process_file(file, root_directory):
+#     # 获取文件的后缀
+#     # 类方法：获取文件名后缀
+#     file_spilit = os.path.splitext(file.name)
 
-    # 读取文件进行处理
-    if process_function:
-        logger.info(TAG+"spilit_process_file(): " +
-                    file_name + ": " + file_spilit[0])
-        process_function(file_name, file_spilit[0])
+#     # 从字典中获取相应的处理函数，默认为 None
+#     process_function = extension_switch.get(file_spilit[1], None)
 
-    else:
-        # if if_passwd_file(file_name, file_spilit[0]):
-        #     process_passwd_file(file_name)
+#     file_name = root_directory + '/' + File.get_parent_directory(file)
 
-        # print(file_name)
-        logger.info(TAG+"=>Unsupported file format: "+file_name)
+#     # 读取文件进行处理
+#     if process_function:
+#         logger.info(TAG+"spilit_process_file(): " +
+#                     file_name + ": " + file_spilit[0])
+#         process_function(file_name, file_spilit[0])
+#     else:
+#         if if_passwd_file(file_name, file_spilit[0]):
+#             process_passwd_file(file_name)
+#         elif if_authorized_keys_file(file_name, file_spilit[0]):
+#             process_authorized_keys_file(file_name)
+#         elif if_private_keys_file(file_name, file_spilit[0]):
+#             process_priv_file(file_name)
+#         # print(file_name)
+#         logger.info(TAG+"=>Unsupported file format: "+file_name)

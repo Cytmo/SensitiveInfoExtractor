@@ -27,7 +27,7 @@ globalVar._init()
 globalVar.set_value("code_path", "")
 
 # 需要扫描的文件夹列表
-scan_folder = ['../data']
+scan_folder = ['../data/linux']
 
 # 进程处理函数
 
