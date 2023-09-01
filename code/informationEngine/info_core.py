@@ -9,7 +9,7 @@ from informationEngine.info_protection import IoCIdentifier
 from spacy.tokens import Doc
 from typing import Any, Tuple
 import re
-
+from pygments.lexers import guess_lexer, ClassNotFound
 
 # 添加日志模块
 from util.logUtils import LoggerSingleton
@@ -195,8 +195,27 @@ def chn_text_preprocessing(text: str) -> str:
 
 
 def has_chinese(text: str) -> bool:
-    pattern = re.compile(r'[\u4e00-\u9fa5]')  # 匹配中文字符的范围
-    return bool(pattern.search(text))
+    # pattern = re.compile(r'[\u4e00-\u9fa5]')  # 匹配中文字符的范围
+    # return bool(pattern.search(text))
+    return chinese_character_percentage(text) > 70.0
+
+
+# 判断中文字符占比
+def chinese_character_percentage(text:str)-> float:
+    total_characters = 0 
+    chinese_characters = 0
+    english_characters = 0
+    for char in text:
+        if '\u4e00' <= char <= '\u9fff':
+            chinese_characters += 1
+        if '\u0041' <= char <= '\u005a' or '\u0061' <= char <= '\u007a':
+            english_characters += 1
+    total_characters = chinese_characters + english_characters
+    if total_characters == 0:
+        return 0.0
+
+    percentage = (chinese_characters / total_characters) * 100
+    return percentage
 
 
 # 从处理过后的字符串中提取成对信息
@@ -298,11 +317,6 @@ def extract_paired_info(text):
     # print(text)
     has_user = False
     has_address = False
-  
-
-
-
-
     for i in range(len(text)-1):
         # print(text[i], text[i+1]) 
         # 密码不会最先出现
@@ -364,14 +378,17 @@ def eng_text_preprocessing(text: str) -> str:
 # 输入：处理过后的字符串
 # 输出：成对信息列表
 def begin_info_extraction(text: str) -> list:
+    logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除doc提取的[pic]
     text = text.replace("[pic]", "")
+    # 移除代码注释 // # 等
+    text = re.sub(r'//.*', '', text)
     logger.debug(TAG + 'Text before IoC protection: '+text)
     if has_chinese(text):
-        logger.info(TAG + 'Chinese text detected.')
+        logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
     else:
-        logger.info(TAG + 'English text detected.')
+        logger.info(TAG + 'This is an English text.')
         text = fuzz_prevention(text)
         logger.debug(TAG + 'Text after IoC protection: '+text)
 
