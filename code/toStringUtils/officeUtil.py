@@ -145,8 +145,7 @@ def ppt_and_dps_file(ppt_file_path):
     # image_all_text = ocr_batch_textract(image_folder_path)
     logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
     for row in image_all_text:
-        print(row)
-        print()
+        logger.info(row)
     image_all_text = ""
 
     # 去除水印文字
