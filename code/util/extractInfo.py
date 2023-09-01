@@ -31,8 +31,8 @@ def extract_universal(file_path, nameclean):
 
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    text = ppt_and_dps_file(file_path)
-    sensitive_info_detect(file_path, text)
+    # text = ppt_and_dps_file(file_path)
+    # sensitive_info_detect(file_path, text)
 
 
 def extract_xlsx(file_path, nameclean):
@@ -59,11 +59,8 @@ def extract_et(file_path, nameclean):
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
     # text = ocr_textract(file_path)
-    text = ocr_paddleocr(file_path)
-    text_string = "\n".join(text)
-    logger.info(TAG+"extract_pic(): picture information")
-    logger.info(TAG+"extract_pic(): " + text_string)
-    sensitive_info_detect(file_path, text_string)
+    text = ocr_table_batch(file_path)
+    print(text)
 
 
 def extract_eml(file_path, nameclean):
