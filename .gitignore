@@ -155,3 +155,4 @@ code/util/__pycache__
 code/modes/*
 code/output/*
 code/test.py
+code/clean.sh

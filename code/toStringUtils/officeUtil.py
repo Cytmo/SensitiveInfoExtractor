@@ -1,3 +1,4 @@
+import openpyxl
 import aspose.pydrawing as drawing
 from pptx import Presentation
 import aspose.slides as slides
@@ -152,6 +153,58 @@ def ppt_and_dps_file(ppt_file_path):
     return slide_text+"\n"+image_all_text
 
 
+def xlsx_file(file_path):
+    # 加载 Excel 文件
+    workbook = openpyxl.load_workbook(file_path)
+
+    # 获取所有工作簿的名称
+    sheet_names = workbook.sheetnames
+
+    # 遍历工作簿并读取内容
+    workbook_contents = []
+
+    for sheet_name in sheet_names:
+        worksheet = workbook[sheet_name]
+        rows = list(worksheet.iter_rows(values_only=True))
+        workbook_contents.append((sheet_name, rows))
+
+    # 关闭工作簿
+    workbook.close()
+    json_data = xlsx_format(workbook_contents)
+    return json_data
+
+
+def xlsx_format(workbook_contents):
+    xlsx_file_info = []
+    for sheet_name, rows in workbook_contents:
+        columns = rows[0]
+        # 生成 JSON 格式数据
+        json_data = []
+        for row in rows[1:]:
+            row_dict = {}
+            for i, value in enumerate(row):
+                column_name = columns[i]
+                if value is None:
+                    if i == 0:
+                        break
+                    value = "none"
+                elif isinstance(value, datetime):
+                    value = handle_datetime(value)
+                row_dict[column_name] = value
+
+            if not len(row_dict) == 0:
+                json_data.append(row_dict)
+        one_workbook = {"workbook_name": sheet_name,
+                        "workbook_content": json_data}
+        xlsx_file_info.append(one_workbook)
+
+    return xlsx_file_info
+
+
+def handle_datetime(obj):
+    if isinstance(obj, datetime):
+        return obj.strftime('%Y-%m-%d %H:%M:%S')
+    return None
 # print(wps_file_text("data/wps/Android手机VPN安装指南.wps"))
 # print(et_file_text("data/wps/资产梳理.et"))
 

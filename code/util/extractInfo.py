@@ -31,15 +31,16 @@ def extract_universal(file_path, nameclean):
 
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    # text = ppt_and_dps_file(file_path)
-    # sensitive_info_detect(file_path, text)
+    text = ppt_and_dps_file(file_path)
+    sensitive_info_detect(file_path, text)
 
 
 def extract_xlsx(file_path, nameclean):
     logger.info(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
-    # TODO extract_xlsx() 待处理
-    text = universal_textract(file_path)
-    sensitive_info_detect(file_path, text)
+    # text = universal_textract(file_path)
+    text = xlsx_file(file_path)
+    formatted_data = json.dumps(text, ensure_ascii=False)
+    res_out.add_new_json(file_path, formatted_data)
 
 
 def extract_wps(file_path, nameclean):
@@ -146,8 +147,8 @@ def is_win_reg_file(file_path):
             file_path, file_path.replace("/system", "/sam"))
         data_list = [line for line in reg_info.split('\n') if line.strip()]
         cleaned_list = [line.replace('\x14', '') for line in data_list]
-        file_path_tip = file_path+" "+" with " + \
-            file_path.split("/")[-1].replace("/system", "/sam")
+        file_path_tip = file_path+" "+"with " + \
+            file_path.split("/")[-1].replace("system", "sam")
         res_out.add_new_json(file_path_tip, cleaned_list)
         return True
 
