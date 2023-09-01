@@ -152,3 +152,29 @@ def is_win_reg_file(file_path):
     if "sam.hiv" in file_path or "sam/sam" in file_path:
         return True
     return False
+
+
+def is_bash_history(file_path):
+
+    if "sh_history" in file_path:
+        logger.info(TAG+"is_bash_history(): " + file_path)
+        text = universal_file(file_path)
+        sensitive_info_text = begin_info_extraction(text)
+        logger.info(sensitive_info_text)
+        res_out.add_new_json(file_path, sensitive_info_text)
+        return True
+
+    return False
+
+
+def is_token_file(file_path):
+
+    if "token" in file_path:
+        logger.info(TAG+"is_token_file(): " + file_path)
+        text = universal_file(file_path)
+        sensitive_info_text = begin_info_extraction(text)
+        logger.info(sensitive_info_text)
+        res_out.add_new_json(file_path, sensitive_info_text)
+        return True
+
+    return False

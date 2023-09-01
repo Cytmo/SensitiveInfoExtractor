@@ -242,6 +242,14 @@ def spilit_process_file(file, root_directory):
         if is_win_reg_file(file_name):
             return
 
+        # 判断是否是命令行历史记录
+        if is_bash_history(file_name):
+            return
+
+        # 判断是否是token文件
+        if is_token_file(file_name):
+            return
+
         # if if_passwd_file(file_name, file_spilit[0]):
         #     process_passwd_file(file_name)
 
