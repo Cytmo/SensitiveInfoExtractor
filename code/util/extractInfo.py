@@ -31,7 +31,7 @@ def extract_universal(file_path, nameclean):
 
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    # text = ppt_and_dps_file(file_path)
+    text = ppt_and_dps_file(file_path)
     # sensitive_info_detect(file_path, text)
 
 

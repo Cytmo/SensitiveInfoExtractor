@@ -119,12 +119,12 @@ def ocr_batch_textract(folder_path):
 def ocr_table_batch(folder_path):
 
     ocr_result = []
-    table_engine = PPStructure(layout=False, show_log=False)
+    table_engine = PPStructure(layout=False, show_log=True)
 
     image_paths = read_all_pic(folder_path)
 
     for image_path in image_paths:
-
+        logger.info(TAG+"ocr_table_batch(): "+image_path)
         img = cv2.imread(image_path)
         result = table_engine(img)
 
