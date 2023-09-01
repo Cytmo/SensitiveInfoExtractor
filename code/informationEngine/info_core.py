@@ -140,19 +140,18 @@ def text_preprocessing(text: str) -> str:
     text, item_protection_dict1 = item_protection(text)
     global item_protection_dict 
     item_protection_dict = item_protection_dict1
-    # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
+    # 构建正则表达式，匹配英文字符、数字以及指定关键词
     pattern = f"(?:{'|'.join(keywords_list)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
 
     # 使用正则表达式进行匹配和替换
-    cleaned_text = re.findall(pattern, text)
+    cleaned_text = re.findall(pattern, text,re.IGNORECASE)
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
-    # 替换中文关键词
-    for keyword in keywords_list:
-        if keyword in replacement_dict:
-            cleaned_text = cleaned_text.replace(
-                keyword, ' {'+replacement_dict[keyword]+'} ')
+    # 替换关键词
+    for keyword, replacement in replacement_dict.items():
+        pattern = re.compile(re.escape(keyword), re.IGNORECASE)
+        cleaned_text = pattern.sub(f'{{{replacement}}}', cleaned_text)
     # 移除空行
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
@@ -178,7 +177,7 @@ def chn_text_preprocessing(text: str) -> str:
     pattern = f"(?:{'|'.join(chn_keywords_list)}|[a-zA-Z0-9,.;@?!\"'()])+"
 
     # 使用正则表达式进行匹配和替换
-    cleaned_text = re.findall(pattern, text)
+    cleaned_text = re.findall(pattern, text,re.IGNORECASE)
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
@@ -194,7 +193,7 @@ def chn_text_preprocessing(text: str) -> str:
     return cleaned_text
 
 
-def has_chinese(text: str) -> bool:
+def is_chinese_text(text: str) -> bool:
     # pattern = re.compile(r'[\u4e00-\u9fa5]')  # 匹配中文字符的范围
     # return bool(pattern.search(text))
     return chinese_character_percentage(text) > 70.0
@@ -382,9 +381,10 @@ def begin_info_extraction(text: str) -> list:
     # 移除doc提取的[pic]
     text = text.replace("[pic]", "")
     # 移除代码注释 // # 等
-    text = re.sub(r'//.*', '', text)
+    # 已移除，影响地址的提取
+    # text = re.sub(r'//.*', '', text)
     logger.debug(TAG + 'Text before IoC protection: '+text)
-    if has_chinese(text):
+    if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
     else:
