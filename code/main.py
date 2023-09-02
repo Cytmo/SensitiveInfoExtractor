@@ -27,6 +27,8 @@ T1 = time.perf_counter()
 globalVar._init()
 globalVar.set_value("code_path", "")
 
+globalVar.init_sensitive_word("config/sensitive_word.yml")
+
 # 需要扫描的文件夹列表
 scan_folder = ['../data/linux']
 
@@ -91,4 +93,4 @@ output_tile_path = "output/"+datetime.now().strftime("%Y%m%d%H%M%S%f") + \
     "_output.json"
 res_out.save_to_file(output_tile_path)
 logger.info(TAG+"result is saved to: "+output_tile_path+" , total is " +
-            str(len(res_out.res_json)-2) + " file")
+            str(len(res_out.res_json)-2) + " term")

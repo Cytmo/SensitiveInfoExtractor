@@ -51,3 +51,5 @@ tar -xzvf john-1.9.0-jumbo-1.tar.gz
 
 # # vim ~/.bashrc
 # # export UNRAR_LIB_PATH=/usr/lib/libunrar.so
+
+# pip install whispers

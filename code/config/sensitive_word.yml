@@ -1,0 +1,61 @@
+english_patterns:
+  - name: URL
+    regex: ^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$
+
+  - name: ip
+    regex: ^((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))(\.((2((5[0-5])|([0-4]\d)))|([0-1]?\d{1,2}))){3}$
+
+  - name: email
+    regex: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+  - name: username
+    regex: none
+
+  - name: password
+    regex: none
+
+  - name: address
+    regex: none
+
+chinese_patterns:
+  - name: 邮箱
+    regex: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+  - name: 用户名
+    regex: none
+
+  - name: 密码
+    regex: none
+
+  - name: 地址
+    regex: none
+
+  - name: 责任人
+    regex: none
+
+  - name: 使用人
+    regex: none
+
+  - name: 口令
+    regex: none
+
+  - name: 密钥
+    regex: none
+
+  - name: 学号
+    regex: none
+
+  - name: 工号
+    regex: none
+
+  - name: 地点
+    regex: none
+
+  - name: 型号
+    regex: none
+
+  - name: 数量
+    regex: none
+
+  - name: 型号
+    regex: none

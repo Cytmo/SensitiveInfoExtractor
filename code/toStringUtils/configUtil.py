@@ -58,18 +58,30 @@ def yml_file(file_path):
 
 
 # 解析 windows registry file: sam.hiv/system.hiv/sam/system
-def win_reg_file(file_path, res_path):
+def win_reg_file(sam_path, system_path):
     # 使用samdump2解析
-    command = "samdump2 {} {}".format(file_path, res_path)
-    print("Running"+command)
+    command = "samdump2 {} {}".format(sam_path, system_path)
     result = subprocess.run(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    # 打印标准输出
-    print("标准输出：")
-    print(result.stdout)
+    return result.stdout
+
+# 解析源码文件夹
+
+
+def source_code_file(file_path, res_path=''):
+    # 使用whispers解析
+    command = "whispers {}".format(file_path)
+    # print("Running "+command)
+    result = subprocess.run(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    result_out = [result.stdout, result.stderr]
+    return result.stdout, result.stderr
 
 
 # print(xml_file("data/linux/applicationContext.xml"))
 # print(yml_file("data/linux/application-dev.yml"))
 # win_reg_file("../data/windwos/system.hiv", "../data/windwos/sam.hiv")
 # win_reg_file("../data/windwos/sam/sam/system", "../data/windwos/sam/sam/sam")
+# if __name__ == "__main__":
+#     source_code_file(
+#         "/home/jeremy/home/security-text-detect-825/workspace/python_fasts3-main")

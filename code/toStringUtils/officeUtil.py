@@ -1,3 +1,5 @@
+import xlrd
+import openpyxl
 import aspose.pydrawing as drawing
 from pptx import Presentation
 import aspose.slides as slides
@@ -7,6 +9,7 @@ import fitz
 from docx import Document
 from datetime import datetime
 import textract
+from util import globalVar
 from toStringUtils.picUtil import *
 """
 officeUtil: 解析 docx/pdf/wps/et
@@ -79,31 +82,24 @@ def wps_file_text(wps_file_path):
     text = textract.process(filename=wps_doc_name, encoding='utf-8')
     os.rename(wps_doc_name, wps_file_path)
     decoded_text = text.decode('utf-8')
+    decoded_text = decoded_text.replace("[pic]", "")
     return decoded_text
-
-
-# 提取.et中的文本
-def et_file_text(et_file_path):
-    et_doc_name = et_file_path.replace(".et", ".xlsx")
-    os.rename(et_file_path, et_doc_name)
-    text = textract.process(filename=et_doc_name, encoding='utf-8')
-    os.rename(et_doc_name, et_file_path)
-    decoded_text = text.decode('utf-8')
-    return decoded_text
-
-
-def read_image_by_ocr(image_bytes):
-    return ocr_textract(image_bytes)
 
 
 # 提取.ppt和.wps中的文本和图片
 def ppt_and_dps_file(ppt_file_path):
     if ppt_file_path.endswith(".ppt"):
-        ppt_pptx_path = ppt_file_path.replace(".ppt", ".pptx")
+        ppt_file_dir = "../workspace/ppt/"
+        ppt_pptx_path = ppt_file_dir + \
+            ppt_file_path.replace(".ppt", ".pptx").split("/")[-1]
 
     if ppt_file_path.endswith(".dps"):
-        ppt_pptx_path = ppt_file_path.replace(".dps", ".pptx")
+        ppt_file_dir = "../workspace/dps/"
+        ppt_pptx_path = ppt_file_dir + \
+            ppt_file_path.replace(".dps", ".pptx").split("/")[-1]
 
+    os.makedirs(ppt_file_dir, exist_ok=True)
+    logger.info(TAG+"ppt_and_dps_file(): "+ppt_pptx_path)
     result_image_path = "../workspace/image"
     os.makedirs(result_image_path, exist_ok=True)
     ppt_pptx_name = ppt_file_path.split("/")[-1]
@@ -137,10 +133,12 @@ def ppt_and_dps_file(ppt_file_path):
     # 解析图片信息
     image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
 
-    image_all_text = ocr_batch_paddle(image_folder_path)
+    image_all_text = ocr_table_batch(image_folder_path)
     # image_all_text = ocr_batch_textract(image_folder_path)
     logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
-    logger.info(TAG+"ppt_and_dps_file(): "+image_all_text)
+    for row in image_all_text:
+        logger.info(row)
+    image_all_text = ""
 
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")
@@ -152,23 +150,105 @@ def ppt_and_dps_file(ppt_file_path):
     return slide_text+"\n"+image_all_text
 
 
-# print(wps_file_text("data/wps/Android手机VPN安装指南.wps"))
-# print(et_file_text("data/wps/资产梳理.et"))
+def xlsx_file(file_path):
+    # 打开 Excel 文件
+    workbook = xlrd.open_workbook(file_path)
 
-# docx_file_path = 'test/test_pic_txt.docx'  # 替换为实际的 .docx 文件路径
-# result_image_path = 'test/image'  # 替换为实际的图片保存路径
-# docx_text = docx_file_text_and_img(docx_file_path, result_image_path)
-# print("Text Content:")
-# print(docx_text)
+    # 获取所有工作簿的名称
+    sheet_names = workbook.sheet_names()
 
-# pdf_file_path = "test/test_pdf.pdf"
-# result_image_path = "test/image"
-# extracted_text = pdf_file_text_and_img(pdf_file_path, result_image_path)
-# print("提取的文本：")
-# print(extracted_text)
+    # 遍历工作簿并读取内容
+    workbook_contents = []
 
-# print(ppt_and_dps_file("data/office/20180327081403010127.ppt", "test/image/ppt"))
-# print(ppt_and_dps_file("data/office/学生信息管理系统使用介绍.ppt", "test/image/ppt"))
+    for sheet_name in sheet_names:
+        worksheet = workbook.sheet_by_name(sheet_name)
 
-# print(ppt_and_dps_file("data/wps/学生信息管理系统使用介绍.dps", "test/image/dps"))
-# print(ppt_and_dps_file("data/wps/20180327081403010127.dps", "test/image/dps"))
+        # 读取工作簿的内容行
+        rows = [worksheet.row_values(row_num)
+                for row_num in range(worksheet.nrows)]
+
+        workbook_contents.append((sheet_name, rows))
+
+    # 关闭工作簿
+    workbook.release_resources()
+    del workbook
+
+    res = xlsx_format(workbook_contents)
+
+    if len(res) == 1:
+        return res[0]
+    return res
+
+
+def xlsx_format(workbook_contents):
+    xlsx_file_info = []
+
+    for sheet_name, rows in workbook_contents:
+        sheet_data = []
+
+        for row in rows:
+            row_data = []
+
+            for value in row:
+                if value is None:
+                    row_data.append("none")
+                elif isinstance(value, datetime):
+                    row_data.append(handle_datetime(value))
+                else:
+                    row_data.append(value)
+
+            if len(row_data) > 0:
+                sheet_data.append(row_data)
+
+        xlsx_file_info.append(sheet_data)
+
+    xlsx_file_info = xlsx_remove_irrelevant_columns(xlsx_file_info)
+
+    return xlsx_file_info
+
+
+def xlsx_remove_irrelevant_columns(xlsx_file_info):
+
+    sensitive_word = globalVar.get_sensitive_word()
+
+    res = []
+
+    for item in xlsx_file_info:
+
+        res_one_item = one_table_remove_irrelevant_columns(
+            sensitive_word, item)
+
+        if not len(res_one_item) == 0:
+            res.append(res_one_item)
+
+    return res
+
+
+def one_table_remove_irrelevant_columns(sensitive_word, item):
+    column_names = item[0]
+    # 用于存储要保留的列索引
+    valid_columns = []
+    # 遍历每一列
+    for idx, column_name in enumerate(column_names):
+        # 遍历敏感词列表
+        for word in sensitive_word:
+            # 如果列名是敏感词的子字符串，则保留该列
+            if word['name'] in column_name:
+                valid_columns.append(idx)
+                break
+
+    filtered_info = []
+
+    # 重新构建info，只包括要保留的列
+    if len(valid_columns) != 0:
+        filtered_info = [[row[i] for i in valid_columns] for row in item]
+        filtered_info = [[item for item in row if item != ""]
+                         for row in filtered_info]
+
+    return filtered_info
+
+
+def handle_datetime(obj):
+    if isinstance(obj, datetime):
+        return obj.strftime('%Y-%m-%d %H:%M:%S')
+    return None

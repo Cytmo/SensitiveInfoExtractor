@@ -1,8 +1,10 @@
 from datetime import datetime
-# import easyocr
 from paddleocr import PaddleOCR
 import textract
 import os
+import cv2
+from paddleocr import PPStructure, save_structure_res
+from bs4 import BeautifulSoup
 # 日志模块
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.picUtil.py-"
@@ -49,18 +51,22 @@ def ocr_paddleocr(file):
     return res
 
 
-def read_all_pic(folder_path, image_extensions=None):
+def read_all_pic(path, image_extensions=None):
     if image_extensions is None:
         image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
 
-    image_paths = []
-
-    for root, dirs, files in os.walk(folder_path):
-        for file in files:
-            if any(file.lower().endswith(ext) for ext in image_extensions):
-                image_paths.append(os.path.join(root, file))
-
-    return image_paths
+    if os.path.isdir(path):
+        image_paths = []
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if any(file.lower().endswith(ext) for ext in image_extensions):
+                    image_paths.append(os.path.join(root, file))
+        return image_paths
+    elif os.path.isfile(path):
+        _, ext = os.path.splitext(path)
+        if ext.lower() in image_extensions:
+            return [path]
+    return []
 
 
 def ocr_batch_paddle(folder_path):
@@ -109,5 +115,39 @@ def ocr_batch_textract(folder_path):
         #                 image_path + " is none")
     return image_all_text
 
-# print(pic_file("data/HCC维护信息.png"))
-# print(pic_file("data/carbon.jpg"))
+
+def ocr_table_batch(folder_path):
+
+    ocr_result = []
+    # show_log 打印识别日志
+    table_engine = PPStructure(layout=False, show_log=False)
+
+    image_paths = read_all_pic(folder_path)
+
+    for image_path in image_paths:
+        logger.info(TAG+"ocr_table_batch(): "+image_path)
+        img = cv2.imread(image_path)
+        result = table_engine(img)
+
+        html_code = result[0]["res"]["html"]
+        soup = BeautifulSoup(html_code, 'html.parser')
+
+        table = soup.find('table')
+        table_data = []
+        for row in table.find_all('tr'):
+            row_data = [cell.get_text(strip=True)
+                        for cell in row.find_all('td')]
+            if row_data:
+                table_data.append(row_data)
+
+        # 使用for循环遍历原始列表并添加非空的子列表到新列表
+        filtered_list = []
+        image_path = [image_path]
+        filtered_list.append(image_path)
+        for row in table_data:
+            if row != ['']:
+                filtered_list.append(row)
+
+        ocr_result.append(filtered_list)
+
+    return ocr_result
