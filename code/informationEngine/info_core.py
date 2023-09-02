@@ -440,7 +440,7 @@ special_keywords_list = [
 ]
 
 
-def special_processing(text: str) -> str:
+def special_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for text')
     text, item_protection_dict1 = item_protection(text)
     global item_protection_dict 
@@ -502,10 +502,22 @@ def special_processing(text: str) -> str:
     return result_dict
 
 
+def info_extraction(info) -> dict:
+    if info.isinstance(str):
+        return begin_info_extraction(info)
+    elif info.isinstance(list):
+        if info[1].isinstance(str):
+            # join list to str
+            info = "\n".join(info)
+            return begin_info_extraction(info)
+        else:
+            #todo table info extract
+            return None
+
 # 从处理过后的字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
-def begin_info_extraction(text: str) -> list:
+def begin_info_extraction(text: str) -> dict:
     original_text = text
     logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除doc提取的[pic]
