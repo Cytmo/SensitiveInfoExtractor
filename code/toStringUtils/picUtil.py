@@ -1,5 +1,5 @@
 from datetime import datetime
-import easyocr
+# import easyocr
 from paddleocr import PaddleOCR
 import textract
 import os

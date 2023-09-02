@@ -5,10 +5,13 @@ import datetime
 import queue
 import zipfile
 import os
-# from util.extractInfo import *
+from util.extractInfo import *
 from informationEngine.info_core import begin_info_extraction
-# from toStringUtils.universalUtil import *
+from toStringUtils.universalUtil import *
+from util.logUtils import LoggerSingleton
 import re
+
+logger = LoggerSingleton().get_logger()
 
 # 添加结果输出模块
 from util.resultUtil import ResOut
@@ -242,45 +245,45 @@ def process_priv_file(filename):
     sensitiveInformation.print_sensitive()
 
 
-# # 后缀匹配解析函数
-# extension_switch = {
-#     ".rar": process_rar_file,
-#     ".zip": process_zip_file,
-#     ".txt": extract_universal,
-#     ".doc": extract_universal,
-#     ".ppt": extract_ppt_dps,
-#     ".dps": extract_ppt_dps,
-#     ".xlsx": extract_xlsx,
-#     ".wps": extract_wps,
-#     ".et": extract_et,
-#     ".eml": extract_eml,
-#     ".png": extract_pic,
-#     ".jpg": extract_pic,
-#     ".pub": process_pub_file,
-# }
+# 后缀匹配解析函数
+extension_switch = {
+    ".rar": process_rar_file,
+    ".zip": process_zip_file,
+    ".txt": extract_universal,
+    ".doc": extract_universal,
+    ".ppt": extract_ppt_dps,
+    ".dps": extract_ppt_dps,
+    ".xlsx": extract_xlsx,
+    ".wps": extract_wps,
+    ".et": extract_et,
+    ".eml": extract_eml,
+    ".png": extract_pic,
+    ".jpg": extract_pic,
+    ".pub": process_pub_file,
+}
 
 
-# def spilit_process_file(file, root_directory):
-#     # 获取文件的后缀
-#     # 类方法：获取文件名后缀
-#     file_spilit = os.path.splitext(file.name)
+def spilit_process_file(file, root_directory):
+    # 获取文件的后缀
+    # 类方法：获取文件名后缀
+    file_spilit = os.path.splitext(file.name)
 
-#     # 从字典中获取相应的处理函数，默认为 None
-#     process_function = extension_switch.get(file_spilit[1], None)
+    # 从字典中获取相应的处理函数，默认为 None
+    process_function = extension_switch.get(file_spilit[1], None)
 
-#     file_name = root_directory + '/' + File.get_parent_directory(file)
+    file_name = root_directory + '/' + File.get_parent_directory(file)
 
-#     # 读取文件进行处理
-#     if process_function:
-#         logger.info(TAG+"spilit_process_file(): " +
-#                     file_name + ": " + file_spilit[0])
-#         process_function(file_name, file_spilit[0])
-#     else:
-#         if if_passwd_file(file_name, file_spilit[0]):
-#             process_passwd_file(file_name)
-#         elif if_authorized_keys_file(file_name, file_spilit[0]):
-#             process_authorized_keys_file(file_name)
-#         elif if_private_keys_file(file_name, file_spilit[0]):
-#             process_priv_file(file_name)
-#         # print(file_name)
-#         logger.info(TAG+"=>Unsupported file format: "+file_name)
+    # 读取文件进行处理
+    if process_function:
+        logger.info(TAG+"spilit_process_file(): " +
+                    file_name + ": " + file_spilit[0])
+        process_function(file_name, file_spilit[0])
+    else:
+        if if_passwd_file(file_name, file_spilit[0]):
+            process_passwd_file(file_name)
+        elif if_authorized_keys_file(file_name, file_spilit[0]):
+            process_authorized_keys_file(file_name)
+        elif if_private_keys_file(file_name, file_spilit[0]):
+            process_priv_file(file_name)
+        # print(file_name)
+        logger.info(TAG+"=>Unsupported file format: "+file_name)
