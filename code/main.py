@@ -27,6 +27,9 @@ T1 = time.perf_counter()
 globalVar._init()
 globalVar.set_value("code_path", "")
 
+globalVar.init_sensitive_word("config/sensitive_word.yml")
+
+print(globalVar.get_sensitive_word())
 # 需要扫描的文件夹列表
 scan_folder = ['../data']
 

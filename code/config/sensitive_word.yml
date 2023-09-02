@@ -42,9 +42,6 @@ chinese_patterns:
   - name: 口令
     regex: none
 
-  - name: 编号
-    regex: none
-
   - name: 密钥
     regex: none
 
@@ -52,4 +49,16 @@ chinese_patterns:
     regex: none
 
   - name: 工号
+    regex: none
+
+  - name: 地点
+    regex: none
+
+  - name: 型号
+    regex: none
+
+  - name: 数量
+    regex: none
+
+  - name: 型号
     regex: none

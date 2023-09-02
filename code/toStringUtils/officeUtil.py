@@ -8,6 +8,7 @@ import fitz
 from docx import Document
 from datetime import datetime
 import textract
+from util import globalVar
 from toStringUtils.picUtil import *
 """
 officeUtil: 解析 docx/pdf/wps/et
@@ -176,35 +177,69 @@ def xlsx_file(file_path):
 
     # 关闭工作簿
     workbook.close()
-    json_data = xlsx_format(workbook_contents)
-    return json_data
+    res = xlsx_format(workbook_contents)
+    return res
 
 
 def xlsx_format(workbook_contents):
     xlsx_file_info = []
+
     for sheet_name, rows in workbook_contents:
-        columns = rows[0]
-        # 生成 JSON 格式数据
-        json_data = []
-        for row in rows[1:]:
-            row_dict = {}
-            for i, value in enumerate(row):
-                column_name = columns[i]
+        sheet_data = []
+
+        for row in rows:
+            row_data = []
+
+            for value in row:
                 if value is None:
-                    if i == 0:
-                        break
-                    value = "none"
+                    row_data.append("none")
                 elif isinstance(value, datetime):
-                    value = handle_datetime(value)
-                row_dict[column_name] = value
+                    row_data.append(handle_datetime(value))
+                else:
+                    row_data.append(value)
 
-            if not len(row_dict) == 0:
-                json_data.append(row_dict)
-        one_workbook = {"workbook_name": sheet_name,
-                        "workbook_content": json_data}
-        xlsx_file_info.append(one_workbook)
+            if all(element == "none" for element in row_data):
+                continue
+            if len(row_data) > 0:
+                sheet_data.append(row_data)
 
+        xlsx_file_info.append(sheet_data)
+
+    xlsx_file_info = xlsx_remove_irrelevant_columns(xlsx_file_info)
     return xlsx_file_info
+
+
+def xlsx_remove_irrelevant_columns(xlsx_file_info):
+
+    sensitive_word = globalVar.get_sensitive_word()
+
+    res = []
+
+    for item in xlsx_file_info:
+
+        column_names = item[0]
+
+        # 用于存储要保留的列索引
+        valid_columns = []
+
+        # 遍历每一列
+        for idx, column_name in enumerate(column_names):
+            # 遍历敏感词列表
+            for word in sensitive_word:
+                # 如果列名是敏感词的子字符串，则保留该列
+                if word['name'] in column_name:
+
+                    valid_columns.append(idx)
+                    break
+
+        # 重新构建info，只包括要保留的列
+        if len(valid_columns) != 0:
+            filtered_info = [[row[i] for i in valid_columns] for row in item]
+            filtered_info = [[item for item in row if item != "none"]
+                             for row in filtered_info]
+            res.append(filtered_info)
+
+    return res
 
 
 def handle_datetime(obj):

@@ -37,10 +37,8 @@ def extract_ppt_dps(file_path, nameclean):
 
 def extract_xlsx(file_path, nameclean):
     logger.info(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
-    # text = universal_textract(file_path)
     text = xlsx_file(file_path)
-    formatted_data = json.dumps(text, ensure_ascii=False)
-    res_out.add_new_json(file_path, formatted_data)
+    res_out.add_new_json(file_path, text)
 
 
 def extract_wps(file_path, nameclean):
