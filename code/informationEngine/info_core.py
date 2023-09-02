@@ -424,7 +424,7 @@ def convert_chinese_punctuation(text):
 
 
 # 特殊处理
-eng_keywords_list = [
+special_keywords_list = [
     "user",
     "pass",
     "address",
@@ -434,6 +434,9 @@ eng_keywords_list = [
     "auth",
     "salt",
     "host",
+    "password",
+    "username",
+    "url",
 ]
 
 
@@ -483,8 +486,8 @@ def special_processing(text: str) -> str:
         words_list += line.split(" ")
     for i in range(len(words_list) - 1):
         print(words_list[i])
-        if any(key in words_list[i] for key in eng_keywords_list) and not any(
-            key in words_list[i + 1] for key in eng_keywords_list
+        if any(key in words_list[i] for key in special_keywords_list) and not any(
+            key in words_list[i + 1] for key in special_keywords_list
         ):
             if words_list[i+1] in item_protection_dict:
                 result_dict[words_list[i]] = item_protection_dict[words_list[i+1]]
