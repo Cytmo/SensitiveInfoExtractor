@@ -177,7 +177,11 @@ def xlsx_file(file_path):
 
     # 关闭工作簿
     workbook.close()
+
     res = xlsx_format(workbook_contents)
+
+    if len(res) == 1:
+        return res[0]
     return res
 
 
@@ -217,29 +221,37 @@ def xlsx_remove_irrelevant_columns(xlsx_file_info):
 
     for item in xlsx_file_info:
 
-        column_names = item[0]
+        res_one_item = one_table_remove_irrelevant_columns(
+            sensitive_word, item)
 
-        # 用于存储要保留的列索引
-        valid_columns = []
-
-        # 遍历每一列
-        for idx, column_name in enumerate(column_names):
-            # 遍历敏感词列表
-            for word in sensitive_word:
-                # 如果列名是敏感词的子字符串，则保留该列
-                if word['name'] in column_name:
-
-                    valid_columns.append(idx)
-                    break
-
-        # 重新构建info，只包括要保留的列
-        if len(valid_columns) != 0:
-            filtered_info = [[row[i] for i in valid_columns] for row in item]
-            filtered_info = [[item for item in row if item != "none"]
-                             for row in filtered_info]
-            res.append(filtered_info)
+        if not len(res_one_item) == 0:
+            res.append(res_one_item)
 
     return res
+
+
+def one_table_remove_irrelevant_columns(sensitive_word, item):
+    column_names = item[0]
+    # 用于存储要保留的列索引
+    valid_columns = []
+    # 遍历每一列
+    for idx, column_name in enumerate(column_names):
+        # 遍历敏感词列表
+        for word in sensitive_word:
+            # 如果列名是敏感词的子字符串，则保留该列
+            if word['name'] in column_name:
+                valid_columns.append(idx)
+                break
+
+    filtered_info = []
+
+    # 重新构建info，只包括要保留的列
+    if len(valid_columns) != 0:
+        filtered_info = [[row[i] for i in valid_columns] for row in item]
+        filtered_info = [[item for item in row if item != "none"]
+                         for row in filtered_info]
+
+    return filtered_info
 
 
 def handle_datetime(obj):

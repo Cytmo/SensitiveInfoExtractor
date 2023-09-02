@@ -24,9 +24,6 @@ chinese_patterns:
   - name: 用户名
     regex: none
 
-  - name: 日期
-    regex: none
-
   - name: 密码
     regex: none
 

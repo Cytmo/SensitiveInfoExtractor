@@ -5,6 +5,8 @@ import re
 import json
 from datetime import datetime
 from bs4 import BeautifulSoup
+from util import globalVar
+from toStringUtils.officeUtil import one_table_remove_irrelevant_columns, xlsx_file
 
 
 """
@@ -44,6 +46,7 @@ def eml_file(eml_file_path):
     }
 
     # 提取正文和保存附件
+    attachment_file_info = []
     for part in msg.walk():
         content_type = part.get_content_type()
 
@@ -78,11 +81,12 @@ def eml_file(eml_file_path):
                 with open(attachment_path, 'wb') as attachment_file:
                     attachment_file.write(attachment_data)
                 logger.info(TAG+f"Saved attachment: {attachment_path}")
+                attachment_file_info = xlsx_file(attachment_path)
 
     # print(body)
     # email_info["body"] = body
     # 转换为JSON格式
-    return [json.dumps(email_info, ensure_ascii=False), body]
+    return [email_info, body, attachment_file_info]
 
 
 def html_extract(body):
@@ -104,10 +108,8 @@ def html_extract(body):
     # 找到表格标签
     table = soup.find('table')
 
+    table_data = []
     if table:
-        # 创建一个列表来存储表格数据
-        table_data = []
-
         # 遍历表格行
         for row in table.find_all('tr'):
             row_data = []
@@ -116,31 +118,19 @@ def html_extract(body):
                 row_data.append(cell.get_text().strip())
             table_data.append(row_data)
 
-        # 列名列表
-        columns = table_data[0]
-        # 生成 JSON 格式数据
-        json_data = []
-        for row in table_data[1:]:
-            row_dict = {}
-            for i, value in enumerate(row):
-                column_name = columns[i]
-                row_dict[column_name] = value
-            json_data.append(row_dict)
-
-        for item in json_data:
-            if "编号" in item:
-                del item["编号"]
-
+        sensitive_word = globalVar.get_sensitive_word()
+        res_table = one_table_remove_irrelevant_columns(
+            sensitive_word, table_data)
         result = {
             'text': p_text_string,
-            'table': json_data
+            'table': res_table
         }
     else:
         result = {
             'text': p_text_string
         }
 
-    return json.dumps(result, ensure_ascii=False)
+    return result
 
 
 def decode_header(header_value):

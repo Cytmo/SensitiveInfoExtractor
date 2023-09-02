@@ -62,22 +62,24 @@ def extract_pic(file_path, nameclean):
 
 def extract_eml(file_path, nameclean):
     logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
-    eml_header, eml_text = eml_file(file_path)
-    eml_header = json.loads(eml_header)
-    eml_text = json.loads(eml_text)
+    eml_header, eml_text, eml_attachment = eml_file(file_path)
+
     sensitive_info = []
     sensitive_info_text = info_extraction(eml_text["text"])
     if not len(sensitive_info_text) == 0:
-        logger.info(TAG+"extract_eml(): eml body has no sensitive infomation")
+        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
         sensitive_info.append(sensitive_info_text)
 
     if "table" in eml_text:
         logger.info(TAG+"extract_eml(): eml body has table")
         sensitive_info = sensitive_info+eml_text["table"]
 
-    eml_header["body"] = sensitive_info
-
-    res_out.add_new_json(file_path, eml_header)
+    result = {
+        "eml_header": eml_header,
+        "sensitive_info": sensitive_info,
+        "eml_attachment": eml_attachment
+    }
+    res_out.add_new_json(file_path, result)
 
 
 def is_code_file(code_dir_or_file):
