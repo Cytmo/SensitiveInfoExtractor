@@ -93,4 +93,4 @@ output_tile_path = "output/"+datetime.now().strftime("%Y%m%d%H%M%S%f") + \
     "_output.json"
 res_out.save_to_file(output_tile_path)
 logger.info(TAG+"result is saved to: "+output_tile_path+" , total is " +
-            str(len(res_out.res_json)-2) + " file")
+            str(len(res_out.res_json)-2) + " term")
