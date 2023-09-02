@@ -1,3 +1,4 @@
+import xlrd
 import openpyxl
 import aspose.pydrawing as drawing
 from pptx import Presentation
@@ -85,18 +86,7 @@ def wps_file_text(wps_file_path):
     return decoded_text
 
 
-# 提取.et中的文本
-def et_file_text(et_file_path):
-    et_doc_name = et_file_path.replace(".et", ".xlsx")
-    os.rename(et_file_path, et_doc_name)
-    text = textract.process(filename=et_doc_name, encoding='utf-8')
-    os.rename(et_doc_name, et_file_path)
-    decoded_text = text.decode('utf-8')
-    return decoded_text
-
 # 提取.ppt和.wps中的文本和图片
-
-
 def ppt_and_dps_file(ppt_file_path):
     if ppt_file_path.endswith(".ppt"):
         ppt_file_dir = "../workspace/ppt/"
@@ -161,22 +151,27 @@ def ppt_and_dps_file(ppt_file_path):
 
 
 def xlsx_file(file_path):
-    # 加载 Excel 文件
-    workbook = openpyxl.load_workbook(file_path)
+    # 打开 Excel 文件
+    workbook = xlrd.open_workbook(file_path)
 
     # 获取所有工作簿的名称
-    sheet_names = workbook.sheetnames
+    sheet_names = workbook.sheet_names()
 
     # 遍历工作簿并读取内容
     workbook_contents = []
 
     for sheet_name in sheet_names:
-        worksheet = workbook[sheet_name]
-        rows = list(worksheet.iter_rows(values_only=True))
+        worksheet = workbook.sheet_by_name(sheet_name)
+
+        # 读取工作簿的内容行
+        rows = [worksheet.row_values(row_num)
+                for row_num in range(worksheet.nrows)]
+
         workbook_contents.append((sheet_name, rows))
 
     # 关闭工作簿
-    workbook.close()
+    workbook.release_resources()
+    del workbook
 
     res = xlsx_format(workbook_contents)
 
@@ -202,14 +197,13 @@ def xlsx_format(workbook_contents):
                 else:
                     row_data.append(value)
 
-            if all(element == "none" for element in row_data):
-                continue
             if len(row_data) > 0:
                 sheet_data.append(row_data)
 
         xlsx_file_info.append(sheet_data)
 
     xlsx_file_info = xlsx_remove_irrelevant_columns(xlsx_file_info)
+
     return xlsx_file_info
 
 
@@ -248,7 +242,7 @@ def one_table_remove_irrelevant_columns(sensitive_word, item):
     # 重新构建info，只包括要保留的列
     if len(valid_columns) != 0:
         filtered_info = [[row[i] for i in valid_columns] for row in item]
-        filtered_info = [[item for item in row if item != "none"]
+        filtered_info = [[item for item in row if item != ""]
                          for row in filtered_info]
 
     return filtered_info

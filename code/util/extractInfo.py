@@ -31,6 +31,7 @@ def extract_universal(file_path, nameclean):
 
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
+    # TODO: 注释下面两行便于调试其他文件解析
     # text = ppt_and_dps_file(file_path)
     # sensitive_info_detect(file_path, text)
 
@@ -49,9 +50,11 @@ def extract_wps(file_path, nameclean):
 
 def extract_et(file_path, nameclean):
     logger.info(TAG+"extract_et(): " + file_path.split("/")[-1])
-    text = et_file_text(file_path)
-    # TODO extract_xlsx() 待处理
-    sensitive_info_detect(file_path, text)
+    et_doc_name = file_path.replace(".et", ".xlsx")
+    os.rename(file_path, et_doc_name)
+    text = xlsx_file(et_doc_name)
+    os.rename(et_doc_name, file_path)
+    res_out.add_new_json(file_path, text)
 
 
 def extract_pic(file_path, nameclean):
