@@ -9,6 +9,7 @@ from informationEngine.info_protection import IoCIdentifier
 from spacy.tokens import Doc
 from typing import Any, Tuple
 import re
+import re
 from pygments.lexers import guess_lexer, ClassNotFound
 
 # 添加日志模块
@@ -33,11 +34,11 @@ def text_parse(file_path):
     matcher = Matcher(nlp.vocab)
 
     # octet_rx = r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
-    # ip_pattern= [ {"TEXT": {"REGEX": r"^{0}(?:\.{0}){{3}}$".format(octet_rx)}}]
+    # ip_pattern= [ {"TEXT": {"re": r"^{0}(?:\.{0}){{3}}$".format(octet_rx)}}]
     # 添加规则来匹配IP地址
     ip_pattern = [[
         {"TEXT": {
-            "REGEX": r"^(?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}|(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})$"}}
+            "re": r"^(?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}|(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})$"}}
     ]]
 
     # Initialize Matcher
@@ -97,12 +98,13 @@ def item_protection(text: str) -> Tuple[str, dict]:
     # Define regular expressions for different types of items you want to replace
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
     url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+    ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b|localhost\b'
+
 
     patterns = [email_pattern, url_pattern, ip_pattern]
 
     for pattern in patterns:
-        matches = re.finditer(pattern, text)
+        matches = re.finditer(pattern, text, flags=re.IGNORECASE)
         for match in matches:
             item = match.group()
             placeholder = f'?{placeholders_counter}?'
@@ -131,34 +133,56 @@ def fuzz_prevention(text: str) -> str:
 
 
 keywords_list = ["-u", "-p", "IP", "port","-h",
-                 "user", "password", "address", "name", '\n']
+                 "user", "password","passw0rd", "address", "name", '\n']
 replacement_dict = {"-p": "password", "port": "port", "-u": "user", "user": "user", "password": "password",
-                    "-h":"address","address": "address", "name": "name"}
+                    "-h":"address","address": "address", "name": "name","passw0rd":"password"}
+
+# def text_preprocessing(text: str) -> str:
+#     text, item_protection_dict1 = item_protection(text)
+#     global item_protection_dict 
+#     item_protection_dict = item_protection_dict1
+#     # 构建正则表达式，匹配英文字符、数字以及指定关键词
+#     pattern = f"(?:{'|'.join(keywords_list)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
+
+#     # 使用正则表达式进行匹配和替换 |re.ENHANCEMATCH
+#     cleaned_text = re.findall(pattern, text, flags=re.IGNORECASE)
+
+#     # 将匹配到的内容重新组合成字符串
+#     cleaned_text = ' '.join(cleaned_text)
+#     # 替换关键词 |re.ENHANCEMATCH
+#     for keyword, replacement in replacement_dict.items():
+#         pattern = re.compile(re.escape(keyword), flags=re.IGNORECASE)
+#         cleaned_text = pattern.sub(f'{{{replacement}}}', cleaned_text)
+#     # 移除空行
+#     cleaned_text = '\n'.join(
+#         [line for line in cleaned_text.splitlines() if line.strip()])
+#     cleaned_text = cleaned_text.replace("{ {", "{").replace("} }", "}")
+#     # cleaned_text = cleaned_text.replace("{{", "{").replace("}}", "}")
+#     logger.debug("Cleaned text: "+cleaned_text)
+#     return cleaned_text
+
 
 
 def text_preprocessing(text: str) -> str:
-    text, item_protection_dict1 = item_protection(text)
-    global item_protection_dict 
-    item_protection_dict = item_protection_dict1
-    # 构建正则表达式，匹配英文字符、数字以及指定关键词
+    # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(keywords_list)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
 
     # 使用正则表达式进行匹配和替换
-    cleaned_text = re.findall(pattern, text,re.IGNORECASE)
+    cleaned_text = re.findall(pattern, text)
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
-    # 替换关键词
-    for keyword, replacement in replacement_dict.items():
-        pattern = re.compile(re.escape(keyword), re.IGNORECASE)
-        cleaned_text = pattern.sub(f'{{{replacement}}}', cleaned_text)
+    # 替换中文关键词
+    for keyword in keywords_list:
+        if keyword in replacement_dict:
+            cleaned_text = cleaned_text.replace(
+                keyword, ' {'+replacement_dict[keyword]+'} ')
     # 移除空行
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
     cleaned_text = cleaned_text.replace("{ {", "{").replace("} }", "}")
     logger.debug("Cleaned text: "+cleaned_text)
     return cleaned_text
-
 
 # 中文关键字列表
 chn_keywords_list = ["账号","IP", "端口", "名称", "地址",
@@ -361,22 +385,125 @@ def extract_paired_info(text):
         for key, value in item.items():
             if value in item_protection_dict:
                 item[key] = item_protection_dict[value]
+    # if result_pair == []:
+    #     logger.warning(TAG + 'No paired info extracted!')
+    #     success = False
+    # else:
+    #     success = True
     return result_pair
 
+def convert_chinese_punctuation(text):
+    # 定义一个字典来映射中文标点符号到英文标点符号
+    punctuation_mapping = {
+        "，": ",",
+        "。": ".",
+        "！": "!",
+        "？": "?",
+        "“": '"',
+        "”": '"',
+        "‘": "'",
+        "’": "'",
+        "；": ";",
+        "：": ":",
+        "（": "(",
+        "）": ")",
+        "【": "[",
+        "】": "]",
+        "《": "<",
+        "》": ">",
+        "、": ",",
+        "＇": "'",
+        "/**#@+ *": "",
+    }
 
-# 英文通用处理
+    # 使用字典进行替换
+    for chinese_punctuation, english_punctuation in punctuation_mapping.items():
+        text = text.replace(chinese_punctuation, english_punctuation)
 
-eng_keywords_list = ["user", "password", "address", "name", "port",'key']
-def eng_text_preprocessing(text: str) -> str:
-    text = fuzz_prevention(text)
-    print(text.split('\n'))
+    return text
 
+
+# 特殊处理
+eng_keywords_list = [
+    "user",
+    "pass",
+    "address",
+    "name",
+    "port",
+    "key",
+    "auth",
+    "salt",
+    "host",
+]
+
+
+def special_processing(text: str) -> str:
+    logger.info(TAG + 'Special processing for text')
+    text, item_protection_dict1 = item_protection(text)
+    global item_protection_dict 
+    item_protection_dict = item_protection_dict1
+    # text = fuzz_prevention(text)
+    text = text.lower()
+    text = convert_chinese_punctuation(text)
+    text = text.replace("'", '"')
+    text = text.split("\n")
+    lines = []
+    # 用于分割的符号
+    split_symbols = [":", "=", '"']
+    # remove outer "
+    for line in text:
+        if line.startswith('"') and line.endswith('"'):
+            line = line[1:-1]
+        lines.append(line)
+    text = lines
+    lines = []
+    # only  keep each eng_keywords_list between ""
+    for line in text:
+        new_line = ""
+        if ":" in line:
+            line = line.split(":")
+        elif "=" in line:
+            line = line.split("=")
+        elif '"' in line:
+            line = line.split('"')
+        for i in range(len(line)):
+            if i % 2 == 1:
+                new_line += "{} ".format(line[i])
+        lines.append(new_line)
+    result_dict = {}
+    # remove empty eng_keywords_list
+    lines_temp = []
+    for line in lines:
+        line = line.strip()
+        lines_temp.append(line)
+    lines = lines_temp
+    print(lines)
+    words_list = []
+    for line in lines:
+        words_list += line.split(" ")
+    for i in range(len(words_list) - 1):
+        print(words_list[i])
+        if any(key in words_list[i] for key in eng_keywords_list) and not any(
+            key in words_list[i + 1] for key in eng_keywords_list
+        ):
+            if words_list[i+1] in item_protection_dict:
+                result_dict[words_list[i]] = item_protection_dict[words_list[i+1]]
+            else:
+                result_dict[words_list[i]] = words_list[i + 1]
+    #  # 还原被替换的内容
+    # for item in result_dict:
+    #     for key, value in item:
+    #         if value in item_protection_dict:
+    #             item[key] = item_protection_dict[value]
+    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    return result_dict
 
 
 # 从处理过后的字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
 def begin_info_extraction(text: str) -> list:
+    original_text = text
     logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除doc提取的[pic]
     text = text.replace("[pic]", "")
@@ -395,6 +522,9 @@ def begin_info_extraction(text: str) -> list:
         text = text_preprocessing(text)
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
+    if paired_info == []:
+        logger.warning(TAG + 'No paired info extracted!')
+        paired_info = special_processing(original_text)
     return paired_info
 
 
@@ -403,7 +533,7 @@ def begin_info_extraction(text: str) -> list:
 #     sensitive_info = []
 
 #     for pattern in patterns:
-#         matches = re.findall(pattern["regex"], text)
+#         matches = re.findall(pattern["re"], text)
 #         for match in matches:
 #             sensitive_info.append({
 #                 "name": pattern["name"],
