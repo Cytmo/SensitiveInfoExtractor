@@ -30,7 +30,7 @@ class LoggerSingleton:
         time = datetime.now().strftime("%Y%m%d%H%M%S%f")
         if not os.path.exists("log"):
             os.mkdir("log")
-        self.filename = 'log/' + time + 'info_extraction_.log'
+        self.filename = 'log/' + time + '_info_extraction_.log'
         # self.filename = 'log/' + "info_extraction" + '.log'
         logging.info("Logging to %s", self.filename)
         self.setup_logger()

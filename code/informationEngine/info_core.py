@@ -1,3 +1,5 @@
+from util.logUtils import LoggerSingleton
+from util import globalVar
 import argparse
 import os
 import shutil
@@ -11,9 +13,9 @@ from typing import Any, Tuple
 import re
 import re
 from pygments.lexers import guess_lexer, ClassNotFound
+from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
 
 # 添加日志模块
-from util.logUtils import LoggerSingleton
 TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
 
@@ -519,9 +521,9 @@ def info_extraction(info) -> dict:
                 text = text+"\n"+item_to_string
             return begin_info_extraction(text)
         else:
-            print("********")
-            # todo table info extract
-            # return None
+            result_table = one_table_remove_irrelevant_columns(
+                globalVar.get_sensitive_word(), info[1:])
+            return result_table
 
 
 def is_png_text(info):
