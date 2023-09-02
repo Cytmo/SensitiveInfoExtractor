@@ -119,7 +119,8 @@ def ocr_batch_textract(folder_path):
 def ocr_table_batch(folder_path):
 
     ocr_result = []
-    table_engine = PPStructure(layout=False, show_log=True)
+    # show_log 打印识别日志
+    table_engine = PPStructure(layout=False, show_log=False)
 
     image_paths = read_all_pic(folder_path)
 
@@ -140,7 +141,9 @@ def ocr_table_batch(folder_path):
                 table_data.append(row_data)
 
         # 使用for循环遍历原始列表并添加非空的子列表到新列表
-        filtered_list = [image_path]
+        filtered_list = []
+        image_path = [image_path]
+        filtered_list.append(image_path)
         for row in table_data:
             if row != ['']:
                 filtered_list.append(row)

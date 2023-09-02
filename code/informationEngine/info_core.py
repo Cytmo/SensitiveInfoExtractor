@@ -100,7 +100,6 @@ def item_protection(text: str) -> Tuple[str, dict]:
     url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b|localhost\b'
 
-
     patterns = [email_pattern, url_pattern, ip_pattern]
 
     for pattern in patterns:
@@ -109,7 +108,8 @@ def item_protection(text: str) -> Tuple[str, dict]:
             item = match.group()
             placeholder = f'?{placeholders_counter}?'
             placeholders[placeholder] = item
-            text = text.replace(item, placeholder, 1)  # Replace only the first occurrence
+            # Replace only the first occurrence
+            text = text.replace(item, placeholder, 1)
             placeholders_counter += 1
 
     return text, placeholders
@@ -132,14 +132,14 @@ def fuzz_prevention(text: str) -> str:
     return result
 
 
-keywords_list = ["-u", "-p", "IP", "port","-h",
-                 "user", "password","passw0rd", "address", "name", '\n']
+keywords_list = ["-u", "-p", "IP", "port", "-h",
+                 "user", "password", "passw0rd", "address", "name", '\n']
 replacement_dict = {"-p": "password", "port": "port", "-u": "user", "user": "user", "password": "password",
-                    "-h":"address","address": "address", "name": "name","passw0rd":"password"}
+                    "-h": "address", "address": "address", "name": "name", "passw0rd": "password"}
 
 # def text_preprocessing(text: str) -> str:
 #     text, item_protection_dict1 = item_protection(text)
-#     global item_protection_dict 
+#     global item_protection_dict
 #     item_protection_dict = item_protection_dict1
 #     # 构建正则表达式，匹配英文字符、数字以及指定关键词
 #     pattern = f"(?:{'|'.join(keywords_list)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
@@ -160,7 +160,6 @@ replacement_dict = {"-p": "password", "port": "port", "-u": "user", "user": "use
 #     # cleaned_text = cleaned_text.replace("{{", "{").replace("}}", "}")
 #     logger.debug("Cleaned text: "+cleaned_text)
 #     return cleaned_text
-
 
 
 def text_preprocessing(text: str) -> str:
@@ -184,24 +183,27 @@ def text_preprocessing(text: str) -> str:
     logger.debug("Cleaned text: "+cleaned_text)
     return cleaned_text
 
+
 # 中文关键字列表
-chn_keywords_list = ["账号","IP", "端口", "名称", "地址",
+chn_keywords_list = ["账号", "IP", "端口", "名称", "地址",
                      "姓名", "学号", "用户名", "密码", "密钥为", '\n']
 # 中文替换列表
-chn_replacement_dict = {"账号":"user","端口": "port", "名称": "user", "学号": "user", "用户名": "user",
+chn_replacement_dict = {"账号": "user", "端口": "port", "名称": "user", "学号": "user", "用户名": "user",
                         "密钥为": "password", "密码": "password", "地址": "address", "姓名": "name"}
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
 
 item_protection_dict = {}
+
+
 def chn_text_preprocessing(text: str) -> str:
     text, item_protection_dict1 = item_protection(text)
-    global item_protection_dict 
+    global item_protection_dict
     item_protection_dict = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(chn_keywords_list)}|[a-zA-Z0-9,.;@?!\"'()])+"
 
     # 使用正则表达式进行匹配和替换
-    cleaned_text = re.findall(pattern, text,re.IGNORECASE)
+    cleaned_text = re.findall(pattern, text, re.IGNORECASE)
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
@@ -224,8 +226,8 @@ def is_chinese_text(text: str) -> bool:
 
 
 # 判断中文字符占比
-def chinese_character_percentage(text:str)-> float:
-    total_characters = 0 
+def chinese_character_percentage(text: str) -> float:
+    total_characters = 0
     chinese_characters = 0
     english_characters = 0
     for char in text:
@@ -285,7 +287,8 @@ class paired_info():
         }
         self.__init__()
         return result
-    def getter (self,name:str):
+
+    def getter(self, name: str):
         if name in self.__dict__:
             return self.__dict__[name]
         else:
@@ -297,11 +300,10 @@ class paired_info():
     def is_None(self):
         return self.__dict__.get("user") == None and self.__dict__.get("password") == None and self.__dict__.get("address") == None and self.__dict__.get("port") == None
 
+
 info_pattern = {"user": "user", "password": "password",
                 "address": "address", "port": "port"}
 replaced_keyword_list = ["{user}", "{password}", "{address}"]
-
-
 
 
 # def if_reduntant(text: str,filter_dict: dict) -> bool:
@@ -320,7 +322,7 @@ replaced_keyword_list = ["{user}", "{password}", "{address}"]
 #     else:
 #         filter_dict[text] += 1
 #         return False
-            
+
 # # 过滤多余的属性
 # def filter_reduntant(text: list) -> str:
 #     filter_dict = {"{user}": 0, "{password}": 0, "{address}": 0, "{port}": 0}
@@ -341,7 +343,7 @@ def extract_paired_info(text):
     has_user = False
     has_address = False
     for i in range(len(text)-1):
-        # print(text[i], text[i+1]) 
+        # print(text[i], text[i+1])
         # 密码不会最先出现
         if text[i].strip() == "{password}" and a_paired_info.is_None():
             continue
@@ -373,10 +375,11 @@ def extract_paired_info(text):
     filtered_result_pair = []
     for item in result_pair:
         if ("user" in item and "address" in item and "password" in item) and \
-        (item["user"] is not None or item["address"] is not None) and \
-        item["password"] is not None:
+            (item["user"] is not None or item["address"] is not None) and \
+                item["password"] is not None:
             # Remove None attributes
-            filtered_item = {key: value for key, value in item.items() if value is not None}
+            filtered_item = {key: value for key,
+                             value in item.items() if value is not None}
             filtered_result_pair.append(filtered_item)
 
     result_pair = filtered_result_pair
@@ -391,6 +394,7 @@ def extract_paired_info(text):
     # else:
     #     success = True
     return result_pair
+
 
 def convert_chinese_punctuation(text):
     # 定义一个字典来映射中文标点符号到英文标点符号
@@ -443,7 +447,7 @@ special_keywords_list = [
 def special_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for text')
     text, item_protection_dict1 = item_protection(text)
-    global item_protection_dict 
+    global item_protection_dict
     item_protection_dict = item_protection_dict1
     # text = fuzz_prevention(text)
     text = text.lower()
@@ -490,7 +494,8 @@ def special_processing(text: str) -> dict:
             key in words_list[i + 1] for key in special_keywords_list
         ):
             if words_list[i+1] in item_protection_dict:
-                result_dict[words_list[i]] = item_protection_dict[words_list[i+1]]
+                result_dict[words_list[i]
+                            ] = item_protection_dict[words_list[i+1]]
             else:
                 result_dict[words_list[i]] = words_list[i + 1]
     #  # 还原被替换的内容
@@ -503,25 +508,39 @@ def special_processing(text: str) -> dict:
 
 
 def info_extraction(info) -> dict:
-    if info.isinstance(str):
+    if isinstance(info, str):
+        logger.info(TAG + "info_extraction(): input is string")
         return begin_info_extraction(info)
-    elif info.isinstance(list):
-        if info[1].isinstance(str):
-            # join list to str
-            info = "\n".join(info)
-            return begin_info_extraction(info)
+    elif isinstance(info, list):
+        if is_png_text(info):
+            text = ""
+            for item in info[1:]:
+                item_to_string = "\n".join(item)
+                text = text+"\n"+item_to_string
+            return begin_info_extraction(text)
         else:
-            #todo table info extract
-            return None
+            print("********")
+            # todo table info extract
+            # return None
+
+
+def is_png_text(info):
+    total_length = sum(len(item) for item in info[1:])
+    average_length = total_length / float(len(info[1:]))
+    if average_length >= 2:
+        logger.info(TAG + "is_png_text(): input is [table] png ")
+        return False
+    logger.info(TAG + "is_png_text(): input is [text] png ")
+    return True
 
 # 从处理过后的字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
+
+
 def begin_info_extraction(text: str) -> dict:
     original_text = text
     logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
-    # 移除doc提取的[pic]
-    text = text.replace("[pic]", "")
     # 移除代码注释 // # 等
     # 已移除，影响地址的提取
     # text = re.sub(r'//.*', '', text)

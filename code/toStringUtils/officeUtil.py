@@ -80,6 +80,7 @@ def wps_file_text(wps_file_path):
     text = textract.process(filename=wps_doc_name, encoding='utf-8')
     os.rename(wps_doc_name, wps_file_path)
     decoded_text = text.decode('utf-8')
+    decoded_text = decoded_text.replace("[pic]", "")
     return decoded_text
 
 

@@ -4,7 +4,7 @@ from toStringUtils.configUtil import *
 from toStringUtils.emlUtil import *
 from toStringUtils.officeUtil import *
 from toStringUtils.picUtil import *
-from informationEngine.info_core import begin_info_extraction
+from informationEngine.info_core import info_extraction
 
 # 日志模块
 from util.logUtils import LoggerSingleton
@@ -18,7 +18,7 @@ logger = LoggerSingleton().get_logger()
 
 # 此处更换敏感信息提取api
 def sensitive_info_detect(file_path, text):
-    sensitive_info = begin_info_extraction(text)
+    sensitive_info = info_extraction(text)
     res_out.add_new_json(file_path, sensitive_info)
 
 
@@ -31,7 +31,7 @@ def extract_universal(file_path, nameclean):
 
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    text = ppt_and_dps_file(file_path)
+    # text = ppt_and_dps_file(file_path)
     # sensitive_info_detect(file_path, text)
 
 
@@ -58,9 +58,8 @@ def extract_et(file_path, nameclean):
 
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
-    # text = ocr_textract(file_path)
     text = ocr_table_batch(file_path)
-    print(text)
+    sensitive_info_detect(file_path, text[0])
 
 
 def extract_eml(file_path, nameclean):
@@ -69,7 +68,7 @@ def extract_eml(file_path, nameclean):
     eml_header = json.loads(eml_header)
     eml_text = json.loads(eml_text)
     sensitive_info = []
-    sensitive_info_text = begin_info_extraction(eml_text["text"])
+    sensitive_info_text = info_extraction(eml_text["text"])
     if not len(sensitive_info_text) == 0:
         logger.info(TAG+"extract_eml(): eml body has no sensitive infomation")
         sensitive_info.append(sensitive_info_text)
@@ -159,7 +158,7 @@ def is_bash_history(file_path):
     if "sh_history" in file_path:
         logger.info(TAG+"is_bash_history(): " + file_path)
         text = universal_file(file_path)
-        sensitive_info_text = begin_info_extraction(text)
+        sensitive_info_text = info_extraction(text)
         logger.info(sensitive_info_text)
         res_out.add_new_json(file_path, sensitive_info_text)
         return True
@@ -172,9 +171,7 @@ def is_token_file(file_path):
     if "token" in file_path:
         logger.info(TAG+"is_token_file(): " + file_path)
         text = universal_file(file_path)
-        sensitive_info_text = begin_info_extraction(text)
-        logger.info(sensitive_info_text)
-        res_out.add_new_json(file_path, sensitive_info_text)
+        res_out.add_new_json(file_path, text)
         return True
 
     return False
