@@ -92,19 +92,22 @@ def et_file_text(et_file_path):
     decoded_text = text.decode('utf-8')
     return decoded_text
 
-
-def read_image_by_ocr(image_bytes):
-    return ocr_textract(image_bytes)
-
-
 # 提取.ppt和.wps中的文本和图片
+
+
 def ppt_and_dps_file(ppt_file_path):
     if ppt_file_path.endswith(".ppt"):
-        ppt_pptx_path = ppt_file_path.replace(".ppt", ".pptx")
+        ppt_file_dir = "../workspace/ppt/"
+        ppt_pptx_path = ppt_file_dir + \
+            ppt_file_path.replace(".ppt", ".pptx").split("/")[-1]
 
     if ppt_file_path.endswith(".dps"):
-        ppt_pptx_path = ppt_file_path.replace(".dps", ".pptx")
+        ppt_file_dir = "../workspace/dps/"
+        ppt_pptx_path = ppt_file_dir + \
+            ppt_file_path.replace(".dps", ".pptx").split("/")[-1]
 
+    os.makedirs(ppt_file_dir, exist_ok=True)
+    logger.info(TAG+"ppt_and_dps_file(): "+ppt_pptx_path)
     result_image_path = "../workspace/image"
     os.makedirs(result_image_path, exist_ok=True)
     ppt_pptx_name = ppt_file_path.split("/")[-1]
@@ -138,10 +141,12 @@ def ppt_and_dps_file(ppt_file_path):
     # 解析图片信息
     image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
 
-    image_all_text = ocr_batch_paddle(image_folder_path)
+    image_all_text = ocr_table_batch(image_folder_path)
     # image_all_text = ocr_batch_textract(image_folder_path)
     logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
-    logger.info(TAG+"ppt_and_dps_file(): "+image_all_text)
+    for row in image_all_text:
+        logger.info(row)
+    image_all_text = ""
 
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")
@@ -205,23 +210,3 @@ def handle_datetime(obj):
     if isinstance(obj, datetime):
         return obj.strftime('%Y-%m-%d %H:%M:%S')
     return None
-# print(wps_file_text("data/wps/Android手机VPN安装指南.wps"))
-# print(et_file_text("data/wps/资产梳理.et"))
-
-# docx_file_path = 'test/test_pic_txt.docx'  # 替换为实际的 .docx 文件路径
-# result_image_path = 'test/image'  # 替换为实际的图片保存路径
-# docx_text = docx_file_text_and_img(docx_file_path, result_image_path)
-# print("Text Content:")
-# print(docx_text)
-
-# pdf_file_path = "test/test_pdf.pdf"
-# result_image_path = "test/image"
-# extracted_text = pdf_file_text_and_img(pdf_file_path, result_image_path)
-# print("提取的文本：")
-# print(extracted_text)
-
-# print(ppt_and_dps_file("data/office/20180327081403010127.ppt", "test/image/ppt"))
-# print(ppt_and_dps_file("data/office/学生信息管理系统使用介绍.ppt", "test/image/ppt"))
-
-# print(ppt_and_dps_file("data/wps/学生信息管理系统使用介绍.dps", "test/image/dps"))
-# print(ppt_and_dps_file("data/wps/20180327081403010127.dps", "test/image/dps"))
