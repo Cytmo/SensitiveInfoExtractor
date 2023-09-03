@@ -9,7 +9,7 @@ import time
 from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut
 from datetime import datetime
-
+import argparse
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
 TAG = "main.py: "
@@ -29,8 +29,16 @@ globalVar.set_value("code_path", "")
 
 globalVar.init_sensitive_word("config/sensitive_word.yml")
 
+# 添加命令行参数
+argparse = argparse.ArgumentParser()
+argparse.add_argument("-f", "--folder", required=True,default="../data",
+                          help="The folder to be scanned")
+args = argparse.parse_args()
+scan_folder = [args.folder]
+
+
 # 需要扫描的文件夹列表
-scan_folder = ['../data/linux']
+# scan_folder = ['../data/linux']
 
 # 进程处理函数
 
