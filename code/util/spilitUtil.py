@@ -260,7 +260,12 @@ extension_switch = {
     ".png": extract_pic,
     ".jpg": extract_pic,
     ".pub": process_pub_file,
-}
+    ".yml": extract_config,
+    ".xml": extract_config,
+    ".properties": extract_config,
+    
+    
+    }
 
 
 def spilit_process_file(file, root_directory):

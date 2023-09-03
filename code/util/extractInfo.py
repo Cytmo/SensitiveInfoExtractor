@@ -17,8 +17,11 @@ logger = LoggerSingleton().get_logger()
 
 
 # 此处更换敏感信息提取api
-def sensitive_info_detect(file_path, text):
-    sensitive_info = info_extraction(text)
+def sensitive_info_detect(file_path, text,flag=0):
+    if flag==1:
+        sensitive_info = info_extraction(text,flag=1)
+    else:
+        sensitive_info = info_extraction(text)
     res_out.add_new_json(file_path, sensitive_info)
 
 
@@ -27,6 +30,11 @@ def extract_universal(file_path, nameclean):
     logger.info(TAG+"extract_universal(): " + file_path.split("/")[-1])
     text = universal_textract(file_path)
     sensitive_info_detect(file_path, text)
+
+def extract_config(file_path, nameclean):
+    logger.info(TAG+"extract_config(): " + file_path.split("/")[-1])
+    text = universal_file(file_path)
+    sensitive_info_detect(file_path, text,flag=1)
 
 
 def extract_ppt_dps(file_path, nameclean):

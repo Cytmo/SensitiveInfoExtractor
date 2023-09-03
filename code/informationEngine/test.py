@@ -554,3 +554,28 @@ if result:
     print("列表只有一列")
 else:
     print("列表不只有一列")
+
+
+'''
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    driver-class-name: com.mysql.jdbc.Driver
+    username: xxlab
+    password: lab@998877
+    
+    
+db.driver=com.mysql.jdbc.Driver
+db.url=jdbc:mysql://localhost:3306/mydb
+db.username=sysadmin
+db.password=kllSJkd!@777
+
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+    <property name="url" value="jdbc:mysql://localhost:3306/mydb"/>
+    <property name="username" value="root"/>
+    <property name="password" value="HHHLab@2022"/>
+</bean>
+'''    

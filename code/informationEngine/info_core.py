@@ -99,10 +99,13 @@ def item_protection(text: str) -> Tuple[str, dict]:
 
     # Define regular expressions for different types of items you want to replace
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    jdbc_pattern = r'jdbc:mysql://[a-zA-Z0-9:/._-]+'
     url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b|localhost\b'
+    # jdbc_pattern = r'jdbc:mysql://[a-zA-Z0-9:/._-]+'
 
-    patterns = [email_pattern, url_pattern, ip_pattern]
+
+    patterns = [email_pattern,jdbc_pattern ,url_pattern, ip_pattern]
 
     for pattern in patterns:
         matches = re.finditer(pattern, text, flags=re.IGNORECASE)
@@ -130,7 +133,7 @@ def fuzz_prevention(text: str) -> str:
 
     # 使用正则替换
     result = re.sub(file_pattern, 'file', text)
-
+    result = result.replace("username", "user")
     return result
 
 
@@ -443,6 +446,7 @@ special_keywords_list = [
     "password",
     "username",
     "url",
+    "driver",
 ]
 
 
@@ -451,10 +455,13 @@ def special_processing(text: str) -> dict:
     text, item_protection_dict1 = item_protection(text)
     global item_protection_dict
     item_protection_dict = item_protection_dict1
-    # text = fuzz_prevention(text)
+    text = fuzz_prevention(text)
     text = text.lower()
     text = convert_chinese_punctuation(text)
     text = text.replace("'", '"')
+    # text = text.replace(":", "\"")
+    # text = text.replace("=", "\"")
+
     text = text.split("\n")
     lines = []
     # 用于分割的符号
@@ -480,6 +487,7 @@ def special_processing(text: str) -> dict:
                 new_line += "{} ".format(line[i])
         lines.append(new_line)
     result_dict = {}
+    logger.debug(TAG + 'Special processing for text: '+str(lines))
     # remove empty eng_keywords_list
     lines_temp = []
     for line in lines:
@@ -491,10 +499,12 @@ def special_processing(text: str) -> dict:
     for line in lines:
         words_list += line.split(" ")
     for i in range(len(words_list) - 1):
-        print(words_list[i])
+        # print(words_list[i])
+        logger.debug(TAG + 'Special processing for text: '+words_list[i]+" "+words_list[i+1])
         if any(key in words_list[i] for key in special_keywords_list) and not any(
             key in words_list[i + 1] for key in special_keywords_list
         ):
+            logger.debug(TAG + 'Extract: '+words_list[i]+" "+words_list[i+1])
             if words_list[i+1] in item_protection_dict:
                 result_dict[words_list[i]
                             ] = item_protection_dict[words_list[i+1]]
@@ -508,8 +518,90 @@ def special_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing result: '+str(result_dict))
     return result_dict
 
+def config_processing(text: str) -> dict:
+    logger.info(TAG + 'Special processing for config')
+    text, item_protection_dict1 = item_protection(text)
+    global item_protection_dict
+    item_protection_dict = item_protection_dict1
+    text = fuzz_prevention(text)
+    text = text.lower()
+    text = convert_chinese_punctuation(text)
+    text = text.replace("'", '"')
+    # text = text.replace(":", "\"")
+    # text = text.replace("=", "\"")
 
-def info_extraction(info) -> dict:
+    text = text.split("\n")
+    lines = []
+    # 用于分割的符号
+    split_symbols = [":", "=", '"']
+    # remove outer "
+    for line in text:
+        if line.startswith('"') and line.endswith('"'):
+            line = line[1:-1]
+        lines.append(line)
+    text = lines
+    # lines = []
+    matches_result = {}
+    # only  keep each eng_keywords_list between ""
+    for line in text:
+        line= line.lower()
+        new_line = ""
+        if "=\"" in line:
+            # 使用正则表达式匹配属性名和属性值
+            pattern = r'\s*name\s*=\s*"([^"]+)"\s*value\s*=\s*"([^"]+)"'
+            matches = re.findall(pattern, line)
+            # 打印匹配结果
+            for match in matches:
+                matches_result[match[0]] = match[1]
+        elif "=" in line:
+            # logger.debug(TAG + 'Dividing by =: '+line)
+            parts = line.strip().split('=')
+            if len(parts) == 2:
+                key, value = parts
+                key = key.strip()
+                value = value.strip()
+                if key and value:
+                    matches_result[key] = value
+        elif ':' in line:
+            key, _, value = line.partition(':')
+            key = key.strip()
+            value = value.strip()
+            if key and value:
+                matches_result[key] = value
+        # for i in range(len(line)):
+        #     if i % 2 == 1:
+        #         new_line += "{} ".format(line[i])
+        # lines.append(new_line)
+    result_dict = {}
+    logger.debug(TAG + 'Special processing for text: '+str(lines))
+    # remove empty eng_keywords_list
+    for key in matches_result:
+        if any(key1 in key for key1 in special_keywords_list):
+            result_dict[key] = matches_result[key]
+
+    # 还原被替换的内容
+    # new_result_dict = {}
+    # for key, value in result_dict.items():
+    #     logger.debug(TAG + 'Restoring: '+key+" "+value)
+    #     for key1, value1 in item_protection_dict.items():
+    #         logger.debug(TAG + 'Restoring: '+key1+" "+value1)
+    #         if key1 in value:
+    #             logger.debug(TAG + 'Restoring: '+key1+" "+value1)
+    #             value = value.replace(key1, value1)
+    #     new_result_dict[key] = value
+        # 还原被替换的内容
+    for key, value in result_dict.items():
+        if value in item_protection_dict:
+            result_dict[key] = item_protection_dict[value]
+    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    return result_dict
+
+# flag: 0: text 1: table
+SPECIAL = 1
+
+def info_extraction(info,flag=0) -> dict:
+    if flag == SPECIAL:
+        return config_processing(info)
     if isinstance(info, str):
         logger.info(TAG + "info_extraction(): input is string")
         return begin_info_extraction(info)
