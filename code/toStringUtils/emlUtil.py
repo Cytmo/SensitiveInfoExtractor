@@ -1,9 +1,6 @@
 import email
-import base64
 import os
 import re
-import json
-from datetime import datetime
 from bs4 import BeautifulSoup
 from util import globalVar
 from toStringUtils.officeUtil import one_table_remove_irrelevant_columns, xlsx_file

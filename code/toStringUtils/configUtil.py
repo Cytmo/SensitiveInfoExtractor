@@ -1,8 +1,6 @@
 import json
 import yaml
 import json
-import os
-from regipy.registry import RegistryHive
 import xml.etree.ElementTree as ET
 import subprocess
 

@@ -7,7 +7,6 @@ import queue
 import zipfile
 import os
 from util.extractInfo import *
-from informationEngine.info_core import begin_info_extraction
 from toStringUtils.universalUtil import *
 from util.logUtils import LoggerSingleton
 import re

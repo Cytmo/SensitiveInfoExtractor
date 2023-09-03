@@ -1,9 +1,8 @@
-from datetime import datetime
 from paddleocr import PaddleOCR
 import textract
 import os
 import cv2
-from paddleocr import PPStructure, save_structure_res
+from paddleocr import PPStructure
 from bs4 import BeautifulSoup
 
 # 日志模块

@@ -2,9 +2,7 @@ from util.resultUtil import ResOut
 from util import globalVar
 from util import processUtil
 from util import spilitUtil
-from util.fileUtil import File
 from util import fileUtil
-from informationEngine import info_core
 import time
 from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut

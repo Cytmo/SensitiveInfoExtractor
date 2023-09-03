@@ -1,12 +1,9 @@
 import xlrd
-import openpyxl
-import aspose.pydrawing as drawing
 from pptx import Presentation
 import aspose.slides as slides
 import os
 import docx
 import fitz
-from docx import Document
 from datetime import datetime
 import textract
 from util import globalVar
