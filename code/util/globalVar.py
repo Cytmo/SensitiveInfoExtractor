@@ -1,6 +1,12 @@
 import yaml
 import multiprocessing
 
+"""
+globalVar: 全局变量模块, 全局且多进程共享唯一
+usage:
+    from util import globalVar
+"""
+
 
 def _init():  # 初始化
     global _global_dict

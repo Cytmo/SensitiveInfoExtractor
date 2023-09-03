@@ -5,7 +5,7 @@ TAG = "util.universalUtil.py: "
 logger = LoggerSingleton().get_logger()
 
 """
-universalUtil: 通用读取
+universalUtil: 通用文件读取
 """
 
 
@@ -13,8 +13,6 @@ universalUtil: 通用读取
 #  .csv, .doc, .docx, .eml, .epub, .gif, .htm, .html, .jpeg, .jpg, .json, .log, .mp3, .msg, .odt,
 # .ogg, .pdf, .png, .pptx, .ps, .psv, .rtf, .tab, .tff, .tif, .tiff, .tsv, .txt, .wav, .xls, .xlsx
 # doc文件需要 apt-get install antiword
-
-
 def universal_textract(file):
     text = textract.process(filename=file, encoding='utf-8')
     decoded_text = text.decode('utf-8')
@@ -39,4 +37,3 @@ def universal_file(file):
     except Exception as e:
         return str(e)
 
-# 各个文件的提取

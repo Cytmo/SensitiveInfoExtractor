@@ -5,6 +5,7 @@ import os
 import cv2
 from paddleocr import PPStructure, save_structure_res
 from bs4 import BeautifulSoup
+
 # 日志模块
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.picUtil.py-"
@@ -16,8 +17,26 @@ picUtil: 图片OCR
 """
 
 
+# 读取输入目录或者输入图片的路径处理
+def read_all_pic(path, image_extensions=None):
+    if image_extensions is None:
+        image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
+
+    if os.path.isdir(path):
+        image_paths = []
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if any(file.lower().endswith(ext) for ext in image_extensions):
+                    image_paths.append(os.path.join(root, file))
+        return image_paths
+    elif os.path.isfile(path):
+        _, ext = os.path.splitext(path)
+        if ext.lower() in image_extensions:
+            return [path]
+    return []
+
+
 # 1st OCR method: 使用textract中的ocr方式识别图片(tesseract-ocr)
-# 效果: 表格截图中短文本识别效果较差且顺序错乱, 代码截图识别效果可以
 def ocr_textract(file):
     text = textract.process(filename=file, encoding='utf-8')
     # 解码
@@ -28,8 +47,7 @@ def ocr_textract(file):
     return res
 
 
-# 2nd OCR method: 使用百度PaddleOCR
-# 效果: 识别率很高，但是耗时较长
+# 2nd OCR method: 使用百度PaddleOCR普通识别
 def ocr_paddleocr(file):
     ocr = PaddleOCR(lang="ch",
                     use_gpu=False,
@@ -51,24 +69,7 @@ def ocr_paddleocr(file):
     return res
 
 
-def read_all_pic(path, image_extensions=None):
-    if image_extensions is None:
-        image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
-
-    if os.path.isdir(path):
-        image_paths = []
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                if any(file.lower().endswith(ext) for ext in image_extensions):
-                    image_paths.append(os.path.join(root, file))
-        return image_paths
-    elif os.path.isfile(path):
-        _, ext = os.path.splitext(path)
-        if ext.lower() in image_extensions:
-            return [path]
-    return []
-
-
+# 使用百度PaddleOCR批量普通识别
 def ocr_batch_paddle(folder_path):
     image_paths = read_all_pic(folder_path)
 
@@ -90,14 +91,10 @@ def ocr_batch_paddle(folder_path):
         if not len(res) == 0:
             image_string = "\n".join(res)
             image_all_text = image_all_text+"\n"+image_string
-        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
-        #                 image_path + " is not none, str len is "+str(len(image_all_text)))
-        # else:
-        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
-        #                 image_path + " is none")
     return image_all_text
 
 
+# 使用textract_OCR批量普通识别
 def ocr_batch_textract(folder_path):
     image_paths = read_all_pic(folder_path)
 
@@ -108,16 +105,11 @@ def ocr_batch_textract(folder_path):
         if not len(image_info) == 0:
             image_string = "\n".join(image_info)
             image_all_text = image_all_text+"\n"+image_string
-        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
-        #                 image_path + " is not none, str len is "+str(len(image_all_text)))
-        # else:
-        #     logger.info(TAG+"ppt_and_dps_file(): handle " +
-        #                 image_path + " is none")
     return image_all_text
 
 
+# 使用百度PaddleOCR表格形式识别, 输入为包含图片路径的list
 def ocr_table_batch(folder_path):
-
     ocr_result = []
     # show_log 打印识别日志
     table_engine = PPStructure(layout=False, show_log=False)

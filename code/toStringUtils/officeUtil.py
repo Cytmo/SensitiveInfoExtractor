@@ -11,9 +11,13 @@ from datetime import datetime
 import textract
 from util import globalVar
 from toStringUtils.picUtil import *
+
+
 """
 officeUtil: 解析 docx/pdf/wps/et
 """
+
+
 # 日志模块
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.officeUtil.py-"
@@ -150,6 +154,7 @@ def ppt_and_dps_file(ppt_file_path):
     return slide_text+"\n"+image_all_text
 
 
+# 提取.xlsx中的文本
 def xlsx_file(file_path):
     # 打开 Excel 文件
     workbook = xlrd.open_workbook(file_path)
@@ -180,6 +185,7 @@ def xlsx_file(file_path):
     return res
 
 
+# 对提取.xlsx中的文本进行格式化成表格数据结构
 def xlsx_format(workbook_contents):
     xlsx_file_info = []
 
@@ -207,6 +213,7 @@ def xlsx_format(workbook_contents):
     return xlsx_file_info
 
 
+# 对提取.xlsx中的多张表格信息进行敏感信息匹配和提取
 def xlsx_remove_irrelevant_columns(xlsx_file_info):
 
     sensitive_word = globalVar.get_sensitive_word()
@@ -224,6 +231,7 @@ def xlsx_remove_irrelevant_columns(xlsx_file_info):
     return res
 
 
+# 对提取.xlsx中的单张表格信息进行敏感信息匹配和提取
 def one_table_remove_irrelevant_columns(sensitive_word, item):
     column_names = item[0]
     # 用于存储要保留的列索引
@@ -248,6 +256,7 @@ def one_table_remove_irrelevant_columns(sensitive_word, item):
     return filtered_info
 
 
+# 对xlsx中的时间进行格式化
 def handle_datetime(obj):
     if isinstance(obj, datetime):
         return obj.strftime('%Y-%m-%d %H:%M:%S')

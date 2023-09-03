@@ -3,6 +3,15 @@ import os
 from multiprocessing import Manager
 
 
+"""
+class ResOut: 结果输出模块, 全局且多进程共享唯一
+
+usage:
+    from util.resultUtil import ResOut
+    res_out = ResOut()
+"""
+
+
 class ResOut:
     _instance = None
 

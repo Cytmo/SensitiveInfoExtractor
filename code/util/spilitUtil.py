@@ -1,3 +1,4 @@
+from util.resultUtil import ResOut
 from util import globalVar
 from util.fileUtil import File
 from unrar import rarfile
@@ -11,10 +12,10 @@ from toStringUtils.universalUtil import *
 from util.logUtils import LoggerSingleton
 import re
 
+# 添加日志模块
 logger = LoggerSingleton().get_logger()
 
 # 添加结果输出模块
-from util.resultUtil import ResOut
 res_out = ResOut()
 
 
@@ -61,7 +62,8 @@ def if_authorized_keys_file(filename, nameclean):
         return True
     else:
         return False
-    
+
+
 def if_private_keys_file(filename, nameclean):
     with open(filename, 'r') as f:
         first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
@@ -117,9 +119,9 @@ sensitive_data_templete = {
     "6": [18, 4],  # 公钥及说明
     "7": [19],  # 公钥允许执行的命令
     "8": [20],  # 公钥所允许的IP
-    "9": [21], #公钥
-    "10": [22], #私钥
-    "11": [21,22] #公钥私钥对
+    "9": [21],  # 公钥
+    "10": [22],  # 私钥
+    "11": [21, 22]  # 公钥私钥对
 
 }
 
@@ -141,15 +143,15 @@ class SensitiveInformation:
         return
 
     def print_sensitive(self):
-        print("")
-        print(sensitive_data_type.get(str(self.type)))
+        # print("")
+        # print(sensitive_data_type.get(str(self.type)))
         templete_list = []
         for item in self.data_templete:
             templete_list = templete_list + \
                 sensitive_data_templete.get(str(item))
         for i in range(len(templete_list)):
             if self.data[i] != "" and templete_list[i] != 0:
-                print(sensitive_data_pairs.get(
+                logger.info(sensitive_data_pairs.get(
                     str(templete_list[i]))+":" + self.data[i])
 
     def add_templete(self, templete, data):
@@ -197,6 +199,8 @@ def process_shadow_file(filename):
 option_pattern = r'(?<=\")\s*,\s*(?=\")'
 
 # 公钥认证文件匹配
+
+
 def process_authorized_keys_file(filename):
     authorized_file = open(filename)
     for line in authorized_file.readlines():
@@ -207,10 +211,10 @@ def process_authorized_keys_file(filename):
         clean_authorized_tmp = [s for s in authorized_tmp if s != ""]
         if clean_authorized_tmp[0] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [6], [clean_authorized_tmp[1],clean_authorized_tmp[2] if len(clean_authorized_tmp) >= 3 else ''])
+                [6], [clean_authorized_tmp[1], clean_authorized_tmp[2] if len(clean_authorized_tmp) >= 3 else ''])
         elif clean_authorized_tmp[1] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [6], [clean_authorized_tmp[2],clean_authorized_tmp[3] if len(clean_authorized_tmp) >= 4 else ''])
+                [6], [clean_authorized_tmp[2], clean_authorized_tmp[3] if len(clean_authorized_tmp) >= 4 else ''])
             options = re.split(option_pattern, clean_authorized_tmp[0])
             for items in options:
                 if items[:5] == "comma":
@@ -223,7 +227,7 @@ def process_authorized_keys_file(filename):
 
 
 # 公钥文件
-def process_pub_file(filename,nameclean):
+def process_pub_file(filename, nameclean):
     pub_file = open(filename)
     for line in pub_file.readlines():
         if line == "\n":
@@ -233,15 +237,17 @@ def process_pub_file(filename,nameclean):
         clean_pub_tmp = [s for s in pub_tmp if s != ""]
         if clean_pub_tmp[0] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [9],[clean_pub_tmp[1]])
+                [9], [clean_pub_tmp[1]])
         sensitiveInformation.print_sensitive()
 
 # 私钥文件
+
+
 def process_priv_file(filename):
     priv_file = open(filename)
     sensitiveInformation = SensitiveInformation(5)
     sensitiveInformation.add_templete(
-        [10],[''.join(priv_file.readlines()[1:-1])])
+        [10], [''.join(priv_file.readlines()[1:-1])])
     sensitiveInformation.print_sensitive()
 
 
@@ -263,9 +269,9 @@ extension_switch = {
     ".yml": extract_config,
     ".xml": extract_config,
     ".properties": extract_config,
-    
-    
-    }
+
+
+}
 
 
 def spilit_process_file(file, root_directory):
@@ -306,4 +312,5 @@ def spilit_process_file(file, root_directory):
             process_authorized_keys_file(file_name)
         elif if_private_keys_file(file_name, file_spilit[0]):
             process_priv_file(file_name)
+
         logger.info(TAG+"=>Unsupported file format: "+file_name)
