@@ -247,8 +247,23 @@ def one_table_remove_irrelevant_columns(sensitive_word, item):
     # 重新构建info，只包括要保留的列
     if len(valid_columns) != 0:
         filtered_info = [[row[i] for i in valid_columns] for row in item]
-        filtered_info = [[item for item in row if item != ""]
-                         for row in filtered_info]
+        # filtered_info = [[item for item in row if item != ""]
+        #                  for row in filtered_info]
+
+        # 提取列名
+        column_names = filtered_info[0]
+        # 初始化一个空的 JSON 列表
+        json_data = []
+
+        # 遍历行数据，将每一行转换为字典
+        for row in filtered_info[1:]:
+            row_dict = {}
+            for i, value in enumerate(row):
+                # 使用列名作为键，行中的值作为值
+                if value != "":
+                    row_dict[column_names[i]] = value
+            json_data.append(row_dict)
+        filtered_info = json_data
 
     return filtered_info
 

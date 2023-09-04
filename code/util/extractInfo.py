@@ -65,6 +65,7 @@ def extract_wps(file_path, nameclean):
     text = wps_file_text(file_path)
     sensitive_info_detect(file_path, text)
 
+
 # .et文件读取和提取操作
 def extract_et(file_path, nameclean):
     logger.info(TAG+"extract_et(): " + file_path.split("/")[-1])
@@ -103,7 +104,6 @@ def extract_eml(file_path, nameclean):
         "eml_attachment": eml_attachment
     }
     res_out.add_new_json(file_path, result)
-
 
 
 # 源代码文件读取和提取操作
@@ -150,9 +150,8 @@ def is_code_file(code_dir_or_file):
             if not len(ak_sk) == 2:
                 continue
         if len(ak_sk) == 2:
-            one_ak_sk = json.dumps(ak_sk)
+            extract_out.append(ak_sk)
             ak_sk = {}
-            extract_out.append(one_ak_sk)
 
     # 特殊处理的项结果(ak与sk)+未特殊处理的原有项
     res = extract_out+result_stdout_copy
