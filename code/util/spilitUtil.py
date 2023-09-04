@@ -30,7 +30,6 @@ def convert_format_time(time_days):
     result_data = target_date.strftime('%Y-%m-%d')
     del start_date
     del time_days
-    del result_data
     return result_data
 
 

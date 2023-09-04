@@ -9,6 +9,7 @@ import time
 from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut
 from datetime import datetime
+import cProfile
 
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
@@ -30,7 +31,7 @@ globalVar.set_value("code_path", "")
 globalVar.init_sensitive_word("config/sensitive_word.yml")
 
 # 需要扫描的文件夹列表
-scan_folder = ['../data/linux']
+scan_folder = ['../data']
 
 # 进程处理函数
 
@@ -55,33 +56,36 @@ direct_controller = fileUtil.DirectController()
 # 声明进程控制类
 process_manager = processUtil.ProcessManager()
 
+def main():
+    # 逐个根目录执行
+    while not globalVar.root_folder_list.empty():
+        # 取出第一个根目录
+        folder = globalVar.root_folder_list.get()
+        # 构建根目录的文件树
+        direct_controller.head_directory = direct_controller.build_directory_tree(
+            folder)
+        # 可以通过下方该指令输出文件树
+        # direct_controller.print_directory_tree(direct_controller.head_directory)
 
-# 逐个根目录执行
-while not globalVar.root_folder_list.empty():
-    # 取出第一个根目录
-    folder = globalVar.root_folder_list.get()
-    # 构建根目录的文件树
-    direct_controller.head_directory = direct_controller.build_directory_tree(
-        folder)
-    # 可以通过下方该指令输出文件树
-    # direct_controller.print_directory_tree(direct_controller.head_directory)
+        # 逐个文件执行
+        while not direct_controller.fileList.empty():
+            # 获取一个文件File类型
+            file = direct_controller.fileList.get()
 
-    # 逐个文件执行
-    while not direct_controller.fileList.empty():
-        # 获取一个文件File类型
-        file = direct_controller.fileList.get()
+            # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
+            # process_manager.add_process(
+            #     callback_func, process_function, args=(folder,), kwargs={"file": file, })
 
-        # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
-        # process_manager.add_process(
-        #     callback_func, process_function, args=(folder,), kwargs={"file": file, })
+            # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
+            spilitUtil.spilit_process_file(file, folder)
 
-        # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
-        spilitUtil.spilit_process_file(file, folder)
-
-    # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
-    # process_manager.close_process_pool()
-    # process_manager.release_process_pool()
-
+        # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
+        # process_manager.close_process_pool()
+        # process_manager.release_process_pool()
+    # Your code here
+profiler = cProfile.Profile()
+profiler.run('main()')
+profiler.dump_stats('./log/profile_results.prof')
 
 T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
