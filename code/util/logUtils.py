@@ -2,16 +2,14 @@ import os
 import logging
 import colorlog
 from datetime import datetime
-from shutil import copyfile
 
 
 """
 class LoggerSingleton: 日志打印单例模式，其作用是确保在整个程序中只有一个日志实例被创建和使用。
-在项目python文件开头中加入以下代码即可访问
-from util.log_utils import LoggerSingleton
-TAG="**/**.py: "
-logger = LoggerSingleton().get_logger()
-logger.info(TAG+"***")
+usage:
+    from util.log_utils import LoggerSingleton
+    TAG="**/**.py: "
+    logger = LoggerSingleton().get_logger()
 """
 
 

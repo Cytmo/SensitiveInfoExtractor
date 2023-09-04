@@ -1,9 +1,6 @@
 import email
-import base64
 import os
 import re
-import json
-from datetime import datetime
 from bs4 import BeautifulSoup
 from util import globalVar
 from toStringUtils.officeUtil import one_table_remove_irrelevant_columns, xlsx_file
@@ -15,6 +12,8 @@ emlUtil: 解析邮件
 2. 解析正文格式: "text/html", "text/plain"
 3. 解析附件: xlsx
 """
+
+
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.emlUtil.py-"
 logger = LoggerSingleton().get_logger()
@@ -83,12 +82,10 @@ def eml_file(eml_file_path):
                 logger.info(TAG+f"Saved attachment: {attachment_path}")
                 attachment_file_info = xlsx_file(attachment_path)
 
-    # print(body)
-    # email_info["body"] = body
-    # 转换为JSON格式
     return [email_info, body, attachment_file_info]
 
 
+# 解析eml中的文本中的html
 def html_extract(body):
     # 创建BeautifulSoup对象
     soup = BeautifulSoup(body, 'html.parser')
@@ -133,6 +130,7 @@ def html_extract(body):
     return result
 
 
+# 解析eml中的邮件头信息
 def decode_header(header_value):
     decoded_parts = []
     for part, charset in email.header.decode_header(header_value):

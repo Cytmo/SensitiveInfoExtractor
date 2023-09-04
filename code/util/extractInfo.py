@@ -6,6 +6,11 @@ from toStringUtils.officeUtil import *
 from toStringUtils.picUtil import *
 from informationEngine.info_core import info_extraction
 
+"""
+extractInfo: 文件信息读取与敏感信息提取
+"""
+
+
 # 日志模块
 from util.logUtils import LoggerSingleton
 TAG = "util.extractInfo.py-"
@@ -17,37 +22,51 @@ logger = LoggerSingleton().get_logger()
 
 
 # 此处更换敏感信息提取api
-def sensitive_info_detect(file_path, text):
-    sensitive_info = info_extraction(text)
+def sensitive_info_detect(file_path, text, flag=0):
+    if flag == 1:
+        sensitive_info = info_extraction(text, flag=1)
+    else:
+        sensitive_info = info_extraction(text)
     res_out.add_new_json(file_path, sensitive_info)
 
 
-# 各种文件的提取操作
+# 常用文件提取操作, 如.txt...
 def extract_universal(file_path, nameclean):
     logger.info(TAG+"extract_universal(): " + file_path.split("/")[-1])
     text = universal_textract(file_path)
     sensitive_info_detect(file_path, text)
 
 
+# 配置文件读取和提取操作, 如.xml/.yml/.properties...
+def extract_config(file_path, nameclean):
+    logger.info(TAG+"extract_config(): " + file_path.split("/")[-1])
+    text = universal_file(file_path)
+    sensitive_info_detect(file_path, text, flag=1)
+
+
+# .ppt/.dps文件读取和提取操作
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
     # TODO: 注释下面两行便于调试其他文件解析
-    # text = ppt_and_dps_file(file_path)
-    # sensitive_info_detect(file_path, text)
+    text = ppt_and_dps_file(file_path)
+    sensitive_info_detect(file_path, text)
 
 
+# .xlsx文件读取和提取操作
 def extract_xlsx(file_path, nameclean):
     logger.info(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
     text = xlsx_file(file_path)
     res_out.add_new_json(file_path, text)
 
 
+# .wps文件读取和提取操作
 def extract_wps(file_path, nameclean):
     logger.info(TAG+"extract_wps(): " + file_path.split("/")[-1])
     text = wps_file_text(file_path)
     sensitive_info_detect(file_path, text)
 
 
+# .et文件读取和提取操作
 def extract_et(file_path, nameclean):
     logger.info(TAG+"extract_et(): " + file_path.split("/")[-1])
     et_doc_name = file_path.replace(".et", ".xlsx")
@@ -57,12 +76,14 @@ def extract_et(file_path, nameclean):
     res_out.add_new_json(file_path, text)
 
 
+# 图片文件ocr读取和提取操作, 如.jpg/.png...
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
     text = ocr_table_batch(file_path)
     sensitive_info_detect(file_path, text[0])
 
 
+# .eml文件读取和提取操作
 def extract_eml(file_path, nameclean):
     logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
     eml_header, eml_text, eml_attachment = eml_file(file_path)
@@ -85,6 +106,7 @@ def extract_eml(file_path, nameclean):
     res_out.add_new_json(file_path, result)
 
 
+# 源代码文件读取和提取操作
 def is_code_file(code_dir_or_file):
     target_substring = "python_fasts3-main"
 
@@ -128,9 +150,8 @@ def is_code_file(code_dir_or_file):
             if not len(ak_sk) == 2:
                 continue
         if len(ak_sk) == 2:
-            one_ak_sk = json.dumps(ak_sk)
+            extract_out.append(ak_sk)
             ak_sk = {}
-            extract_out.append(one_ak_sk)
 
     # 特殊处理的项结果(ak与sk)+未特殊处理的原有项
     res = extract_out+result_stdout_copy
@@ -138,6 +159,7 @@ def is_code_file(code_dir_or_file):
     return True
 
 
+# win 注册表文件读取和提取操作
 def is_win_reg_file(file_path):
 
     if "system.hiv" in file_path or "sam/system" in file_path:
@@ -156,6 +178,7 @@ def is_win_reg_file(file_path):
     return False
 
 
+# .bash_history文件读取和提取操作
 def is_bash_history(file_path):
 
     if "sh_history" in file_path:
@@ -169,6 +192,7 @@ def is_bash_history(file_path):
     return False
 
 
+# token文件读取和提取操作
 def is_token_file(file_path):
 
     if "token" in file_path:

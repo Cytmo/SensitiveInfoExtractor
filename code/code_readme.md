@@ -10,9 +10,8 @@
 └── util
 ```
 
-> lib说明
-
 * unrar
+
 ```
 # pip install unrar  #直接pip install即可
 # cd lib (code/lib)

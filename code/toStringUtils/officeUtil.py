@@ -1,19 +1,20 @@
 import xlrd
-import openpyxl
-import aspose.pydrawing as drawing
 from pptx import Presentation
 import aspose.slides as slides
 import os
 import docx
 import fitz
-from docx import Document
 from datetime import datetime
 import textract
 from util import globalVar
 from toStringUtils.picUtil import *
+
+
 """
 officeUtil: 解析 docx/pdf/wps/et
 """
+
+
 # 日志模块
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.officeUtil.py-"
@@ -150,6 +151,7 @@ def ppt_and_dps_file(ppt_file_path):
     return slide_text+"\n"+image_all_text
 
 
+# 提取.xlsx中的文本
 def xlsx_file(file_path):
     # 打开 Excel 文件
     workbook = xlrd.open_workbook(file_path)
@@ -180,6 +182,7 @@ def xlsx_file(file_path):
     return res
 
 
+# 对提取.xlsx中的文本进行格式化成表格数据结构
 def xlsx_format(workbook_contents):
     xlsx_file_info = []
 
@@ -207,6 +210,7 @@ def xlsx_format(workbook_contents):
     return xlsx_file_info
 
 
+# 对提取.xlsx中的多张表格信息进行敏感信息匹配和提取
 def xlsx_remove_irrelevant_columns(xlsx_file_info):
 
     sensitive_word = globalVar.get_sensitive_word()
@@ -224,6 +228,7 @@ def xlsx_remove_irrelevant_columns(xlsx_file_info):
     return res
 
 
+# 对提取.xlsx中的单张表格信息进行敏感信息匹配和提取
 def one_table_remove_irrelevant_columns(sensitive_word, item):
     column_names = item[0]
     # 用于存储要保留的列索引
@@ -242,12 +247,28 @@ def one_table_remove_irrelevant_columns(sensitive_word, item):
     # 重新构建info，只包括要保留的列
     if len(valid_columns) != 0:
         filtered_info = [[row[i] for i in valid_columns] for row in item]
-        filtered_info = [[item for item in row if item != ""]
-                         for row in filtered_info]
+        # filtered_info = [[item for item in row if item != ""]
+        #                  for row in filtered_info]
+
+        # 提取列名
+        column_names = filtered_info[0]
+        # 初始化一个空的 JSON 列表
+        json_data = []
+
+        # 遍历行数据，将每一行转换为字典
+        for row in filtered_info[1:]:
+            row_dict = {}
+            for i, value in enumerate(row):
+                # 使用列名作为键，行中的值作为值
+                if value != "":
+                    row_dict[column_names[i]] = value
+            json_data.append(row_dict)
+        filtered_info = json_data
 
     return filtered_info
 
 
+# 对xlsx中的时间进行格式化
 def handle_datetime(obj):
     if isinstance(obj, datetime):
         return obj.strftime('%Y-%m-%d %H:%M:%S')

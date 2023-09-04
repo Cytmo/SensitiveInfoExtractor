@@ -2,13 +2,19 @@ from util.resultUtil import ResOut
 from util import globalVar
 from util import processUtil
 from util import spilitUtil
-from util.fileUtil import File
 from util import fileUtil
-from informationEngine import info_core
 import time
 from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut
 from datetime import datetime
+import argparse
+
+"""
+main: 主程序执行文件
+usage:
+    cd code
+    python main.py # 无参数默认扫描"../data"文件夹
+"""
 import cProfile
 
 # 添加日志模块
@@ -30,26 +36,26 @@ globalVar.set_value("code_path", "")
 
 globalVar.init_sensitive_word("config/sensitive_word.yml")
 
-# 需要扫描的文件夹列表
-scan_folder = ['../data']
+# 添加命令行参数, 默认扫描"../data"文件夹
+argparse = argparse.ArgumentParser()
+argparse.add_argument("-f", "--folder", default="../data",
+                      help="The folder to be scanned")
+args = argparse.parse_args()
+scan_folder = [args.folder]
+
 
 # 进程处理函数
-
-
 def process_function(arg, file):
     spilitUtil.spilit_process_file(file, arg)
 
+
 # 进程回调函数
-
-
 def callback_func(result):
     return
 
 
 # 将初始目录压进根目录队列
 [globalVar.root_folder_list.put(folder) for folder in scan_folder]
-# 添加字符串元素到队列
-# root_folder_list.put("Folder1")
 
 # 声明文件输控制类
 direct_controller = fileUtil.DirectController()
@@ -89,12 +95,16 @@ profiler.dump_stats('./log/profile_results.prof')
 
 T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
-# 程序运行时间:0.27023641716203606毫秒
-logger.info(TAG+"************************* end ******************************")
+
+
+# 将结果写入文件
 res_out.add_new_json(
     "main.py", "************************* end ******************************")
 output_tile_path = "output/"+datetime.now().strftime("%Y%m%d%H%M%S%f") + \
     "_output.json"
 res_out.save_to_file(output_tile_path)
+
+
+logger.info(TAG+"************************* end ******************************")
 logger.info(TAG+"result is saved to: "+output_tile_path+" , total is " +
             str(len(res_out.res_json)-2) + " term")

@@ -1,8 +1,6 @@
 import json
 import yaml
 import json
-import os
-from regipy.registry import RegistryHive
 import xml.etree.ElementTree as ET
 import subprocess
 
@@ -11,6 +9,7 @@ import subprocess
 configUtil: 解析一些特殊配置文件 
 1. xml/yml
 2. Windows sam.hiv/system.hiv
+3. 源代码目录
 """
 
 
@@ -65,9 +64,8 @@ def win_reg_file(sam_path, system_path):
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     return result.stdout
 
+
 # 解析源码文件夹
-
-
 def source_code_file(file_path, res_path=''):
     # 使用whispers解析
     command = "whispers {}".format(file_path)
@@ -76,12 +74,3 @@ def source_code_file(file_path, res_path=''):
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     result_out = [result.stdout, result.stderr]
     return result.stdout, result.stderr
-
-
-# print(xml_file("data/linux/applicationContext.xml"))
-# print(yml_file("data/linux/application-dev.yml"))
-# win_reg_file("../data/windwos/system.hiv", "../data/windwos/sam.hiv")
-# win_reg_file("../data/windwos/sam/sam/system", "../data/windwos/sam/sam/sam")
-# if __name__ == "__main__":
-#     source_code_file(
-#         "/home/jeremy/home/security-text-detect-825/workspace/python_fasts3-main")
