@@ -15,6 +15,8 @@ def _init():  # 初始化
     root_folder_list = multiprocessing.Manager().Queue()
     global _sensitive_word
     _sensitive_word = multiprocessing.Manager().list()
+    global _pic_hash
+    _pic_hash = multiprocessing.Manager().dict()
 
 
 def set_value(key, value):

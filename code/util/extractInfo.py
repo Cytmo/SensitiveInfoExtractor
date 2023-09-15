@@ -37,7 +37,18 @@ def extract_universal(file_path, nameclean):
     sensitive_info_detect(file_path, text)
 
 
+# 直接读取文件文本
+def extract_direct_read(file_path, namclean):
+    logger.info(TAG+"extract_direct_read(): " + file_path.split("/")[-1])
+    # 打开文件并读取其内容
+    content = ""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+    sensitive_info_detect(file_path, content)
+
 # 配置文件读取和提取操作, 如.xml/.yml/.properties...
+
+
 def extract_config(file_path, nameclean):
     logger.info(TAG+"extract_config(): " + file_path.split("/")[-1])
     text = universal_file(file_path)
@@ -108,9 +119,21 @@ def extract_eml(file_path, nameclean):
 
 # 源代码文件读取和提取操作
 def is_code_file(code_dir_or_file):
-    target_substring = "python_fasts3-main"
+    # 代码后缀文件
+    extension_code = [
+        '.py', '.java', '.c', '.cpp', '.h', '.hpp', '.js', '.html', '.css', '.rb',
+        '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
+        '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
+        '.asm', '.ps1', '.dockerignore', 'Dockerfile', '.toml', 'rs', '.gitignore'
+    ]
 
-    if not target_substring in code_dir_or_file:
+    flag_code_file = False
+    for item in extension_code:
+        if item in code_dir_or_file:
+            flag_code_file = True
+            break
+
+    if not flag_code_file:
         return False
 
     result_stdout, result_stderr = source_code_file(code_dir_or_file)

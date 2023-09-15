@@ -255,6 +255,7 @@ class paired_info():
         self.address = None
         self.user = None
         self.password = None
+        self.phonenumber = None
 
     def set_port(self, port):
         self.port = port
@@ -268,6 +269,9 @@ class paired_info():
     def set_password(self, password):
         self.password = password
 
+    def set_phonenumber(self, phonenumber):
+        self.phonenumber = phonenumber
+
     def setter(self, name: str, value: Any) -> None:
         # if self.__dict__.get(name) != None and self.__dict__.get(name) != value:
         #     return False
@@ -275,7 +279,8 @@ class paired_info():
             "port": lambda x: self.set_port(x),
             "address": lambda x: self.set_address(x),
             "user": lambda x: self.set_user(x),
-            "password": lambda x: self.set_password(x)
+            "password": lambda x: self.set_password(x),
+            "phonenumber": lambda x: self.set_phonenumber(x)
         }
         if name in attr_switch:
             # print("Setting "+str(name)+" " +str( value))
@@ -288,8 +293,11 @@ class paired_info():
             "user": self.user,
             "password": self.password,
             "address": self.address,
-            "port": self.port
+            "port": self.port,
+            "phonenumber": self.phonenumber
         }
+        # remove None attributes
+        
         self.__init__()
         return result
 
@@ -603,6 +611,14 @@ def info_extraction(info,flag=0) -> dict:
     if flag == SPECIAL:
         return config_processing(info)
     if isinstance(info, str):
+        # 若文本中不存在中文和英文关键词，进行模糊提取
+        new_info = info.replace("\n", "")
+        if not any(key in new_info for key in keywords_list) and not any(key in new_info for key in chn_keywords_list):
+            logger.info(TAG + "info_extraction(): fuzz extract")
+            # 判断是否中文
+            if is_chinese_text(info):
+                begin_info_extraction(info)
+            return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
         return begin_info_extraction(info)
     elif isinstance(info, list):
@@ -616,6 +632,57 @@ def info_extraction(info,flag=0) -> dict:
             result_table = one_table_remove_irrelevant_columns(
                 globalVar.get_sensitive_word(), info[1:])
             return result_table
+
+
+def fuzz_extract(text: str) -> dict:
+    logger.info(TAG + "fuzz_extract(): fuzz extract")
+    result_dict = {}
+    result=[]
+
+    lines = text.split("\n")
+    a_paired_info = paired_info()
+    for line in lines:
+        # # 若含有中文
+        # if re.search(r'[\u4e00-\u9fa5]', line):
+        #     continue
+        # 若该行为IP地址
+        if re.match(r'\b(?:\d{1,3}\.){3}\d{1,3}\b|localhost\b', line):
+            if a_paired_info.getter("user") != None and a_paired_info.getter("password") != None:
+                result.append(a_paired_info.output())
+                a_paired_info = paired_info()
+            logger.info(TAG + "fuzz_extract(): input is IP address")
+            a_paired_info.set_address(line.strip())
+        # 若该行仅含有字母和数字
+        elif re.match(r'[a-zA-Z0-9]+', line):
+
+
+            # 是否是电话号码
+            if re.match(r'^1[3-9]\d{9}$', line):
+                logger.info(TAG + "fuzz_extract(): input is phone number")
+                a_paired_info.setter("phonenumber", line.strip())
+            elif a_paired_info.getter("user") == None:
+                a_paired_info.setter("user", line.strip())
+            elif a_paired_info.getter("password") == None:
+                a_paired_info.setter("password", line.strip())
+            else:
+                result.append(a_paired_info.output())
+                a_paired_info = paired_info()
+    if a_paired_info.getter("user") != None and a_paired_info.getter("password") != None:
+        result.append(a_paired_info.output())
+
+    # remove None attributes
+    filtered_result = []
+    for item in result:
+        if ("user" in item and "password" in item) and \
+            (item["user"] is not None or item["password"] is not None):
+            # Remove None attributes
+            filtered_item = {key: value for key,
+                             value in item.items() if value is not None}
+            filtered_result.append(filtered_item)
+
+    logger.info(TAG + "fuzz_extract(): fuzz extract result: "+str(filtered_result))
+    # logger.info(TAG + "fuzz_extract(): fuzz extract result: "+str(result))
+    return filtered_result 
 
 
 def is_png_text(info):
@@ -653,6 +720,9 @@ def begin_info_extraction(text: str) -> dict:
     if paired_info == []:
         logger.warning(TAG + 'No paired info extracted!')
         paired_info = special_processing(original_text)
+    # if paired_info == {}:
+    #     logger.warning(TAG + 'No paired info extracted!')
+    #     paired_info = fuzz_extract(original_text)
     return paired_info
 
 

@@ -1,3 +1,6 @@
+from util import globalVar
+from functools import lru_cache
+import hashlib
 from paddleocr import PaddleOCR
 import textract
 import os
@@ -27,25 +30,22 @@ def read_all_pic(path, image_extensions=None):
             for file in files:
                 if any(file.lower().endswith(ext) for ext in image_extensions):
                     image_paths.append(os.path.join(root, file))
-             #compress image
-        for image_path in image_paths:
-            logger.info(TAG+"compress_image(): "+image_path)
-            compress_image(image_path)
         return image_paths
     elif os.path.isfile(path):
         _, ext = os.path.splitext(path)
         if ext.lower() in image_extensions:
-            logger.info(TAG+"compress_image(): "+path)
-            compress_image(path)
             return [path]
 
     return []
 
+
 def compress_image(image_path):
+    return
+    # return
     logger.debug(TAG+"compress_image(): "+image_path)
     img = cv2.imread(image_path)
     h, w = img.shape[:2]
-    logger.debug(TAG+"image_width: "+str(w)+ "image_height: "+str(h))
+    logger.debug(TAG+"image_width: "+str(w) + "image_height: "+str(h))
 
     h, w = img.shape[:2]
     # if h > 400 or w > 300:
@@ -55,12 +55,33 @@ def compress_image(image_path):
     #     os.remove(image_path)
     #     cv2.imwrite(image_path, img)
     logger.debug(TAG+"compress_image(): "+image_path)
-    img = cv2.resize(img, (int(w / 2), int(h / 2)))
-    # remove color
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    max_width = 1000
+    max_height = 750
+
+    # 获取原始图像的宽度和高度
+    original_height, original_width, _ = img.shape
+
+    # 计算宽度和高度的缩放比例
+    width_scale = max_width / original_width
+    height_scale = max_height / original_height
+
+    # 选择较小的缩放比例，以保持图像在指定的最大尺寸内
+    scale = min(width_scale, height_scale)
+    # scale = max(scale,0.7)
+    # 根据缩放比例调整图像大小
+    img = cv2.resize(img, None, fx=scale, fy=scale)
+    # # remove color
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # # 高斯模糊去噪声
+    # img = cv2.GaussianBlur(img, (5, 5), 0)
+    # threshold_value = 0
+    # 二值化处理
+    # _, img = cv2.threshold(img, threshold_value,255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     # if os.path.exists(image_path):
     os.remove(image_path)
+
     cv2.imwrite(image_path, img)
+
 
 # 1st OCR method: 使用textract中的ocr方式识别图片(tesseract-ocr)
 def ocr_textract(file):
@@ -134,38 +155,69 @@ def ocr_batch_textract(folder_path):
     return image_all_text
 
 
+def calculate_image_md5(image_path):
+    try:
+        # 打开图片文件并计算 MD5 哈希值
+        with open(image_path, 'rb') as file:
+            image_data = file.read()
+            md5_hash = hashlib.md5(image_data).hexdigest()
+        return md5_hash
+    except FileNotFoundError:
+        return None
+
+
+def find_image_by_hash(hash_to_find):
+    # 在全局字典中查找哈希值
+    if hash_to_find in globalVar._pic_hash:
+        return globalVar._pic_hash[hash_to_find]
+    else:
+        return False
+
+
 # 使用百度PaddleOCR表格形式识别, 输入为包含图片路径的list
 def ocr_table_batch(folder_path):
     ocr_result = []
     # show_log 打印识别日志
-    table_engine = PPStructure(layout=False, show_log=False)
+    table_engine = PPStructure(show_log=False, layout=False,
+                               lang="ch", use_gpu=True
+                               )
 
     image_paths = read_all_pic(folder_path)
 
     for image_path in image_paths:
-        logger.info(TAG+"ocr_table_batch(): "+image_path)
-        img = cv2.imread(image_path)
-        result = table_engine(img)
 
-        html_code = result[0]["res"]["html"]
-        soup = BeautifulSoup(html_code, 'html.parser')
+        single_pic_hash = calculate_image_md5(image_path)
 
-        table = soup.find('table')
-        table_data = []
-        for row in table.find_all('tr'):
-            row_data = [cell.get_text(strip=True)
-                        for cell in row.find_all('td')]
-            if row_data:
-                table_data.append(row_data)
+        result = find_image_by_hash(single_pic_hash)
 
-        # 使用for循环遍历原始列表并添加非空的子列表到新列表
-        filtered_list = []
-        image_path = [image_path]
-        filtered_list.append(image_path)
-        for row in table_data:
-            if row != ['']:
-                filtered_list.append(row)
+        if result == False:
+            logger.info(TAG+"ocr_table_batch() with new hash: "+image_path)
+            img = cv2.imread(image_path)
+            result = table_engine(img)
 
-        ocr_result.append(filtered_list)
+            html_code = result[0]["res"]["html"]
+            soup = BeautifulSoup(html_code, 'html.parser')
+
+            table = soup.find('table')
+            table_data = []
+            for row in table.find_all('tr'):
+                row_data = [cell.get_text(strip=True)
+                            for cell in row.find_all('td')]
+                if row_data:
+                    table_data.append(row_data)
+
+            # 使用for循环遍历原始列表并添加非空的子列表到新列表
+            filtered_list = []
+            image_path = [image_path]
+            filtered_list.append(image_path)
+            for row in table_data:
+                if row != ['']:
+                    filtered_list.append(row)
+
+            globalVar._pic_hash[single_pic_hash] = filtered_list
+            ocr_result.append(filtered_list)
+        else:
+            logger.info(TAG+"ocr_table_batch() with old hash: "+image_path)
+            ocr_result.append(result)
 
     return ocr_result

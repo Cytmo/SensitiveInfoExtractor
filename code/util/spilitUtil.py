@@ -24,6 +24,8 @@ res_out = ResOut()
 
     内存泄漏是否处理：是
 '''
+
+
 def convert_format_time(time_days):
     start_date = datetime(1970, 1, 1)
     target_date = start_date + timedelta(days=time_days)
@@ -38,6 +40,8 @@ def convert_format_time(time_days):
 
     内存泄漏是否处理：是
 '''
+
+
 def process_rar_file(filename, nameclean):
     rf = rarfile.RarFile(filename)
     rf.extractall(globalVar.get_value("code_path")+'../workspace')
@@ -48,11 +52,14 @@ def process_rar_file(filename, nameclean):
     del nameclean
     # print("Processing rar file:", filename)
 
+
 '''
     处理zip解压
 
     内存泄漏是否处理：是
 '''
+
+
 def process_zip_file(filename, nameclean):
     # print("---------------"+filename+"  "+nameclean)
     # print(globalVar.get_value("code_path"))
@@ -182,16 +189,17 @@ class SensitiveInformation:
         self.data = self.data + data
 
     def change_to_json(self):
-        result = {"type":sensitive_data_type.get(str(self.type))}
+        result = {"type": sensitive_data_type.get(str(self.type))}
         templete_list = []
 
         for item in self.data_templete:
             templete_list = templete_list + \
                 sensitive_data_templete.get(str(item))
-        
+
         for i in range(len(templete_list)):
             if self.data[i] != "" and templete_list[i] != 0:
-                result[sensitive_data_pairs.get(str(templete_list[i]))] = self.data[i]
+                result[sensitive_data_pairs.get(
+                    str(templete_list[i]))] = self.data[i]
         return result
 
 
@@ -206,9 +214,9 @@ def process_passwd_file(filename):
             continue
         line = line.rstrip("\n")
         # sensitive_information_que.put(SensitiveInformation(1,1,line.split(":")))
-        res.append(SensitiveInformation(1, [1], line.split(":")).change_to_json())
-    res_out.add_new_json(filename,res)
-
+        res.append(SensitiveInformation(
+            1, [1], line.split(":")).change_to_json())
+    res_out.add_new_json(filename, res)
 
 
 def process_shadow_file(filename):
@@ -238,12 +246,14 @@ def process_shadow_file(filename):
         # sensitiveInformation.print_sensitive()
         # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
         res.append(sensitiveInformation.change_to_json())
-    res_out.add_new_json(filename,res)
+    res_out.add_new_json(filename, res)
 
 
 option_pattern = r'(?<=\")\s*,\s*(?=\")'
 
 # 公钥认证文件匹配
+
+
 def process_authorized_keys_file(filename):
     authorized_file = open(filename)
     res = []
@@ -271,7 +281,7 @@ def process_authorized_keys_file(filename):
         # sensitiveInformation.print_sensitive()
         # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
         res.append(sensitiveInformation.change_to_json())
-    res_out.add_new_json(filename,res)
+    res_out.add_new_json(filename, res)
 
 
 # 公钥文件
@@ -287,20 +297,22 @@ def process_pub_file(filename, nameclean):
         clean_pub_tmp = [s for s in pub_tmp if s != ""]
         if clean_pub_tmp[0] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [9],[clean_pub_tmp[1]])
+                [9], [clean_pub_tmp[1]])
         # sensitiveInformation.print_sensitive()
         # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
         res.append(sensitiveInformation.change_to_json())
-    res_out.add_new_json(filename,res)
+    res_out.add_new_json(filename, res)
 
 # 私钥文件
+
+
 def process_priv_file(filename):
     priv_file = open(filename)
     sensitiveInformation = SensitiveInformation(5)
     sensitiveInformation.add_templete(
-        [10],[''.join(priv_file.readlines()[1:-1])])
+        [10], [''.join(priv_file.readlines()[1:-1])])
     # sensitiveInformation.print_sensitive()
-    res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename, sensitiveInformation.change_to_json())
 
 
 # 后缀匹配解析函数
@@ -308,6 +320,7 @@ extension_switch = {
     ".rar": process_rar_file,
     ".zip": process_zip_file,
     ".txt": extract_universal,
+    ".md": extract_direct_read,
     ".doc": extract_universal,
     ".ppt": extract_ppt_dps,
     ".dps": extract_ppt_dps,
