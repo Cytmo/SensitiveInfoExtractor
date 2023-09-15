@@ -2,7 +2,8 @@ from util.resultUtil import ResOut
 from util import globalVar
 from util.fileUtil import File
 from unrar import rarfile
-import datetime
+from datetime import datetime
+from datetime import timedelta
 import queue
 import zipfile
 import os
@@ -18,20 +19,40 @@ logger = LoggerSingleton().get_logger()
 res_out = ResOut()
 
 
+'''
+    将时间戳转换为日期格式
+
+    内存泄漏是否处理：是
+'''
 def convert_format_time(time_days):
-    start_date = datetime.datetime(1970, 1, 1)
-    target_date = start_date + datetime.timedelta(days=time_days)
-    return target_date.strftime('%Y-%m-%d')
+    start_date = datetime(1970, 1, 1)
+    target_date = start_date + timedelta(days=time_days)
+    result_data = target_date.strftime('%Y-%m-%d')
+    del start_date
+    del time_days
+    return result_data
 
 
+'''
+    处理rar解压
+
+    内存泄漏是否处理：是
+'''
 def process_rar_file(filename, nameclean):
     rf = rarfile.RarFile(filename)
     rf.extractall(globalVar.get_value("code_path")+'../workspace')
     globalVar.root_folder_list.put(
         globalVar.get_value("code_path")+'../workspace/'+nameclean)
+    del rf
+    del filename
+    del nameclean
     # print("Processing rar file:", filename)
 
+'''
+    处理zip解压
 
+    内存泄漏是否处理：是
+'''
 def process_zip_file(filename, nameclean):
     # print("---------------"+filename+"  "+nameclean)
     # print(globalVar.get_value("code_path"))
@@ -39,6 +60,9 @@ def process_zip_file(filename, nameclean):
     zip_file.extractall(globalVar.get_value("code_path")+'../workspace')
     globalVar.root_folder_list.put(
         globalVar.get_value("code_path")+'../workspace/'+nameclean)
+    del zip_file
+    del filename
+    del nameclean
     # print("Processing zip file:", filename)
 
 
@@ -157,24 +181,43 @@ class SensitiveInformation:
         self.data_templete = self.data_templete + templete
         self.data = self.data + data
 
+    def change_to_json(self):
+        result = {"type":sensitive_data_type.get(str(self.type))}
+        templete_list = []
+
+        for item in self.data_templete:
+            templete_list = templete_list + \
+                sensitive_data_templete.get(str(item))
+        
+        for i in range(len(templete_list)):
+            if self.data[i] != "" and templete_list[i] != 0:
+                result[sensitive_data_pairs.get(str(templete_list[i]))] = self.data[i]
+        return result
+
 
 sensitive_information_que = queue.Queue()
 
 
 def process_passwd_file(filename):
     passwd_file = open(filename)
+    res = []
     for line in passwd_file.readlines():
         if line == "\n":
             continue
+        line = line.rstrip("\n")
         # sensitive_information_que.put(SensitiveInformation(1,1,line.split(":")))
-        SensitiveInformation(1, [1], line.split(":")).print_sensitive()
+        res.append(SensitiveInformation(1, [1], line.split(":")).change_to_json())
+    res_out.add_new_json(filename,res)
+
 
 
 def process_shadow_file(filename):
     shadow_file = open(filename)
+    res = []
     for line in shadow_file.readlines():
         if line == "\n":
             continue
+        line = line.rstrip("\n")
         data_tmp = line.split(":")
         sensitiveInformation = SensitiveInformation(2)
         if data_tmp[1].count('$') < 4:
@@ -192,19 +235,22 @@ def process_shadow_file(filename):
             sensitiveInformation.add_templete(
                 [5], [convert_format_time(int(data_tmp[2]))]+data_tmp[3:7])
 
-        sensitiveInformation.print_sensitive()
+        # sensitiveInformation.print_sensitive()
+        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        res.append(sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename,res)
 
 
 option_pattern = r'(?<=\")\s*,\s*(?=\")'
 
 # 公钥认证文件匹配
-
-
 def process_authorized_keys_file(filename):
     authorized_file = open(filename)
+    res = []
     for line in authorized_file.readlines():
         if line == "\n":
             continue
+        line = line.rstrip("\n")
         sensitiveInformation = SensitiveInformation(3)
         authorized_tmp = line.split(" ")
         clean_authorized_tmp = [s for s in authorized_tmp if s != ""]
@@ -222,32 +268,39 @@ def process_authorized_keys_file(filename):
                 elif items[:5] == "from=":
                     sensitiveInformation.add_templete(
                         [8], [re.search(r'"(.*?)"', items).group(1)])
-        sensitiveInformation.print_sensitive()
+        # sensitiveInformation.print_sensitive()
+        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        res.append(sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename,res)
 
 
 # 公钥文件
 def process_pub_file(filename, nameclean):
     pub_file = open(filename)
+    res = []
     for line in pub_file.readlines():
         if line == "\n":
             continue
+        line.rstrip("\n")
         sensitiveInformation = SensitiveInformation(4)
         pub_tmp = line.split(" ")
         clean_pub_tmp = [s for s in pub_tmp if s != ""]
         if clean_pub_tmp[0] == "ssh-rsa":
             sensitiveInformation.add_templete(
-                [9], [clean_pub_tmp[1]])
-        sensitiveInformation.print_sensitive()
+                [9],[clean_pub_tmp[1]])
+        # sensitiveInformation.print_sensitive()
+        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        res.append(sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename,res)
 
 # 私钥文件
-
-
 def process_priv_file(filename):
     priv_file = open(filename)
     sensitiveInformation = SensitiveInformation(5)
     sensitiveInformation.add_templete(
-        [10], [''.join(priv_file.readlines()[1:-1])])
-    sensitiveInformation.print_sensitive()
+        [10],[''.join(priv_file.readlines()[1:-1])])
+    # sensitiveInformation.print_sensitive()
+    res_out.add_new_json(filename,sensitiveInformation.change_to_json())
 
 
 # 后缀匹配解析函数
@@ -268,8 +321,6 @@ extension_switch = {
     ".yml": extract_config,
     ".xml": extract_config,
     ".properties": extract_config,
-
-
 }
 
 
@@ -307,6 +358,8 @@ def spilit_process_file(file, root_directory):
 
         if if_passwd_file(file_name, file_spilit[0]):
             process_passwd_file(file_name)
+        elif if_shadow_file(file_name, file_spilit[0]):
+            process_shadow_file(file_name)
         elif if_authorized_keys_file(file_name, file_spilit[0]):
             process_authorized_keys_file(file_name)
         elif if_private_keys_file(file_name, file_spilit[0]):

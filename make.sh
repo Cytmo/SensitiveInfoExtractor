@@ -53,3 +53,13 @@ tar -xzvf john-1.9.0-jumbo-1.tar.gz
 # # export UNRAR_LIB_PATH=/usr/lib/libunrar.so
 
 # pip install whispers
+
+# 程序时间性能展示
+# pip install snakeviz
+# snakeviz ./log/profile_results.prof
+
+
+
+# 目前无用的库
+# 加速库
+# sudo apt-get install libopenblas-dev

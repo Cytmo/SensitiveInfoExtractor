@@ -8,15 +8,17 @@ from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut
 from datetime import datetime
 import argparse
-import subprocess
+import cProfile
+import os
 
+# 设置使用openblas高性能计算库
+os.environ['USE_OPENBLAS'] = '1'  # 使用OpenBLAS
 """
 main: 主程序执行文件
 usage:
     cd code
     python main.py # 无参数默认扫描"../data"文件夹
 """
-import cProfile
 
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
@@ -39,21 +41,15 @@ globalVar.init_sensitive_word("config/sensitive_word.yml")
 
 # 添加命令行参数, 默认扫描"../data"文件夹
 argparse = argparse.ArgumentParser()
-argparse.add_argument("-f", "--folder", default="../data",
+argparse.add_argument("-f", "--folder", default="../data/paddle_test",
                       help="The folder to be scanned")
 args = argparse.parse_args()
 scan_folder = [args.folder]
 
 
-# 进程处理函数
-def process_function(arg, file):
-    spilitUtil.spilit_process_file(file, arg)
-
-
 # 进程回调函数
 def callback_func(result):
     return
-
 
 # 将初始目录压进根目录队列
 [globalVar.root_folder_list.put(folder) for folder in scan_folder]
@@ -96,14 +92,6 @@ profiler.dump_stats('./log/profile_results.prof')
 
 T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
-
-command = "rm -rf ../workspace/*"
-result = subprocess.run(
-    command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-if result.returncode == 0:
-    logger.info('工作区已清空')
-else:
-    logger.info('工作区清空失败')
 
 
 # 将结果写入文件
