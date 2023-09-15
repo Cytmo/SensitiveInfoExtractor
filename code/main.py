@@ -8,6 +8,7 @@ from util.logUtils import LoggerSingleton
 from util.resultUtil import ResOut
 from datetime import datetime
 import argparse
+import subprocess
 
 """
 main: 主程序执行文件
@@ -95,6 +96,14 @@ profiler.dump_stats('./log/profile_results.prof')
 
 T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
+
+command = "rm -rf ../workspace/*"
+result = subprocess.run(
+    command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+if result.returncode == 0:
+    logger.info('工作区已清空')
+else:
+    logger.info('工作区清空失败')
 
 
 # 将结果写入文件

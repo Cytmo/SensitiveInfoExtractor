@@ -603,6 +603,10 @@ def info_extraction(info,flag=0) -> dict:
     if flag == SPECIAL:
         return config_processing(info)
     if isinstance(info, str):
+        # 若文本中不存在中文和英文关键词，进行模糊提取
+        if not any(key in info for key in keywords_list) and not any(key in info for key in chn_keywords_list):
+            logger.info(TAG + "info_extraction(): fuzz extract")
+            return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
         return begin_info_extraction(info)
     elif isinstance(info, list):
@@ -616,6 +620,32 @@ def info_extraction(info,flag=0) -> dict:
             result_table = one_table_remove_irrelevant_columns(
                 globalVar.get_sensitive_word(), info[1:])
             return result_table
+
+
+def fuzz_extract(text: str) -> dict:
+    logger.info(TAG + "fuzz_extract(): fuzz extract")
+    result_dict = {}
+    result=[]
+    lines = text.split("\n")
+    a_paired_info = paired_info()
+    for line in lines:
+        # 若该行为IP地址
+        if re.match(r'\b(?:\d{1,3}\.){3}\d{1,3}\b|localhost\b', line):
+            logger.info(TAG + "fuzz_extract(): input is IP address")
+            a_paired_info.set_address(line.strip())
+        # 若该行仅含有字母和数字
+        elif re.match(r'[a-zA-Z0-9]+', line):
+            if a_paired_info.getter("user") == None:
+                a_paired_info.setter("user", line.strip())
+            elif a_paired_info.getter("password") == None:
+                a_paired_info.setter("password", line.strip())
+            else:
+                result.append(a_paired_info.output())
+                a_paired_info = paired_info()
+    if not a_paired_info.is_None():
+        result.append(a_paired_info.output())
+    logger.info(TAG + "fuzz_extract(): fuzz extract result: "+str(result))
+    return result
 
 
 def is_png_text(info):
@@ -653,6 +683,9 @@ def begin_info_extraction(text: str) -> dict:
     if paired_info == []:
         logger.warning(TAG + 'No paired info extracted!')
         paired_info = special_processing(original_text)
+    if paired_info == {}:
+        logger.warning(TAG + 'No paired info extracted!')
+        paired_info = fuzz_extract(original_text)
     return paired_info
 
 
