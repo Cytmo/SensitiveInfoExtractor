@@ -157,4 +157,4 @@ code/output/*
 code/test.py
 code/clean.sh
 code/models
-.prof
+*.prof

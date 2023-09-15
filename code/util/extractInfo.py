@@ -59,8 +59,8 @@ def extract_config(file_path, nameclean):
 def extract_ppt_dps(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
     # TODO: 注释下面两行便于调试其他文件解析
-    # text = ppt_and_dps_file(file_path)
-    # sensitive_info_detect(file_path, text)
+    text = ppt_and_dps_file(file_path)
+    sensitive_info_detect(file_path, text)
 
 
 # .xlsx文件读取和提取操作

@@ -63,6 +63,7 @@ direct_controller = fileUtil.DirectController()
 # 声明进程控制类
 process_manager = processUtil.ProcessManager()
 
+
 def main():
     # 逐个根目录执行
     while not globalVar.root_folder_list.empty():
@@ -85,6 +86,7 @@ def main():
 
             # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
             spilitUtil.spilit_process_file(file, folder)
+
 
         # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
         # process_manager.close_process_pool()

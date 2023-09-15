@@ -1,3 +1,4 @@
+from util import globalVar
 from functools import lru_cache
 import hashlib
 from paddleocr import PaddleOCR
@@ -29,16 +30,10 @@ def read_all_pic(path, image_extensions=None):
             for file in files:
                 if any(file.lower().endswith(ext) for ext in image_extensions):
                     image_paths.append(os.path.join(root, file))
-             # compress image
-        # for image_path in image_paths:
-            # logger.info(TAG+"compress_image(): "+image_path)
-            # compress_image(image_path)
         return image_paths
     elif os.path.isfile(path):
         _, ext = os.path.splitext(path)
         if ext.lower() in image_extensions:
-            # logger.info(TAG+"compress_image(): "+path)
-            # compress_image(path)
             return [path]
 
     return []
@@ -87,9 +82,8 @@ def compress_image(image_path):
 
     cv2.imwrite(image_path, img)
 
+
 # 1st OCR method: 使用textract中的ocr方式识别图片(tesseract-ocr)
-
-
 def ocr_textract(file):
     text = textract.process(filename=file, encoding='utf-8')
     # 解码
@@ -161,6 +155,25 @@ def ocr_batch_textract(folder_path):
     return image_all_text
 
 
+def calculate_image_md5(image_path):
+    try:
+        # 打开图片文件并计算 MD5 哈希值
+        with open(image_path, 'rb') as file:
+            image_data = file.read()
+            md5_hash = hashlib.md5(image_data).hexdigest()
+        return md5_hash
+    except FileNotFoundError:
+        return None
+
+
+def find_image_by_hash(hash_to_find):
+    # 在全局字典中查找哈希值
+    if hash_to_find in globalVar._pic_hash:
+        return globalVar._pic_hash[hash_to_find]
+    else:
+        return False
+
+
 # 使用百度PaddleOCR表格形式识别, 输入为包含图片路径的list
 def ocr_table_batch(folder_path):
     ocr_result = []
@@ -170,48 +183,41 @@ def ocr_table_batch(folder_path):
                                )
 
     image_paths = read_all_pic(folder_path)
-    # md5_list = []
-    # for image_path in image_paths:
-    #     # Open the image file in binary mode
-    #     with open(image_path, "rb") as file:
-    #         # Create an MD5 hash object
-    #         md5_hash = hashlib.md5()
-    #         # Read the file in chunks and update the hash object
-    #         while True:
-    #             data = file.read(4096)  # Read 4KB chunks of the file
-    #             if not data:
-    #                 break
-    #             md5_hash.update(data)
 
-    #         # Get the hexadecimal representation of the MD5 hash
-    #         md5_value = md5_hash.hexdigest()
-
-    #         # Append the MD5 hash to the list
-    #         md5_list.append(md5_value)
     for image_path in image_paths:
-        logger.info(TAG+"ocr_table_batch(): "+image_path)
-        img = cv2.imread(image_path)
-        result = table_engine(img)
 
-        html_code = result[0]["res"]["html"]
-        soup = BeautifulSoup(html_code, 'html.parser')
+        single_pic_hash = calculate_image_md5(image_path)
 
-        table = soup.find('table')
-        table_data = []
-        for row in table.find_all('tr'):
-            row_data = [cell.get_text(strip=True)
-                        for cell in row.find_all('td')]
-            if row_data:
-                table_data.append(row_data)
+        result = find_image_by_hash(single_pic_hash)
 
-        # 使用for循环遍历原始列表并添加非空的子列表到新列表
-        filtered_list = []
-        image_path = [image_path]
-        filtered_list.append(image_path)
-        for row in table_data:
-            if row != ['']:
-                filtered_list.append(row)
+        if result == False:
+            logger.info(TAG+"ocr_table_batch() with new hash: "+image_path)
+            img = cv2.imread(image_path)
+            result = table_engine(img)
 
-        ocr_result.append(filtered_list)
+            html_code = result[0]["res"]["html"]
+            soup = BeautifulSoup(html_code, 'html.parser')
+
+            table = soup.find('table')
+            table_data = []
+            for row in table.find_all('tr'):
+                row_data = [cell.get_text(strip=True)
+                            for cell in row.find_all('td')]
+                if row_data:
+                    table_data.append(row_data)
+
+            # 使用for循环遍历原始列表并添加非空的子列表到新列表
+            filtered_list = []
+            image_path = [image_path]
+            filtered_list.append(image_path)
+            for row in table_data:
+                if row != ['']:
+                    filtered_list.append(row)
+
+            globalVar._pic_hash[single_pic_hash] = filtered_list
+            ocr_result.append(filtered_list)
+        else:
+            logger.info(TAG+"ocr_table_batch() with old hash: "+image_path)
+            ocr_result.append(result)
 
     return ocr_result
