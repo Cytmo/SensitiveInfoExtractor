@@ -27,25 +27,26 @@ def read_all_pic(path, image_extensions=None):
             for file in files:
                 if any(file.lower().endswith(ext) for ext in image_extensions):
                     image_paths.append(os.path.join(root, file))
-             #compress image
-        for image_path in image_paths:
-            logger.info(TAG+"compress_image(): "+image_path)
-            compress_image(image_path)
+             # compress image
+        # for image_path in image_paths:
+            # logger.info(TAG+"compress_image(): "+image_path)
+            # compress_image(image_path)
         return image_paths
     elif os.path.isfile(path):
         _, ext = os.path.splitext(path)
         if ext.lower() in image_extensions:
-            logger.info(TAG+"compress_image(): "+path)
-            compress_image(path)
+            # logger.info(TAG+"compress_image(): "+path)
+            # compress_image(path)
             return [path]
 
     return []
+
 
 def compress_image(image_path):
     logger.debug(TAG+"compress_image(): "+image_path)
     img = cv2.imread(image_path)
     h, w = img.shape[:2]
-    logger.debug(TAG+"image_width: "+str(w)+ "image_height: "+str(h))
+    logger.debug(TAG+"image_width: "+str(w) + "image_height: "+str(h))
 
     h, w = img.shape[:2]
     # if h > 400 or w > 300:
@@ -63,6 +64,8 @@ def compress_image(image_path):
     cv2.imwrite(image_path, img)
 
 # 1st OCR method: 使用textract中的ocr方式识别图片(tesseract-ocr)
+
+
 def ocr_textract(file):
     text = textract.process(filename=file, encoding='utf-8')
     # 解码
