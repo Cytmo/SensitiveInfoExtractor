@@ -615,6 +615,9 @@ def info_extraction(info,flag=0) -> dict:
         new_info = info.replace("\n", "")
         if not any(key in new_info for key in keywords_list) and not any(key in new_info for key in chn_keywords_list):
             logger.info(TAG + "info_extraction(): fuzz extract")
+            # 判断是否中文
+            if is_chinese_text(info):
+                begin_info_extraction(info)
             return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
         return begin_info_extraction(info)
