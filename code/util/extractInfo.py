@@ -121,15 +121,24 @@ def extract_eml(file_path, nameclean):
 def is_code_file(code_dir_or_file):
     # 代码后缀文件
     extension_code = [
-        '.py', '.java', '.c', '.cpp', '.h', '.hpp', '.js', '.html', '.css', '.rb',
+        '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
         '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
-        '.asm', '.ps1', '.dockerignore', 'Dockerfile', '.toml', 'rs', '.gitignore'
+        '.ps1', '.dockerignore', 'Dockerfile', '.toml', '.gitignore', 'h'
     ]
 
+    code_config = ['Dockerfile']
+
     flag_code_file = False
+
     for item in extension_code:
-        if item in code_dir_or_file:
+        file_spilit = os.path.splitext(item)
+        if file_spilit == code_dir_or_file:
+            flag_code_file = True
+            break
+
+    for item in code_config:
+        if str(code_dir_or_file).split("/")[-1] == item:
             flag_code_file = True
             break
 
