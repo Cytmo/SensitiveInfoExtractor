@@ -617,7 +617,7 @@ def info_extraction(info,flag=0) -> dict:
             logger.info(TAG + "info_extraction(): fuzz extract")
             # 判断是否中文
             if is_chinese_text(info):
-                begin_info_extraction(info)
+                return begin_info_extraction(info)
             return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
         return begin_info_extraction(info)
