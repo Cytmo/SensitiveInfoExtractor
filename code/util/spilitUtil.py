@@ -88,12 +88,12 @@ def if_authorized_keys_file(filename, nameclean):
 
 
 def if_private_keys_file(filename, nameclean):
-    # with open(filename, 'r') as f:
-    #     first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
-    # if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
-    #     return True
-    # else:
-    return False
+    with open(filename, 'r') as f:
+        first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
+    if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
+        return True
+    else:
+        return False
 
 
 sensitive_data_pairs = {
