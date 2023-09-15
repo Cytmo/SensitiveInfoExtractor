@@ -95,12 +95,12 @@ def if_authorized_keys_file(filename, nameclean):
 
 
 def if_private_keys_file(filename, nameclean):
-    # with open(filename, 'r') as f:
-    #     first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
-    # if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
-    #     return True
-    # else:
-    return False
+    with open(filename, 'r') as f:
+        first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
+    if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
+        return True
+    else:
+        return False
 
 
 sensitive_data_pairs = {
@@ -214,8 +214,10 @@ def process_passwd_file(filename):
             continue
         line = line.rstrip("\n")
         # sensitive_information_que.put(SensitiveInformation(1,1,line.split(":")))
-        res.append(SensitiveInformation(
-            1, [1], line.split(":")).change_to_json())
+        data_tmp = line.split(":")
+        if int(data_tmp[2]) < 1 or int(data_tmp[2]) > 999:
+            res.append(SensitiveInformation(
+                1, [1], data_tmp).change_to_json())
     res_out.add_new_json(filename, res)
 
 
@@ -235,17 +237,18 @@ def process_shadow_file(filename):
             split_passwd = data_tmp[1].split("$")
             sensitiveInformation.add_templete(
                 [3], [data_tmp[0], shadow_passwd_type[split_passwd[1]], split_passwd[2], ''.join(split_passwd[3:])])
+            
 
-        if data_tmp[3] == "0" or data_tmp[3] == "":
-            sensitiveInformation.add_templete(
-                [4], [convert_format_time(int(data_tmp[2])), "无限"])
-        else:
-            sensitiveInformation.add_templete(
-                [5], [convert_format_time(int(data_tmp[2]))]+data_tmp[3:7])
+            if data_tmp[3] == "0" or data_tmp[3] == "":
+                sensitiveInformation.add_templete(
+                    [4], [convert_format_time(int(data_tmp[2])), "无限"])
+            else:
+                sensitiveInformation.add_templete(
+                    [5], [convert_format_time(int(data_tmp[2]))]+data_tmp[3:7])
 
-        # sensitiveInformation.print_sensitive()
-        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
-        res.append(sensitiveInformation.change_to_json())
+            # sensitiveInformation.print_sensitive()
+            # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+            res.append(sensitiveInformation.change_to_json())
     res_out.add_new_json(filename, res)
 
 
