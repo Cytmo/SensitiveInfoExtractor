@@ -25,7 +25,8 @@ class ResOut:
     def add_new_json(self, file_path, sensitive_info):
         single_info = {"file_path": file_path,
                        "sensitive_info": sensitive_info}
-        self.res_json.append(single_info)
+        if len(sensitive_info) != 0:
+            self.res_json.append(single_info)
 
     def get_res_json(self):
         return self.res_json
