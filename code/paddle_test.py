@@ -9,7 +9,10 @@ from util.resultUtil import ResOut
 from datetime import datetime
 import argparse
 import cProfile
+import os
 
+# 设置使用openblas高性能计算库
+os.environ['USE_OPENBLAS'] = '1'  # 使用OpenBLAS
 """
 main: 主程序执行文件
 usage:

@@ -200,16 +200,20 @@ sensitive_information_que = queue.Queue()
 
 def process_passwd_file(filename):
     passwd_file = open(filename)
+    res = []
     for line in passwd_file.readlines():
         if line == "\n":
             continue
         line = line.rstrip("\n")
         # sensitive_information_que.put(SensitiveInformation(1,1,line.split(":")))
-        res_out.add_new_json(filename,SensitiveInformation(1, [1], line.split(":")).change_to_json())
+        res.append(SensitiveInformation(1, [1], line.split(":")).change_to_json())
+    res_out.add_new_json(filename,res)
+
 
 
 def process_shadow_file(filename):
     shadow_file = open(filename)
+    res = []
     for line in shadow_file.readlines():
         if line == "\n":
             continue
@@ -232,16 +236,17 @@ def process_shadow_file(filename):
                 [5], [convert_format_time(int(data_tmp[2]))]+data_tmp[3:7])
 
         # sensitiveInformation.print_sensitive()
-        res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        res.append(sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename,res)
 
 
 option_pattern = r'(?<=\")\s*,\s*(?=\")'
 
 # 公钥认证文件匹配
-
-
 def process_authorized_keys_file(filename):
     authorized_file = open(filename)
+    res = []
     for line in authorized_file.readlines():
         if line == "\n":
             continue
@@ -264,12 +269,15 @@ def process_authorized_keys_file(filename):
                     sensitiveInformation.add_templete(
                         [8], [re.search(r'"(.*?)"', items).group(1)])
         # sensitiveInformation.print_sensitive()
-        res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        res.append(sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename,res)
 
 
 # 公钥文件
 def process_pub_file(filename, nameclean):
     pub_file = open(filename)
+    res = []
     for line in pub_file.readlines():
         if line == "\n":
             continue
@@ -281,11 +289,11 @@ def process_pub_file(filename, nameclean):
             sensitiveInformation.add_templete(
                 [9],[clean_pub_tmp[1]])
         # sensitiveInformation.print_sensitive()
-        res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        # res_out.add_new_json(filename,sensitiveInformation.change_to_json())
+        res.append(sensitiveInformation.change_to_json())
+    res_out.add_new_json(filename,res)
 
 # 私钥文件
-
-
 def process_priv_file(filename):
     priv_file = open(filename)
     sensitiveInformation = SensitiveInformation(5)
@@ -313,8 +321,6 @@ extension_switch = {
     ".yml": extract_config,
     ".xml": extract_config,
     ".properties": extract_config,
-
-
 }
 
 
