@@ -198,7 +198,8 @@ def is_win_reg_file(file_path):
         logger.info(TAG+"is_win_reg_file(): " + file_path)
         reg_info = win_reg_file(
             file_path, file_path.replace("/system", "/sam"))
-        # todo
+        reg_info = reg_info.replace("\x14","")
+
         lines = reg_info.strip().split('\n')
         # print(lines)
         users = []
