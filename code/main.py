@@ -39,11 +39,13 @@ argparse = argparse.ArgumentParser()
 argparse.add_argument("-f", "--folder", default="../data",
                       help="The folder to be scanned")
 # false 默认单进程 true 多进程
-argparse.add_argument("-mp", "--multiprocess_process", default="false",
-                      help="The folder to be scanned")
+argparse.add_argument("-mp", "--multiprocess", default="false",
+                      help="if use multiprocess")
+argparse.add_argument("-t", "--time", default="time_info.txt",
+                      help="time info output file")
 args = argparse.parse_args()
 scan_folder = [args.folder]
-if args.multiprocess_process == "true":
+if args.multiprocess == "true":
     logger.info(TAG+"==>多进程运行！")
     multiprocess_flag = True
 else:
@@ -108,6 +110,11 @@ profiler.dump_stats('./log/profile_results.prof')
 
 T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
+
+
+time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
+with open(args.time, "a+") as f:
+    f.write(time_info+"\n")
 
 command = "rm -rf ../workspace/*"
 result = subprocess.run(
