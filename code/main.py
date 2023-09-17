@@ -25,9 +25,6 @@ logger.info(TAG + "************************ start *****************************"
 
 # 添加结果输出模块
 res_out = ResOut()
-res_out.add_new_json(
-    "main.py", "************************ start *****************************")
-
 # 计时
 T1 = time.perf_counter()
 
@@ -41,8 +38,17 @@ globalVar.init_sensitive_word("config/sensitive_word.yml")
 argparse = argparse.ArgumentParser()
 argparse.add_argument("-f", "--folder", default="../data",
                       help="The folder to be scanned")
+# false 默认单进程 true 多进程
+argparse.add_argument("-mp", "--multiprocess_process", default="false",
+                      help="The folder to be scanned")
 args = argparse.parse_args()
 scan_folder = [args.folder]
+if args.multiprocess_process == "true":
+    logger.info(TAG+"==>多进程运行！")
+    multiprocess_flag = True
+else:
+    logger.info(TAG+"==>(默认)单进程运行！[添加 '-m true'  进行多进程运行]")
+    multiprocess_flag = False
 
 
 # 进程处理函数
@@ -80,18 +86,22 @@ def main():
             # 获取一个文件File类型
             file = direct_controller.fileList.get()
 
-            # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
-            # process_manager.add_process(
-            #     callback_func, process_function, args=(folder,), kwargs={"file": file, })
-
-            # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
-            spilitUtil.spilit_process_file(file, folder)
-
+            if multiprocess_flag:
+                # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
+                process_manager.add_process(
+                    callback_func, process_function, args=(folder,), kwargs={"file": file, })
+            else:
+                # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
+                spilitUtil.spilit_process_file(file, folder)
 
         # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
-        # process_manager.close_process_pool()
-        # process_manager.release_process_pool()
+
+        if multiprocess_flag:
+            process_manager.close_process_pool()
+            process_manager.release_process_pool()
     # Your code here
+
+
 profiler = cProfile.Profile()
 profiler.run('main()')
 profiler.dump_stats('./log/profile_results.prof')
@@ -109,8 +119,6 @@ else:
 
 
 # 将结果写入文件
-res_out.add_new_json(
-    "main.py", "************************* end ******************************")
 output_tile_path = "output/"+datetime.now().strftime("%Y%m%d%H%M%S%f") + \
     "_output.json"
 res_out.save_to_file(output_tile_path)
