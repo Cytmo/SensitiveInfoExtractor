@@ -1,1 +1,0 @@
-python3 core.py -f test/text.txt
