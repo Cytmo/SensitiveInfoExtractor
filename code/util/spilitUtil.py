@@ -237,7 +237,6 @@ def process_shadow_file(filename):
             split_passwd = data_tmp[1].split("$")
             sensitiveInformation.add_templete(
                 [3], [data_tmp[0], shadow_passwd_type[split_passwd[1]], split_passwd[2], ''.join(split_passwd[3:])])
-            
 
             if data_tmp[3] == "0" or data_tmp[3] == "":
                 sensitiveInformation.add_templete(
@@ -380,5 +379,5 @@ def spilit_process_file(file, root_directory):
             process_authorized_keys_file(file_name)
         elif if_private_keys_file(file_name, file_spilit[0]):
             process_priv_file(file_name)
-
-        logger.info(TAG+"=>Unsupported file format: "+file_name)
+        else:
+            logger.info(TAG+"=>Unsupported file format: "+file_name)
