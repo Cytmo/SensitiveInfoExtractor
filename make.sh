@@ -1,65 +1,54 @@
-# conda env python=3.8
-# pip install --upgrade pip
-# pip install python-pptx
-# pip install textract
-# sudo apt install build-essential
+# 使用conda新建虚拟环境
+conda create -n dev python=3.8
+conda activate dev
 
+# python库
+pip install --upgrade pip
+pip install python-pptx
+pip install textract
+pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
+pip install paddleocr 
+pip install opencv-python-headless
+pip install PyMuPDF     
+pip install eml_parser
+pip install beautifulsoup4
+pip install spacy
+pip install aspose.slides
+pip install unrar
+pip install whispers
+pip install snakeviz
+pip install colorlog
+pip install pygments    
 
-# install pic-ocr lib
-#(1)
-# sudo apt-get install tesseract-ocr
-# pip install -i https://mirrors.aliyun.com/pypi/simple python-office -U
-# pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple
-#(2)
-# pip install paddleocr 
-# wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz
-# tar -zxvf openssl-1.1.1o.tar.gz
-# cd openssl-1.1.1o
-# ./config
-# make
-# make test 
-# sudo make install (on this moment you can't install python by pyenv)
-# sudo find / -name libssl.so.1.1
-# sudo ln -s /usr/local/lib/libssl.so.1.1  /usr/lib/libssl.so.1.1
-# sudo find / -name libcrypto.so.1.1
-# sudo ln -s /usr/local/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
-# pip uninstall opencv-python
-# pip install opencv-python-headless
+# linux软件安装
+sudo apt install antiword
+sudo apt install build-essential
+sudo apt install libc6-dev 
+sudo apt install libgdiplus
+sudo apt install samdump2
+sudo apt-get install libopenblas-dev
 
-# pip install PyMuPDF     
-# pip install eml_parser
-# pip install beautifulsoup4
-# pip install tabulate
-# pip install spacy
-# pip install aspose.slides
-# sudo apt install libc6-dev 
-# sudo apt install libgdiplus
+# 依赖库配置
+cd lib (code/lib)
+wget http://www.rarlab.com/rar/unrarsrc-5.4.5.tar.gz
+tar -xzvf unrarsrc-5.4.5.tar.gz
+cd unrar
+sudo make lib
+sudo make install-lib
 
-# 具体见code/lib/readme.md
-# pip install unrar  #直接pip install即可
-# cd lib (code/lib)
-# wget http://www.rarlab.com/rar/unrarsrc-5.4.5.tar.gz
-# # tar -xzvf unrarsrc-5.4.5.tar.gz
-# cd unrar
-# sudo make lib
-# sudo make install-lib
+cd
+wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz
+tar -zxvf openssl-1.1.1o.tar.gz
+cd openssl-1.1.1o
+./config
+make
+make test 
+sudo make install
+sudo ln -s /usr/local/lib/libssl.so.1.1  /usr/lib/libssl.so.1.1
+sudo ln -s /usr/local/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
+vim ~/.bashrc
+export UNRAR_LIB_PATH=/usr/lib/libunrar.so
 
-#Jhon安装
-cd lib
-wget https://www.openwall.com/john/k/john-1.9.0-jumbo-1.tar.gz
-tar -xzvf john-1.9.0-jumbo-1.tar.gz
-
-# # vim ~/.bashrc
-# # export UNRAR_LIB_PATH=/usr/lib/libunrar.so
-
-# pip install whispers
 
 # 程序时间性能展示
-# pip install snakeviz
-# snakeviz ./log/profile_results.prof
-
-
-
-# 目前无用的库
-# 加速库
-# sudo apt-get install libopenblas-dev
+#  snakeviz ./log/profile_results.prof
