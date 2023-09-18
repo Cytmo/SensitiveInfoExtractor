@@ -124,16 +124,16 @@ def is_code_file(code_dir_or_file):
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
         '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
-        '.ps1', '.dockerignore', 'Dockerfile', '.toml', '.gitignore', '.h'
+        '.ps1', 'Dockerfile', '.toml', '.h'
     ]
 
-    code_config = ['Dockerfile']
+    code_config = ['Dockerfile', '.dockerignore', '.gitignore']
 
     flag_code_file = False
 
-    for item in extension_code:
-        if '.' in os.path.basename(code_dir_or_file):
-            file_extension = os.path.splitext(code_dir_or_file)[1]
+    if '.' in code_dir_or_file:
+        file_extension = os.path.splitext(code_dir_or_file)[1]
+        for item in extension_code:
             if file_extension == item:
                 flag_code_file = True
                 break
