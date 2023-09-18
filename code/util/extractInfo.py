@@ -124,7 +124,7 @@ def is_code_file(code_dir_or_file):
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
         '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
-        '.ps1', '.dockerignore', 'Dockerfile', '.toml', '.gitignore', 'h'
+        '.ps1', '.dockerignore', 'Dockerfile', '.toml', '.gitignore', '.h'
     ]
 
     code_config = ['Dockerfile']
@@ -132,10 +132,11 @@ def is_code_file(code_dir_or_file):
     flag_code_file = False
 
     for item in extension_code:
-        file_spilit = os.path.splitext(item)
-        if file_spilit == code_dir_or_file:
-            flag_code_file = True
-            break
+        if '.' in os.path.basename(code_dir_or_file):
+            file_extension = os.path.splitext(code_dir_or_file)[1]
+            if file_extension == item:
+                flag_code_file = True
+                break
 
     for item in code_config:
         if str(code_dir_or_file).split("/")[-1] == item:
@@ -198,7 +199,7 @@ def is_win_reg_file(file_path):
         logger.info(TAG+"is_win_reg_file(): " + file_path)
         reg_info = win_reg_file(
             file_path, file_path.replace("/system", "/sam"))
-        reg_info = reg_info.replace("\x14","")
+        reg_info = reg_info.replace("\x14", "")
 
         lines = reg_info.strip().split('\n')
         # print(lines)
@@ -220,12 +221,13 @@ def is_win_reg_file(file_path):
             users.append(user_info)
         for user in users:
             if "*disabled*" in user["Username"]:
-                user["Username"] = user["Username"].replace("*disabled*", "").strip()
+                user["Username"] = user["Username"].replace(
+                    "*disabled*", "").strip()
                 user["Status"] = "disabled"
                 if user["Username"] == "":
                     user["Username"] = "None"
-        print(users)    
-        reg_info_parsed =  json.dumps(users, indent=4)
+        print(users)
+        reg_info_parsed = json.dumps(users, indent=4)
         # data_list = [line for line in reg_info.split('\n') if line.strip()]
         # cleaned_list = [line.replace('\x14', '') for line in data_list]
         file_path_tip = file_path+" "+"with " + \
