@@ -336,6 +336,18 @@ extension_switch = {
     ".yml": extract_config,
     ".xml": extract_config,
     ".properties": extract_config,
+    ".epub": extract_universal,
+    ".csv": extract_universal,
+    ".html": extract_universal,
+    ".mp3": extract_universal,
+    ".msg": extract_universal,
+    ".odt": extract_universal,
+    ".ogg": extract_universal,
+    ".pdf": extract_universal,
+    ".ps": extract_universal,
+    ".rtf": extract_universal,
+    ".tiff": extract_universal,
+    ".wav": extract_universal,
 }
 
 
