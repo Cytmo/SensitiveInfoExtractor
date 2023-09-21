@@ -6,8 +6,8 @@ import shutil
 import spacy
 from spacy.matcher import Matcher
 import yaml
-from informationEngine import info_protection
-from informationEngine.info_protection import IoCIdentifier
+# from informationEngine import info_protection
+# from informationEngine.info_protection import IoCIdentifier
 from spacy.tokens import Doc
 from typing import Any, Tuple
 import re
@@ -81,11 +81,11 @@ def text_parse(file_path):
 #     return iid, doc
 
 
-def ioc_protection(text: str):
-    iid = IoCIdentifier(text)
-    iid.ioc_protect()
-    # iid.check_replace_result()
-    return iid
+# def ioc_protection(text: str):
+#     iid = IoCIdentifier(text)
+#     iid.ioc_protect()
+#     # iid.check_replace_result()
+#     return iid
 
 # import yara_scan
 # def yara_str_scan(text: str):

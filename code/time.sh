@@ -1,17 +1,17 @@
 # run main.py for 20 times
 # write config to time_info.txt
-# echo "single process with image" >> time_info.txt
-# for i in {1..20}
-# do
-#     python main.py 
-# done
+echo "single process with image" >> time_info.txt
+for i in {1..20}
+do
+    python main.py 
+done
 
-# echo "multi-process with image" >> time_info.txt
+echo "multi-process with image" >> time_info.txt
 
-# for i in {1..20}
-# do
-#     python main.py -mp true
-# done
+for i in {1..20}
+do
+    python main.py -mp true
+done
 
 echo "single process without image" >> time_info.txt
 for i in {1..20}
