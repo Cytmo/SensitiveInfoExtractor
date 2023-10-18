@@ -9,6 +9,7 @@ from util.resultUtil import ResOut
 from datetime import datetime
 import argparse
 import subprocess
+import cProfile
 
 """
 main: 主程序执行文件
@@ -16,7 +17,8 @@ usage:
     cd code
     python main.py # 无参数默认扫描"../data"文件夹
 """
-import cProfile
+# 计时
+T1 = time.perf_counter()
 
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
@@ -25,13 +27,11 @@ logger.info(TAG + "************************ start *****************************"
 
 # 添加结果输出模块
 res_out = ResOut()
-# 计时
-T1 = time.perf_counter()
 
 # 添加依赖
 globalVar._init()
-globalVar.set_value("code_path", "")
 
+#初始化敏感词列表
 globalVar.init_sensitive_word("config/sensitive_word.yml")
 
 # 添加命令行参数, 默认扫描"../data"文件夹
@@ -41,10 +41,15 @@ argparse.add_argument("-f", "--folder", default="../data",
 # false 默认单进程 true 多进程
 argparse.add_argument("-mp", "--multiprocess", default="false",
                       help="if use multiprocess")
+# 时间输出到哪
 argparse.add_argument("-t", "--time", default="time_info.txt",
                       help="time info output file")
+
+# 输入扫描的路径
 args = argparse.parse_args()
 scan_folder = [args.folder]
+
+# 多进程参数转换
 if args.multiprocess == "true":
     logger.info(TAG+"==>多进程运行！")
     multiprocess_flag = True
@@ -56,8 +61,6 @@ else:
 # 进程处理函数
 def process_function(arg, file):
     spilitUtil.spilit_process_file(file, arg)
-
-
 # 进程回调函数
 def callback_func(result):
     return
@@ -80,8 +83,6 @@ def main():
         # 构建根目录的文件树
         direct_controller.head_directory = direct_controller.build_directory_tree(
             folder)
-        # 可以通过下方该指令输出文件树
-        # direct_controller.print_directory_tree(direct_controller.head_directory)
 
         # 逐个文件执行
         while not direct_controller.fileList.empty():
@@ -96,26 +97,22 @@ def main():
                 # 下面指令是不开进程池顺序执行时使用的，可以切换直接使用
                 spilitUtil.spilit_process_file(file, folder)
 
-        # 当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
-
+        # 多进程模式下当进程池填入完毕后，阻止新进程的加入并挂起整个进程等待进程池中所有子进程结束
         if multiprocess_flag:
             process_manager.close_process_pool()
             process_manager.release_process_pool()
     # Your code here
 
+# #性能分析工具下的执行
+# profiler = cProfile.Profile()
+# profiler.run('main()')
+# #性能分析使用
+# profiler.dump_stats('./log/profile_results.prof')
 
-profiler = cProfile.Profile()
-profiler.run('main()')
-profiler.dump_stats('./log/profile_results.prof')
+# 不使用性能分析工具直接执行
+main()
 
-T2 = time.perf_counter()
-logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
-
-
-time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
-with open(args.time, "a+") as f:
-    f.write(time_info+"\n")
-
+#清空工作区
 command = "rm -rf ../workspace/*"
 result = subprocess.run(
     command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -129,8 +126,15 @@ else:
 output_tile_path = "output/"+datetime.now().strftime("%Y%m%d%H%M%S%f") + \
     "_output.json"
 res_out.save_to_file(output_tile_path)
-
-
 logger.info(TAG+"************************* end ******************************")
 logger.info(TAG+"result is saved to: "+output_tile_path+" , total is " +
             str(len(res_out.res_json)-2) + " term")
+
+#计时结束
+T2 = time.perf_counter()
+logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
+
+#记录程序运行时间
+time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
+with open(args.time, "a+") as f:
+    f.write(time_info+"\n")

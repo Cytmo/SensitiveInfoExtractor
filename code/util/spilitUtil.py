@@ -44,9 +44,9 @@ def convert_format_time(time_days):
 
 def process_rar_file(filename, nameclean):
     rf = rarfile.RarFile(filename)
-    rf.extractall(globalVar.get_value("code_path")+'../workspace')
+    rf.extractall('../workspace')
     globalVar.root_folder_list.put(
-        globalVar.get_value("code_path")+'../workspace/'+nameclean)
+        '../workspace/'+nameclean)
     del rf
     del filename
     del nameclean
@@ -61,12 +61,10 @@ def process_rar_file(filename, nameclean):
 
 
 def process_zip_file(filename, nameclean):
-    # print("---------------"+filename+"  "+nameclean)
-    # print(globalVar.get_value("code_path"))
     zip_file = zipfile.ZipFile(filename)
-    zip_file.extractall(globalVar.get_value("code_path")+'../workspace')
+    zip_file.extractall('../workspace')
     globalVar.root_folder_list.put(
-        globalVar.get_value("code_path")+'../workspace/'+nameclean)
+        '../workspace/'+nameclean)
     del zip_file
     del filename
     del nameclean
@@ -350,8 +348,9 @@ extension_switch = {
     ".wav": extract_universal,
 }
 
-
+#按照文件类型分发各个文件
 def spilit_process_file(file, root_directory):
+
     # 获取文件的后缀
     # 类方法：获取文件名后缀
     file_spilit = os.path.splitext(file.name)
