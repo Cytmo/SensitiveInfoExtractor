@@ -1,13 +1,11 @@
 from util.resultUtil import ResOut
-from util import globalVar
 from util.fileUtil import File
-from unrar import rarfile
 from datetime import datetime
 from datetime import timedelta
 import queue
-import zipfile
 import os
 from util.extractInfo import *
+from util.decompressionUtil import *
 from toStringUtils.universalUtil import *
 from util.logUtils import LoggerSingleton
 import re
@@ -35,40 +33,7 @@ def convert_format_time(time_days):
     return result_data
 
 
-'''
-    处理rar解压
 
-    内存泄漏是否处理：是
-'''
-
-
-def process_rar_file(filename, nameclean):
-    rf = rarfile.RarFile(filename)
-    rf.extractall('../workspace')
-    globalVar.root_folder_list.put(
-        '../workspace/'+nameclean)
-    del rf
-    del filename
-    del nameclean
-    # print("Processing rar file:", filename)
-
-
-'''
-    处理zip解压
-
-    内存泄漏是否处理：是
-'''
-
-
-def process_zip_file(filename, nameclean):
-    zip_file = zipfile.ZipFile(filename)
-    zip_file.extractall('../workspace')
-    globalVar.root_folder_list.put(
-        '../workspace/'+nameclean)
-    del zip_file
-    del filename
-    del nameclean
-    # print("Processing zip file:", filename)
 
 
 def if_passwd_file(filename, nameclean):
