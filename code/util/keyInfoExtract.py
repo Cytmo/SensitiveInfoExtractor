@@ -1,7 +1,11 @@
+import json
+import subprocess
 from util.keySensitiveInfoUtil import *
 from util.resultUtil import ResOut
 from util.simpleUtil import *
 import re
+
+TAG = "util.extractInfo.py-"
 
 # 添加结果输出模块
 res_out = ResOut()
@@ -34,7 +38,70 @@ def if_private_keys_file(filename, nameclean):
         return True
     else:
         return False
-    
+
+# 解析 windows registry file: sam.hiv/system.hiv/sam/system
+def win_reg_file(sam_path, system_path):
+    # 使用samdump2解析
+    command = "samdump2 {} {}".format(sam_path, system_path)
+    result = subprocess.run(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return result.stdout
+
+# 识别win 注册表文件
+def is_win_reg_file(file_path):
+    if "system.hiv" in file_path or "sam/system" in file_path:
+        logger.info(TAG+"is_win_reg_file(): " + file_path)
+        # TODO 额外判断sam的存在情况
+        return True
+    return False
+
+# 识别win 附属文件
+def rela_win_reg_file(file_path):
+    if "sam.hiv" in file_path or "sam/sam" in file_path:
+        return True
+    return False
+
+
+# 处理win 注册表文件
+def process_win_reg_file(file_path):
+    logger.info("process_win_reg_file: " + file_path)
+    reg_info = win_reg_file(
+        file_path, file_path.replace("/system", "/sam"))
+    reg_info = reg_info.replace("\x14", "")
+
+    lines = reg_info.strip().split('\n')
+    # print(lines)
+    users = []
+
+    for line in lines:
+        parts = line.split(':')
+        # print("aaaaaaa"+str(parts))
+        user_info = {
+            "Status": "enabled",
+            "Username": "None" if parts[0].strip() == "" else parts[0].strip(),
+            "UserID": "None" if parts[1].strip() == "" else int(parts[1].strip()),
+            "LMHash": "None" if parts[2].strip() == "" else parts[2].strip(),
+            "NTLMHash": "None" if parts[3].strip() == "" else parts[3].strip(),
+            "DomainName": "None" if parts[4].strip() == "" else parts[4].strip(),
+            "GroupID": "None" if parts[5].strip() == "" else int(parts[5].strip()),
+            "Description": "None" if parts[6].strip() == "" else parts[6].strip()
+        }
+        users.append(user_info)
+    for user in users:
+        if "*disabled*" in user["Username"]:
+            user["Username"] = user["Username"].replace(
+                "*disabled*", "").strip()
+            user["Status"] = "disabled"
+            if user["Username"] == "":
+                user["Username"] = "None"
+    print(users)
+    reg_info_parsed = json.dumps(users, indent=4)
+    # data_list = [line for line in reg_info.split('\n') if line.strip()]
+    # cleaned_list = [line.replace('\x14', '') for line in data_list]
+    file_path_tip = file_path+" "+"with " + \
+        file_path.split("/")[-1].replace("system", "sam")
+    res_out.add_new_json(file_path_tip, users)
+
 
 def process_passwd_file(filename):
     passwd_file = open(filename)

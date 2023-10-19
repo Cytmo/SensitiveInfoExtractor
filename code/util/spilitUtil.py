@@ -7,12 +7,8 @@ from util.decompressionUtil import *
 from toStringUtils.universalUtil import *
 from util.logUtils import LoggerSingleton
 
-
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
-
-
-
 
 # 后缀匹配解析函数
 extension_switch = {
@@ -66,30 +62,47 @@ def spilit_process_file(file, root_directory):
                     file_name + ": " + file_spilit[0])
         process_function(file_name, file_spilit[0])
     else:
-
-        # 判断文件是win reg 文件
-        if is_win_reg_file(file_name):
-            return
-
-        # 判断是否是命令行历史记录
-        if is_bash_history(file_name):
-            return
-
-        # 判断是否是token文件
-        if is_token_file(file_name):
-            return
-
+        # 代码提取开始
         # 判断是代码目录或者代码文件
         if is_code_file(file_name):
             return
+        
+        # 系统关键敏感信息提取开始
+        # 判断文件是win reg 文件
+        if is_win_reg_file(file_name):
+            process_win_reg_file(file_name)
+            return
+        # 判断文件是否是win reg绑定文件
+        if rela_win_reg_file(file_name):
+            return
 
+        # 判断是否是passwd文件
         if if_passwd_file(file_name, file_spilit[0]):
             process_passwd_file(file_name)
-        elif if_shadow_file(file_name, file_spilit[0]):
+            return
+        
+        # 判断是否是shadow文件
+        if if_shadow_file(file_name, file_spilit[0]):
             process_shadow_file(file_name)
-        elif if_authorized_keys_file(file_name, file_spilit[0]):
+            return
+        
+        # 判断是否是公钥文件
+        if if_authorized_keys_file(file_name, file_spilit[0]):
             process_authorized_keys_file(file_name)
-        elif if_private_keys_file(file_name, file_spilit[0]):
+            return
+        
+        # 判断是否是私钥文件
+        if if_private_keys_file(file_name, file_spilit[0]):
             process_priv_file(file_name)
-        else:
-            logger.info(TAG+"=>Unsupported file format: "+file_name)
+            return
+        
+        # TODO: 下面更改放入通用提取接口
+        # 判断是否是命令行历史记录
+        if is_bash_history(file_name):
+            return
+        # 判断是否是token文件
+        if is_token_file(file_name):
+            return
+        
+        # TODO: 检查文件编码方式，如果能用文本打开读入就正常读入走文本接口
+        logger.info(TAG+"=>Unsupported file format: "+file_name)
