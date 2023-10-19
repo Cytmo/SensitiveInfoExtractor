@@ -118,6 +118,10 @@ def extract_eml(file_path, nameclean):
 
 
 # 源代码文件读取和提取操作
+# TODO:需要重新整理CODE的识别
+def extract_code_file(file_path,nameclean):
+    #TODO: 添加处理
+    return
 def is_code_file(code_dir_or_file):
     # 代码后缀文件
     extension_code = [

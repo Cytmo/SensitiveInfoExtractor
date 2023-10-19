@@ -32,12 +32,17 @@ def if_authorized_keys_file(filename, nameclean):
 
 
 def if_private_keys_file(filename, nameclean):
-    with open(filename, 'r') as f:
-        first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
-    if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
-        return True
-    else:
+    try:
+        with open(filename, 'r') as f:
+            first_line = f.readline().strip()  # 读取第一行并去除首尾空白字符
+        if first_line == "-----BEGIN OPENSSH PRIVATE KEY-----":
+            return True
+        else:
+            return False
+    except:
         return False
+
+
 
 # 解析 windows registry file: sam.hiv/system.hiv/sam/system
 def win_reg_file(sam_path, system_path):
