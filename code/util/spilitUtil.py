@@ -1,6 +1,6 @@
 from util.resultUtil import ResOut
 from util.fileUtil import File
-from util.keyInfoExtract import *
+from informationEngine.keyInfoExtract import *
 import os
 from util.extractInfo import *
 from util.decompressionUtil import *

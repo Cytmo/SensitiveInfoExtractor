@@ -1,6 +1,6 @@
 import json
 import subprocess
-from util.keySensitiveInfoUtil import *
+from informationEngine.keySensitiveInfoUtil import *
 from util.resultUtil import ResOut
 from util.simpleUtil import *
 import re
