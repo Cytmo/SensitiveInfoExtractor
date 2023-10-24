@@ -9,9 +9,9 @@ from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
 
-with open("passwords", "r") as file:
+with open("train/passwords", "r") as file:
     passwords = file.read().splitlines()
-with open("non_passwords", "r") as file:
+with open("train/non_passwords", "r") as file:
     non_passwords = file.read().splitlines()
 
 password_lengths = [len(password) for password in passwords]
