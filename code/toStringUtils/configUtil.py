@@ -1,6 +1,5 @@
 import json
 import yaml
-import json
 import xml.etree.ElementTree as ET
 import subprocess
 
@@ -56,13 +55,7 @@ def yml_file(file_path):
     return yml_to_json(yml_content)
 
 
-# 解析 windows registry file: sam.hiv/system.hiv/sam/system
-def win_reg_file(sam_path, system_path):
-    # 使用samdump2解析
-    command = "samdump2 {} {}".format(sam_path, system_path)
-    result = subprocess.run(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    return result.stdout
+
 
 
 # 解析源码文件夹

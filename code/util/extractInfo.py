@@ -118,6 +118,10 @@ def extract_eml(file_path, nameclean):
 
 
 # 源代码文件读取和提取操作
+# TODO:需要重新整理CODE的识别
+def extract_code_file(file_path,nameclean):
+    #TODO: 添加处理
+    return
 def is_code_file(code_dir_or_file):
     # 代码后缀文件
     extension_code = [
@@ -192,57 +196,9 @@ def is_code_file(code_dir_or_file):
     return True
 
 
-# win 注册表文件读取和提取操作
-def is_win_reg_file(file_path):
-
-    if "system.hiv" in file_path or "sam/system" in file_path:
-        logger.info(TAG+"is_win_reg_file(): " + file_path)
-        reg_info = win_reg_file(
-            file_path, file_path.replace("/system", "/sam"))
-        reg_info = reg_info.replace("\x14", "")
-
-        lines = reg_info.strip().split('\n')
-        # print(lines)
-        users = []
-
-        for line in lines:
-            parts = line.split(':')
-            # print("aaaaaaa"+str(parts))
-            user_info = {
-                "Status": "enabled",
-                "Username": "None" if parts[0].strip() == "" else parts[0].strip(),
-                "UserID": "None" if parts[1].strip() == "" else int(parts[1].strip()),
-                "LMHash": "None" if parts[2].strip() == "" else parts[2].strip(),
-                "NTLMHash": "None" if parts[3].strip() == "" else parts[3].strip(),
-                "DomainName": "None" if parts[4].strip() == "" else parts[4].strip(),
-                "GroupID": "None" if parts[5].strip() == "" else int(parts[5].strip()),
-                "Description": "None" if parts[6].strip() == "" else parts[6].strip()
-            }
-            users.append(user_info)
-        for user in users:
-            if "*disabled*" in user["Username"]:
-                user["Username"] = user["Username"].replace(
-                    "*disabled*", "").strip()
-                user["Status"] = "disabled"
-                if user["Username"] == "":
-                    user["Username"] = "None"
-        print(users)
-        reg_info_parsed = json.dumps(users, indent=4)
-        # data_list = [line for line in reg_info.split('\n') if line.strip()]
-        # cleaned_list = [line.replace('\x14', '') for line in data_list]
-        file_path_tip = file_path+" "+"with " + \
-            file_path.split("/")[-1].replace("system", "sam")
-        res_out.add_new_json(file_path_tip, users)
-        return True
-
-    if "sam.hiv" in file_path or "sam/sam" in file_path:
-        return True
-    return False
-
-
+# TODO 下面两个函数要消除
 # .bash_history文件读取和提取操作
 def is_bash_history(file_path):
-
     if "sh_history" in file_path:
         logger.info(TAG+"is_bash_history(): " + file_path)
         text = universal_file(file_path)
@@ -250,9 +206,7 @@ def is_bash_history(file_path):
         logger.info(sensitive_info_text)
         res_out.add_new_json(file_path, sensitive_info_text)
         return True
-
     return False
-
 
 # token文件读取和提取操作
 def is_token_file(file_path):
