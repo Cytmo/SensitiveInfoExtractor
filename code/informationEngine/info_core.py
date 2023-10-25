@@ -126,6 +126,9 @@ def chn_text_preprocessing(text: str) -> str:
     return cleaned_text
 
 
+
+
+
 def is_chinese_text(text: str) -> bool:
     # pattern = re.compile(r'[\u4e00-\u9fa5]')  # 匹配中文字符的范围
     # return bool(pattern.search(text))
@@ -506,7 +509,7 @@ def info_extraction(info,flag=0) -> dict:
                 globalVar.get_sensitive_word(), info[1:])
             return result_table
 
-
+# TODO: 使用模糊识别的方法提取信息，打关键词,抽取在之后做
 def fuzz_extract(text: str) -> dict:
     logger.info(TAG + "fuzz_extract(): fuzz extract")
     result_dict = {}
