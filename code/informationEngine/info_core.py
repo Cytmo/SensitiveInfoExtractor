@@ -11,40 +11,49 @@ import re
 import re
 from pygments.lexers import guess_lexer, ClassNotFound
 from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
-
+from informationEngine import password_guesser
 # 添加日志模块
 TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
 
 # 保存email地址 url ip地址等内容，防止被替换
-def item_protection(text: str) -> Tuple[str, dict]:
+import re
+from typing import Tuple
+
+
+placeholders_corresponding_type = {}  # This dictionary will store placeholders and their corresponding types
+
+def information_protection(text: str) -> Tuple[str, dict]:
     placeholders = {}  # This dictionary will store placeholders and their corresponding content
     placeholders_counter = 1  # Counter for generating placeholders
+    global placeholders_corresponding_type
+    placeholders_corresponding_type = {}
+    # Define a list of dictionaries with patterns and their corresponding types
+    patterns = [
+        {'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', 'type': 'email'},
+        {'pattern': r'jdbc:mysql://[a-zA-Z0-9:/._-]+', 'type': 'jdbc_url'},
+        {'pattern': r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 'type': 'url'},
+        {'pattern': r'(?:\d{1,3}\.){3}\d{1,3}|localhost', 'type': 'ip'},
+        {'pattern': r'1[3-9]\d{9}', 'type': 'phonenumber'},
+        # {'pattern': r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b', 'type': 'port'}
+    ]
 
-    # Define regular expressions for different types of items you want to replace
-    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-    jdbc_pattern = r'jdbc:mysql://[a-zA-Z0-9:/._-]+'
-    url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    ip_pattern = r'(?:\d{1,3}\.){3}\d{1,3}|localhost'
-
-    port_pattern = r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b'
-
-    # jdbc_pattern = r'jdbc:mysql://[a-zA-Z0-9:/._-]+'
 
 
-    patterns = [email_pattern,jdbc_pattern ,url_pattern, ip_pattern]
-
-    for pattern in patterns:
+    for pattern_info in patterns:
+        pattern = pattern_info['pattern']
         matches = re.finditer(pattern, text, flags=re.IGNORECASE)
         for match in matches:
             item = match.group()
             placeholder = f'?{placeholders_counter}?'
             placeholders[placeholder] = item
+            placeholders_corresponding_type[placeholder] = pattern_info['type']  # Store the corresponding type
             # Replace only the first occurrence
             text = text.replace(item, placeholder, 1)
             placeholders_counter += 1
 
     return text, placeholders
+
 
 
 # 防止文件名等并识别为关键字，如user.txt
@@ -100,10 +109,8 @@ chn_replacement_dict = {"账号": "user", "端口": "port", "名称": "user", "�
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
 
 item_protection_dict = {}
-
-
 def chn_text_preprocessing(text: str) -> str:
-    text, item_protection_dict1 = item_protection(text)
+    text, item_protection_dict1 = information_protection(text)
     global item_protection_dict
     item_protection_dict = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
@@ -152,11 +159,17 @@ def chinese_character_percentage(text: str) -> float:
     percentage = (chinese_characters / total_characters) * 100
     return percentage
 
-import password_guesser
 # 使用svm分类字符串
 def password_classifier(text: str) -> bool:
-    return password_guesser.predict_password(text)
+    result =  password_guesser.predict_password([text])
+    # [[True, 0.9999999922353121]]
+    if result[0][0] == True and result[0][1] > 0.9:
+        return True
+    else:
+        return False
 
+
+# TODO:url和端口号成组且支持一个用户对应多个url
 # 从处理过后的字符串中提取成对信息
 class paired_info_pattern():
     def __init__(self):
@@ -165,6 +178,8 @@ class paired_info_pattern():
         self.user = None
         self.password = None
         self.phonenumber = None
+        
+
 
     def set_port(self, port):
         self.port = port
@@ -224,8 +239,8 @@ class paired_info_pattern():
 
 
 info_pattern = {"user": "user", "password": "password",
-                "address": "address", "port": "port"}
-replaced_keyword_list = ["{user}", "{password}", "{address}", "{port}"]
+                "address": "address", "port": "port","phonenumber":"phonenumber"}
+replaced_keyword_list = ["{user}", "{password}", "{address}", "{port}", "{phonenumber}"]
 
 
 # 从预处理过后的文本中提取成对信息
@@ -257,8 +272,14 @@ def extract_paired_info(text):
             if text[i] == "{address}":
                 has_address = True
     last_output = a_paired_info.output()
+
     if last_output["user"] != None or last_output["address"] != None:
         result_pair.append(last_output)
+
+
+
+
+
     # 移除没有地址的端口号
     for item in result_pair:
         if item["address"] is None and item["port"] is not None:
@@ -340,7 +361,7 @@ special_keywords_list = [
 
 def special_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for text')
-    text, item_protection_dict1 = item_protection(text)
+    text, item_protection_dict1 = information_protection(text)
     global item_protection_dict
     item_protection_dict = item_protection_dict1
     text = fuzz_prevention(text)
@@ -408,7 +429,7 @@ def special_processing(text: str) -> dict:
 
 def config_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for config')
-    text, item_protection_dict1 = item_protection(text)
+    text, item_protection_dict1 = information_protection(text)
     global item_protection_dict
     item_protection_dict = item_protection_dict1
     text = fuzz_prevention(text)
@@ -513,12 +534,34 @@ def info_extraction(info,flag=0) -> dict:
                 globalVar.get_sensitive_word(), info[1:])
             return result_table
 
-# TODO: 使用模糊识别的方法提取信息，打关键词,抽取在之后做
+# 使用模糊识别的方法提取信息，打关键词,抽取在之后做
 def fuzz_extract(text: str) -> dict:
+    original_text = text
+    # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
+    # 移除代码注释 // # 等
+    # 已移除，影响地址的提取
+    # text = re.sub(r'//.*', '', text)
+    logger.debug(TAG + 'Text before IoC protection: '+text)
+    if is_chinese_text(text):
+        logger.info(TAG + 'This is a Chinese text.')
+        text = chn_text_preprocessing(text)
+    else:
+        logger.info(TAG + 'This is an English text.')
+        text = fuzz_prevention(text)
+        logger.debug(TAG + 'Text after IoC protection: '+text)
+        text = text_preprocessing(text)
+    text, item_protection_dict1 = information_protection(text)
+    global item_protection_dict
+    item_protection_dict = item_protection_dict1
+    text = fuzz_mark(text)
+    text = text_refinement(text)
+    paired_info = extract_paired_info(text)
+    logger.info(TAG + 'Info extraction result: '+str(paired_info))
+    return paired_info    
     logger.info(TAG + "fuzz_extract(): fuzz extract")
     result_dict = {}
     result=[]
-
+    
     lines = text.split("\n")
     a_paired_info = paired_info_pattern()
     for line in lines:
@@ -566,8 +609,76 @@ def fuzz_extract(text: str) -> dict:
 
 
 
+# 分割字符串并移除空项
+def text_split(text: str) -> list:
+    logger.info(TAG + "text_split(): text split input: "+str(text))
+    # 使用 \n \t 空格 分割字符串
+    text = re.split(r'\n|\t| ', text)
+    text = [item for item in text if item != '' and item != ' ']
+    logger.info (TAG + "text_split(): text split result: "+str(text))
+    return text
 
 
+def fuzz_mark(text: str) -> str:
+    text = text_split(text)
+    tagged_text = explicit_fuzz_mark(text)
+    tagged_text = implicit_fuzz_mark(tagged_text)
+    return " ".join(tagged_text)
+
+
+
+# 标记可明显识别的关键词 如url port等
+def explicit_fuzz_mark(text: list) -> list:
+    logger.info(TAG+ "placeholder_extract(): placeholder extract{}".format(str(placeholders_corresponding_type)))
+    logger.info(TAG+ "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
+    tagged_text = []
+    logger.info(TAG+ "explicit_fuzz mark input list: {}".format(text))
+    for i in range(len(text)):
+        if text[i] in placeholders_corresponding_type:
+            if placeholders_corresponding_type[text[i]] == 'url':
+                tagged_text.append('{address}')
+            elif placeholders_corresponding_type[text[i]] == 'port':
+                tagged_text.append('{port}')
+            elif placeholders_corresponding_type[text[i]] == 'email':
+                tagged_text.append('{user}')
+            elif placeholders_corresponding_type[text[i]] == 'ip':
+                tagged_text.append('{address}')
+            elif placeholders_corresponding_type[text[i]] == 'phonenumber':
+                tagged_text.append('{phonenumber}')
+            tagged_text.append(text[i])
+        else:
+            tagged_text.append(text[i])
+    logger.info(TAG+ "fuzz_mark(): explicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
+    return tagged_text
+
+# 判断是否是被保护的信息项
+def is_protected_item(item: str) -> bool:
+    pattern = r'\?\d\?'
+    return bool(re.search(pattern, item))
+
+# 标记隐式项 如用户名 密码等
+# ['root', 'Pass@word!!!', '163', '{user}', '?1?', '13666628123', 'Huawei@123456', '{address}', '?5?', 'root', '2!Um37hvjk']
+def implicit_fuzz_mark(text: list) -> list:
+    logger.info(TAG+ "implicit_fuzz_mark(): input list: {}".format(text))
+    tagged_text = []
+    for i in range(len(text)):
+        if is_protected_item(text[i]):
+            tagged_text.append(text[i])
+        elif text[i] in replaced_keyword_list:
+            tagged_text.append(text[i])
+        else:
+            logger.info(TAG+ "implicit_fuzz_mark(): password_classifier input: {}".format(text[i]))
+            password_classifier_result = password_classifier(text[i])
+            logger.info(TAG+ "implicit_fuzz_mark(): password_classifier result: {}".format(password_classifier_result))
+            if password_classifier_result:
+                tagged_text.append('{password}')
+            else:
+                tagged_text.append('{user}')
+            tagged_text.append(text[i])
+    logger.info(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
+    return tagged_text 
+
+    return
 
 def is_png_text(info):
     total_length = sum(len(item) for item in info[1:])
@@ -585,7 +696,7 @@ def is_png_text(info):
 
 def begin_info_extraction(text: str) -> dict:
     original_text = text
-    logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
+    # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除代码注释 // # 等
     # 已移除，影响地址的提取
     # text = re.sub(r'//.*', '', text)

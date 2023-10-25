@@ -1,8 +1,13 @@
 import pickle
 import numpy as np
 import re
+from util import globalVar
+TAG = "informationEngine.password_guesser.py: "
+
+from util.logUtils import LoggerSingleton
+logger = LoggerSingleton().get_logger()
 # 读取模型
-with open('svm_classifier.pkl', 'rb') as f:
+with open('informationEngine/svm_classifier.pkl', 'rb') as f:
     svm_classifier = pickle.load(f)
 # 2. 特征提取
 # 添加更多特征
