@@ -149,6 +149,10 @@ def chinese_character_percentage(text: str) -> float:
     percentage = (chinese_characters / total_characters) * 100
     return percentage
 
+import password_guesser
+# 使用svm分类字符串
+def password_classifier(text: str) -> bool:
+    return password_guesser.predict_password(text)
 
 # 从处理过后的字符串中提取成对信息
 class paired_info_pattern():
