@@ -247,7 +247,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
     return text, placeholders
 
 # 防止文件名等并识别为关键字，如user.txt
-def fuzz_prevention(text: str) -> str:
+def prevent_eng_words_interference(text: str) -> str:
     # 文件后缀列表
     file_extensions = ['sys', 'htm', 'html', 'jpg', 'png', 'vb', 'scr', 'pif', 'chm',
                        'zip', 'rar', 'cab', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
@@ -498,17 +498,12 @@ def special_processing(text: str) -> dict:
     text, item_protection_dict1 = information_protection(text)
     global item_protection_dict
     item_protection_dict = item_protection_dict1
-    text = fuzz_prevention(text)
+    text = prevent_eng_words_interference(text)
     text = text.lower()
     text = convert_chinese_punctuation(text)
     text = text.replace("'", '"')
-    # text = text.replace(":", "\"")
-    # text = text.replace("=", "\"")
-
     text = text.split("\n")
     lines = []
-    # 用于分割的符号
-    split_symbols = [":", "=", '"']
     # remove outer "
     for line in text:
         if line.startswith('"') and line.endswith('"'):
@@ -537,7 +532,6 @@ def special_processing(text: str) -> dict:
         line = line.strip()
         lines_temp.append(line)
     lines = lines_temp
-    print(lines)
     words_list = []
     for line in lines:
         words_list += line.split(" ")
@@ -553,11 +547,9 @@ def special_processing(text: str) -> dict:
                             ] = item_protection_dict[words_list[i+1]]
             else:
                 result_dict[words_list[i]] = words_list[i + 1]
-    #  # 还原被替换的内容
-    # for item in result_dict:
-    #     for key, value in item:
-    #         if value in item_protection_dict:
-    #             item[key] = item_protection_dict[value]
+    for key, value in result_dict.items():
+        if value in item_protection_dict:
+            result_dict[key] = item_protection_dict[value]
     logger.info(TAG + 'Special processing result: '+str(result_dict))
     return result_dict
 
@@ -567,29 +559,22 @@ def config_processing(text: str) -> dict:
     text, item_protection_dict1 = information_protection(text)
     global item_protection_dict
     item_protection_dict = item_protection_dict1
-    text = fuzz_prevention(text)
+    text = prevent_eng_words_interference(text)
     text = text.lower()
     text = convert_chinese_punctuation(text)
     text = text.replace("'", '"')
-    # text = text.replace(":", "\"")
-    # text = text.replace("=", "\"")
-
     text = text.split("\n")
     lines = []
-    # 用于分割的符号
-    split_symbols = [":", "=", '"']
     # remove outer "
     for line in text:
         if line.startswith('"') and line.endswith('"'):
             line = line[1:-1]
         lines.append(line)
     text = lines
-    # lines = []
     matches_result = {}
     # only  keep each eng_keywords_list between ""
     for line in text:
         line= line.lower()
-        new_line = ""
         if "=\"" in line:
             # 使用正则表达式匹配属性名和属性值
             pattern = r'\s*name\s*=\s*"([^"]+)"\s*value\s*=\s*"([^"]+)"'
@@ -612,10 +597,6 @@ def config_processing(text: str) -> dict:
             value = value.strip()
             if key and value:
                 matches_result[key] = value
-        # for i in range(len(line)):
-        #     if i % 2 == 1:
-        #         new_line += "{} ".format(line[i])
-        # lines.append(new_line)
     result_dict = {}
     logger.debug(TAG + 'Special processing for text: '+str(lines))
     # remove empty eng_keywords_list
@@ -624,16 +605,6 @@ def config_processing(text: str) -> dict:
             result_dict[key] = matches_result[key]
 
     # 还原被替换的内容
-    # new_result_dict = {}
-    # for key, value in result_dict.items():
-    #     logger.debug(TAG + 'Restoring: '+key+" "+value)
-    #     for key1, value1 in item_protection_dict.items():
-    #         logger.debug(TAG + 'Restoring: '+key1+" "+value1)
-    #         if key1 in value:
-    #             logger.debug(TAG + 'Restoring: '+key1+" "+value1)
-    #             value = value.replace(key1, value1)
-    #     new_result_dict[key] = value
-        # 还原被替换的内容
     for key, value in result_dict.items():
         if value in item_protection_dict:
             result_dict[key] = item_protection_dict[value]
@@ -653,7 +624,7 @@ def fuzz_extract(text: str) -> dict:
         text = chn_text_preprocessing(text)
     else:
         logger.info(TAG + 'This is an English text.')
-        text = fuzz_prevention(text)
+        text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after IoC protection: '+text)
         text = eng_text_preprocessing(text)
     text, item_protection_dict1 = information_protection(text)
@@ -714,24 +685,21 @@ def fuzz_extract(text: str) -> dict:
     return filtered_result 
 
 ##########################入口函数###############################
-# 从处理过后的字符串中提取成对信息
+# 从处理过后的纯文本字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
-def begin_info_extraction(text: str) -> dict:
+def plain_text_info_extraction(text: str) -> dict:
     original_text = text
     # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除代码注释 // # 等
-    # 已移除，影响地址的提取
-    # text = re.sub(r'//.*', '', text)
     logger.debug(TAG + 'Text before IoC protection: '+text)
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
     else:
         logger.info(TAG + 'This is an English text.')
-        text = fuzz_prevention(text)
-        logger.debug(TAG + 'Text after IoC protection: '+text)
-
+        text = prevent_eng_words_interference(text)
+        logger.debug(TAG + 'Text after fuzz protection: '+text)
         text = eng_text_preprocessing(text)
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
@@ -739,17 +707,15 @@ def begin_info_extraction(text: str) -> dict:
     if paired_info == []:
         logger.warning(TAG + 'No paired info extracted!')
         paired_info = special_processing(original_text)
-    # if paired_info == {}:
-    #     logger.warning(TAG + 'No paired info extracted!')
-    #     paired_info = fuzz_extract(original_text)
     return paired_info
 
-# info_core入口
+# info_core入口 根据输入内容的类型（表格，文本）进行不同的处理
 # flag: 0: text 1: table
 SPECIAL = 1
-def info_extraction(info,flag=0) -> dict:
+def begin_info_extraction(info,flag=0) -> dict:
     if flag == SPECIAL:
         return config_processing(info)
+    # 纯文本
     if isinstance(info, str):
         # 若文本中不存在中文和英文关键词，进行模糊提取
         new_info = info.replace("\n", "")
@@ -757,17 +723,18 @@ def info_extraction(info,flag=0) -> dict:
             logger.info(TAG + "info_extraction(): fuzz extract")
             # 判断是否中文
             if is_chinese_text(info):
-                return begin_info_extraction(info)
+                return plain_text_info_extraction(info)
             return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
-        return begin_info_extraction(info)
+        return plain_text_info_extraction(info)
+    # 表格
     elif isinstance(info, list):
         if is_png_text(info):
             text = ""
             for item in info[1:]:
                 item_to_string = "\n".join(item)
                 text = text+"\n"+item_to_string
-            return begin_info_extraction(text)
+            return plain_text_info_extraction(text)
         else:
             result_table = one_table_remove_irrelevant_columns(
                 globalVar.get_sensitive_word(), info[1:])

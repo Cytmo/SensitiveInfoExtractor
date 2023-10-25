@@ -4,7 +4,7 @@ from toStringUtils.configUtil import *
 from toStringUtils.emlUtil import *
 from toStringUtils.officeUtil import *
 from toStringUtils.picUtil import *
-from informationEngine.info_core import info_extraction
+from informationEngine.info_core import begin_info_extraction
 
 """
 extractInfo: 文件信息读取与敏感信息提取
@@ -24,9 +24,9 @@ logger = LoggerSingleton().get_logger()
 # 此处更换敏感信息提取api
 def sensitive_info_detect(file_path, text, flag=0):
     if flag == 1:
-        sensitive_info = info_extraction(text, flag=1)
+        sensitive_info = begin_info_extraction(text, flag=1)
     else:
-        sensitive_info = info_extraction(text)
+        sensitive_info = begin_info_extraction(text)
     res_out.add_new_json(file_path, sensitive_info)
 
 
@@ -100,7 +100,7 @@ def extract_eml(file_path, nameclean):
     eml_header, eml_text, eml_attachment = eml_file(file_path)
 
     sensitive_info = []
-    sensitive_info_text = info_extraction(eml_text["text"])
+    sensitive_info_text = begin_info_extraction(eml_text["text"])
     if not len(sensitive_info_text) == 0:
         logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
         sensitive_info.append(sensitive_info_text)
@@ -202,7 +202,7 @@ def is_bash_history(file_path):
     if "sh_history" in file_path:
         logger.info(TAG+"is_bash_history(): " + file_path)
         text = universal_file(file_path)
-        sensitive_info_text = info_extraction(text)
+        sensitive_info_text = begin_info_extraction(text)
         logger.info(sensitive_info_text)
         res_out.add_new_json(file_path, sensitive_info_text)
         return True
