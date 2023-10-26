@@ -4,7 +4,7 @@ from informationEngine.keySensitiveInfoUtil import *
 from util.resultUtil import ResOut
 from util.simpleUtil import *
 import re
-
+from util import globalVar
 TAG = "util.extractInfo.py-"
 
 # 添加结果输出模块
@@ -48,8 +48,15 @@ def if_private_keys_file(filename, nameclean):
 def win_reg_file(sam_path, system_path):
     # 使用samdump2解析
     command = "samdump2 {} {}".format(sam_path, system_path)
+    
     result = subprocess.run(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        result.check_returncode()
+    except subprocess.CalledProcessError as e:
+        logger.error(TAG+"win_reg_file(): " + e.stderr)
+        globalVar.set_error_list(e.stderr)
+        return ""
     return result.stdout
 
 # 识别win 注册表文件
@@ -72,6 +79,8 @@ def process_win_reg_file(file_path):
     logger.info("process_win_reg_file: " + file_path)
     reg_info = win_reg_file(
         file_path, file_path.replace("/system", "/sam"))
+    if reg_info == "":
+        return
     reg_info = reg_info.replace("\x14", "")
 
     lines = reg_info.strip().split('\n')

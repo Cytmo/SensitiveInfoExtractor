@@ -17,6 +17,22 @@ def _init():  # 初始化
     _sensitive_word = multiprocessing.Manager().list()
     global _pic_hash
     _pic_hash = multiprocessing.Manager().dict()
+    global error_list
+    error_list = []
+    error_list = multiprocessing.Manager().list()
+
+
+
+def set_error_list(value):
+    # 定义一个全局变量
+    error_list.append(value)
+
+def get_error_list():
+    # 获得一个全局变量，不存在则提示读取对应变量失败
+    try:
+        return error_list
+    except:
+        return []
 
 
 def set_value(key, value):

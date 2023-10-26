@@ -2,8 +2,6 @@ from util.logUtils import LoggerSingleton
 from util import globalVar
 import argparse
 from typing import Any, Tuple
-import re
-import re
 from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
 from informationEngine import password_guesser
 # 添加日志模块

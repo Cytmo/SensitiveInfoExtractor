@@ -10,6 +10,7 @@ from datetime import datetime
 import argparse
 import subprocess
 import cProfile
+from util import globalVar
 
 """
 main: 主程序执行文件
@@ -138,3 +139,7 @@ logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
 with open(args.time, "a+") as f:
     f.write(time_info+"\n")
+error_list = globalVar.get_error_list()
+if error_list is not None and len(error_list) > 0:
+    logger.critical("At least one error occurred during the execution of the program, please check the error_list for details.")
+    logger.critical(TAG+"error_list: "+str(error_list))
