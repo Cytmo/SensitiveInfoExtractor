@@ -156,6 +156,4 @@ code/test.py
 code/clean.sh
 code/models
 *.prof
-data_test
-test
-code/time_info.txt
+time_info.txt
