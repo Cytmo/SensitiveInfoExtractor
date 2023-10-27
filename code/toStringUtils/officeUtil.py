@@ -131,15 +131,6 @@ def ppt_and_dps_file(ppt_file_path):
                 with open(image_filename, "wb") as img_file:
                     img_file.write(image_bytes)
 
-    # 解析图片信息
-    image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
-
-    image_all_text = ocr_table_batch(image_folder_path)
-    # image_all_text = ocr_batch_textract(image_folder_path)
-    logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
-    for row in image_all_text:
-        logger.info(row)
-    image_all_text = ""
 
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")
@@ -147,8 +138,28 @@ def ppt_and_dps_file(ppt_file_path):
         "Created with Aspose.Slides for .NET Standard 2.0 23.8.", "")
     slide_text = slide_text.replace(
         "Copyright 2004-2023Aspose Pty Ltd.", "")
+    logger.info(TAG+"文本信息-"+slide_text)
 
-    return slide_text+"\n"+image_all_text
+    # 解析图片信息
+    image_all_text_res= ""
+    if globalVar.flag_list[0]==True:
+        image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
+        image_all_text = ocr_table_batch(image_folder_path)
+        # image_all_text = ocr_batch_textract(image_folder_path)
+        logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
+        for row in image_all_text:
+            # logger.info(row)
+            try:
+                single_result = " ".join([element for sublist in row[1:] for element in sublist])
+                image_all_text_res+=single_result
+            except IndexError as e:
+                # 处理 IndexError 异常
+                logger.error(e)
+        logger.info(TAG+"图片文本信息-"+image_all_text_res)
+    else:
+        logger.info(TAG+"不处理文件内部的图片!!")
+
+    return slide_text+"\n"+image_all_text_res
 
 
 # 提取.xlsx中的文本

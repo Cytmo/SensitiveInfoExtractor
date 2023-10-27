@@ -46,6 +46,10 @@ argparse.add_argument("-mp", "--multiprocess", default="false",
 argparse.add_argument("-t", "--time", default="time_info.txt",
                       help="time info output file")
 
+# 是否处理非图片文件内部中的图片, 默认为true
+argparse.add_argument("-p", "--picture", default="true",
+                      help="process picture in non image files")
+
 # 输入扫描的路径
 args = argparse.parse_args()
 scan_folder = [args.folder]
@@ -57,6 +61,16 @@ if args.multiprocess == "true":
 else:
     logger.info(TAG+"==>(默认)单进程运行！[添加 '-m true'  进行多进程运行]")
     multiprocess_flag = False
+
+
+# 文件解析处理参数
+if args.picture == "true":
+    logger.info(TAG+"==>处理非图片文件内部中的图片！")
+    globalVar.flag_list.append(True)
+else:
+    logger.info(TAG+"==>(默认)处理非图片文件内部中的图片！[添加 '-p false' 可取消]")
+    globalVar.flag_list.append(False)
+
 
 
 # 进程处理函数

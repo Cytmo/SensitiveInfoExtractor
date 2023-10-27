@@ -20,6 +20,10 @@ def _init():  # 初始化
     global error_list
     error_list = []
     error_list = multiprocessing.Manager().list()
+    # 文件解析时的标志位, list[0]为是否处理非图片文件中的图片
+    global flag_list
+    flag_list = []
+    flag_list = multiprocessing.Manager().list()
 
 
 
