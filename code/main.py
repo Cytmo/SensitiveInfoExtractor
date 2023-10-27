@@ -32,7 +32,7 @@ res_out = ResOut()
 # 添加依赖
 globalVar._init()
 
-#初始化敏感词列表
+# 初始化敏感词列表
 globalVar.init_sensitive_word("config/sensitive_word.yml")
 
 # 添加命令行参数, 默认扫描"../data"文件夹
@@ -72,11 +72,12 @@ else:
     globalVar.flag_list.append(False)
 
 
-
 # 进程处理函数
 def process_function(arg, file):
     spilitUtil.spilit_process_file(file, arg)
 # 进程回调函数
+
+
 def callback_func(result):
     return
 
@@ -124,10 +125,11 @@ def main():
 # #性能分析使用
 # profiler.dump_stats('./log/profile_results.prof')
 
+
 # 不使用性能分析工具直接执行
 main()
 
-#清空工作区
+# 清空工作区
 command = "rm -rf ../workspace/*"
 result = subprocess.run(
     command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -145,15 +147,16 @@ logger.info(TAG+"************************* end ******************************")
 logger.info(TAG+"result is saved to: "+output_tile_path+" , total is " +
             str(len(res_out.res_json)-2) + " term")
 
-#计时结束
+# 计时结束
 T2 = time.perf_counter()
 logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 
-#记录程序运行时间
+# 记录程序运行时间
 time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
 with open(args.time, "a+") as f:
     f.write(time_info+"\n")
 error_list = globalVar.get_error_list()
 if error_list is not None and len(error_list) > 0:
-    logger.critical("At least one error occurred during the execution of the program, please check the error_list for details.")
+    logger.critical(
+        "At least one error occurred during the execution of the program, please check the error_list for details.")
     logger.critical(TAG+"error_list: "+str(error_list))

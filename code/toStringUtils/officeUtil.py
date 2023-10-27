@@ -1,3 +1,5 @@
+import aspose.words as aw
+import re
 import xlrd
 from pptx import Presentation
 import aspose.slides as slides
@@ -19,35 +21,6 @@ officeUtil: 解析 docx/pdf/wps/et
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.officeUtil.py-"
 logger = LoggerSingleton().get_logger()
-
-
-# 提取docx里面的文本与图片
-def docx_file_text_and_img(file_path, result_path):
-    try:
-        doc = docx.Document(file_path)
-        dict_rel = doc.part._rels
-
-        if not os.path.exists(result_path):
-            os.makedirs(result_path)
-
-        text = []
-        for paragraph in doc.paragraphs:
-            text.append(paragraph.text)
-
-        for rel_id, rel in dict_rel.items():
-            if "image" in rel.target_ref:
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                img_name = timestamp+"_docx_"+os.path.basename(rel.target_ref)
-                img_data = rel.target_part.blob
-                img_path = os.path.join(result_path, img_name)
-
-                with open(img_path, "wb") as f:
-                    f.write(img_data)
-
-        return '\n'.join(text)
-
-    except Exception as e:
-        print("Error:", e)
 
 
 # 提取pdf文档中的文本和图片
@@ -74,40 +47,106 @@ def pdf_file_text_and_img(pdf_file_path, result_image_path):
     return text
 
 
-# 提取.wps中的文本
-def wps_file_text(wps_file_path):
-    if not wps_file_path.endswith(".wps"):
-        return "not .wps file"
-    wps_doc_name = wps_file_path.replace(".wps", ".doc")
-    os.rename(wps_file_path, wps_doc_name)
-    text = textract.process(filename=wps_doc_name, encoding='utf-8')
-    os.rename(wps_doc_name, wps_file_path)
-    decoded_text = text.decode('utf-8')
-    decoded_text = decoded_text.replace("[pic]", "")
-    return decoded_text
+# 提取.doc中的文本(兼容.wps)
+def doc_file(file_path, type):
+    if type == ".doc":
+        doc_file_dir = "../workspace/office/doc/"
+        result_image_path = "../workspace/image/office/doc"
+        docx_path = doc_file_dir + \
+            file_path.replace(".doc", ".docx").split("/")[-1]
+    elif type == ".wps":
+        doc_file_dir = "../workspace/wps/wps/"
+        result_image_path = "../workspace/image/wps/wps"
+        docx_path = doc_file_dir + \
+            file_path.replace(".doc", ".docx").split("/")[-1]
+    else:
+        return ""
+
+    os.makedirs(doc_file_dir, exist_ok=True)
+    logger.info(TAG+"doc_file(): "+docx_path)
+
+    os.makedirs(result_image_path, exist_ok=True)
+    doc_docx_name = file_path.split("/")[-1]
+
+    # 使用Aspose.Words将.doc转换为.docx
+    doc = aw.Document(file_path)
+    doc.save(docx_path, aw.SaveFormat.DOCX)
+    logger.info(TAG+"doc_file(): "+"Document conversion successful!")
+
+    try:
+        target_docx = docx.Document(docx_path)
+
+        # 提取文本
+        target_docx_text = ""
+        for paragraph in target_docx.paragraphs:
+            target_docx_text += paragraph.text + "\n"
+
+        # 保存照片
+        image_dir = f"{result_image_path}/{doc_docx_name}/"
+        os.makedirs(image_dir, exist_ok=True)
+        dict_rel = target_docx.part.rels
+        for rel in dict_rel:
+            rel = dict_rel[rel]
+            if "image" in rel.target_ref:
+                if not os.path.exists(image_dir):
+                    os.makedirs(image_dir)
+                img_name = re.findall("/(.*)", rel.target_ref)[0]
+                word_name = os.path.splitext(os.path.basename(docx_path))[0]
+                img_name = f'{word_name}-{img_name}'
+                with open(os.path.join(image_dir, img_name), "wb") as f:
+                    f.write(rel.target_part.blob)
+
+    except Exception as e:
+        logger.error(e)
+
+    logger.info(TAG+"doc_file()-文本信息-"+target_docx_text)
+
+    # 解析图片信息
+    image_all_text_res = ""
+    if globalVar.flag_list[0] == True:
+        image_folder_path = f"{result_image_path}/{doc_docx_name}/"
+        image_all_text = ocr_table_batch(image_folder_path)
+        # image_all_text = ocr_batch_textract(image_folder_path)
+        logger.info(TAG+"doc_file()-image_all_text: ")
+        for row in image_all_text:
+            # logger.info(row)
+            try:
+                single_result = " ".join(
+                    [element for sublist in row[1:] for element in sublist])
+                image_all_text_res += single_result
+            except IndexError as e:
+                # 处理 IndexError 异常
+                logger.error(e)
+        logger.info(TAG+"doc_file()-图片文本信息-"+image_all_text_res)
+    else:
+        logger.info(TAG+"doc_file()-不处理文件内部的图片!!")
+
+    return target_docx_text+"\n"+image_all_text_res
 
 
-# 提取.ppt和.wps中的文本和图片
-def ppt_and_dps_file(ppt_file_path):
-    if ppt_file_path.endswith(".ppt"):
-        ppt_file_dir = "../workspace/ppt/"
-        ppt_pptx_path = ppt_file_dir + \
-            ppt_file_path.replace(".ppt", ".pptx").split("/")[-1]
-
-    if ppt_file_path.endswith(".dps"):
-        ppt_file_dir = "../workspace/dps/"
-        ppt_pptx_path = ppt_file_dir + \
-            ppt_file_path.replace(".dps", ".pptx").split("/")[-1]
+# 提取.ppt中的文本和图片(兼容dps)
+def ppt_file(file_path, type):
+    if type == ".ppt":
+        ppt_file_dir = "../workspace/office/ppt/"
+        result_image_path = "../workspace/image/office/ppt"
+        pptx_path = ppt_file_dir + \
+            file_path.replace(".ppt", ".pptx").split("/")[-1]
+    elif type == ".dps":
+        ppt_file_dir = "../workspace/wps/dps/"
+        result_image_path = "../workspace/image/wps/dps"
+        pptx_path = ppt_file_dir + \
+            file_path.replace(".dps", ".pptx").split("/")[-1]
+    else:
+        return ""
 
     os.makedirs(ppt_file_dir, exist_ok=True)
-    logger.info(TAG+"ppt_and_dps_file(): "+ppt_pptx_path)
-    result_image_path = "../workspace/image"
+    logger.info(TAG+"ppt_file(): "+pptx_path)
     os.makedirs(result_image_path, exist_ok=True)
-    ppt_pptx_name = ppt_file_path.split("/")[-1]
-    with slides.Presentation(ppt_file_path) as presentation:
-        presentation.save(ppt_pptx_path, slides.export.SaveFormat.PPTX)
+    ppt_pptx_name = file_path.split("/")[-1]
+    with slides.Presentation(file_path) as presentation:
+        presentation.save(pptx_path, slides.export.SaveFormat.PPTX)
 
-    presentation = Presentation(ppt_pptx_path)
+    presentation = Presentation(pptx_path)
     slide_text = ""
     for slide_number, slide in enumerate(presentation.slides, start=1):
         # 提取文本内容
@@ -131,33 +170,33 @@ def ppt_and_dps_file(ppt_file_path):
                 with open(image_filename, "wb") as img_file:
                     img_file.write(image_bytes)
 
-
     # 去除水印文字
     slide_text = slide_text.replace("Evaluation only.", "")
     slide_text = slide_text.replace(
-        "Created with Aspose.Slides for .NET Standard 2.0 23.8.", "")
+        "Created with Aspose.Slides for .NET Standard 2.0 23.9", "")
     slide_text = slide_text.replace(
         "Copyright 2004-2023Aspose Pty Ltd.", "")
     logger.info(TAG+"文本信息-"+slide_text)
 
     # 解析图片信息
-    image_all_text_res= ""
-    if globalVar.flag_list[0]==True:
+    image_all_text_res = ""
+    if globalVar.flag_list[0] == True:
         image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
         image_all_text = ocr_table_batch(image_folder_path)
         # image_all_text = ocr_batch_textract(image_folder_path)
-        logger.info(TAG+"ppt_and_dps_file(): image_all_text: ")
+        logger.info(TAG+"ppt_file(): image_all_text: ")
         for row in image_all_text:
             # logger.info(row)
             try:
-                single_result = " ".join([element for sublist in row[1:] for element in sublist])
-                image_all_text_res+=single_result
+                single_result = " ".join(
+                    [element for sublist in row[1:] for element in sublist])
+                image_all_text_res += single_result
             except IndexError as e:
                 # 处理 IndexError 异常
                 logger.error(e)
-        logger.info(TAG+"图片文本信息-"+image_all_text_res)
+        logger.info(TAG+"ppt_file(): 图片文本信息-"+image_all_text_res)
     else:
-        logger.info(TAG+"不处理文件内部的图片!!")
+        logger.info(TAG+"ppt_file(): 不处理文件内部的图片!!")
 
     return slide_text+"\n"+image_all_text_res
 

@@ -11,38 +11,40 @@ from util.logUtils import LoggerSingleton
 logger = LoggerSingleton().get_logger()
 
 # TODO: .csv 调整
-extension_switch_new ={
-    #解压
-    process_rar_file:[".rar"],
-    process_zip_file:[".zip"],
+extension_switch_new = {
+    # 解压
+    process_rar_file: [".rar"],
+    process_zip_file: [".zip"],
 
-    #各种格式文件提取
-    extract_universal:[".txt",".doc",".epub"],
-    extract_direct_read:[".md"],
-    extract_ppt_dps:[".ppt",".dps"],
-    extract_wps:[".wps"],
-    extract_et:[".et"],
-    extract_eml:[".eml"],
+    # 各种格式文件提取
+    extract_universal: [".txt", ".epub"],
+    extract_direct_read: [".md"],
+    extract_ppt: [".ppt"],
+    extract_doc: [".doc"],
+    extract_wps: [".wps"],
+    extract_dps: [".dps"],
+    extract_et: [".et"],
+    extract_eml: [".eml"],
 
-    #表格处理
-    extract_xlsx:[".xlsx"],
+    # 表格处理
+    extract_xlsx: [".xlsx"],
 
-    #图片处理
-    extract_pic:[".png",".jpg"],
+    # 图片处理
+    extract_pic: [".png", ".jpg"],
 
-    #配置文件处理
-    extract_config:[".yml",".xml",".properties"],
+    # 配置文件处理
+    extract_config: [".yml", ".xml", ".properties"],
 
-    #代码文件处理
-    extract_code_file:[
+    # 代码文件处理
+    extract_code_file: [
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
         '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
         '.ps1', 'Dockerfile', '.toml', '.h'
     ],
 
-    #带后缀的关键文件处理
-    process_pub_file:[".pub"],
+    # 带后缀的关键文件处理
+    process_pub_file: [".pub"],
 }
 
 
@@ -52,9 +54,9 @@ extension_switch = {
     ".zip": process_zip_file,
     ".txt": extract_universal,
     ".md": extract_direct_read,
-    ".doc": extract_universal,
-    ".ppt": extract_ppt_dps,
-    ".dps": extract_ppt_dps,
+    ".doc": extract_doc,
+    ".ppt": extract_ppt,
+    ".dps": extract_dps,
     ".xlsx": extract_xlsx,
     ".wps": extract_wps,
     ".et": extract_et,
@@ -80,7 +82,7 @@ extension_switch = {
 }
 
 
-#按照文件类型分发各个文件
+# 按照文件类型分发各个文件
 def spilit_process_file(file, root_directory):
 
     # 获取文件的后缀
@@ -89,9 +91,9 @@ def spilit_process_file(file, root_directory):
     file_name = root_directory + '/' + File.get_parent_directory(file)
 
     # 后缀检测分发
-    for process_function,suffix_list in extension_switch_new.items():
+    for process_function, suffix_list in extension_switch_new.items():
         if file_spilit[1] in suffix_list:
-            process_function(file_name,file_spilit[0])
+            process_function(file_name, file_spilit[0])
             return
 
     # 系统关键敏感信息提取开始
@@ -107,22 +109,22 @@ def spilit_process_file(file, root_directory):
     if if_passwd_file(file_name, file_spilit[0]):
         process_passwd_file(file_name)
         return
-    
+
     # 判断是否是shadow文件
     if if_shadow_file(file_name, file_spilit[0]):
         process_shadow_file(file_name)
         return
-    
+
     # 判断是否是公钥文件
     if if_authorized_keys_file(file_name, file_spilit[0]):
         process_authorized_keys_file(file_name)
         return
-    
+
     # 判断是否是私钥文件
     if if_private_keys_file(file_name, file_spilit[0]):
         process_priv_file(file_name)
         return
-    
+
     # TODO: 下面更改放入通用提取接口
     # 判断是否是命令行历史记录
     if is_bash_history(file_name):
@@ -130,6 +132,6 @@ def spilit_process_file(file, root_directory):
     # 判断是否是token文件
     if is_token_file(file_name):
         return
-    
+
     # TODO: 检查文件编码方式，如果能用文本打开读入就正常读入走文本接口
     logger.info(TAG+"=>Unsupported file format: "+file_name)

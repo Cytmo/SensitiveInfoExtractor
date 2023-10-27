@@ -21,6 +21,7 @@ pip install colorlog
 pip install pygments    
 pip install scikit-learn
 pip install pyyaml
+pip install aspose-words
 
 # linux软件安装
 sudo apt install antiword

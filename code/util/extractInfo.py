@@ -46,20 +46,25 @@ def extract_direct_read(file_path, namclean):
         content = file.read()
     sensitive_info_detect(file_path, content)
 
+
 # 配置文件读取和提取操作, 如.xml/.yml/.properties...
-
-
 def extract_config(file_path, nameclean):
     logger.info(TAG+"extract_config(): " + file_path.split("/")[-1])
     text = universal_file(file_path)
     sensitive_info_detect(file_path, text, flag=1)
 
 
-# .ppt/.dps文件读取和提取操作
-def extract_ppt_dps(file_path, nameclean):
+# .doc文件读取和提取操作
+def extract_doc(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    # TODO: 注释下面两行便于调试其他文件解析
-    text = ppt_and_dps_file(file_path)
+    text = doc_file(file_path, type=".doc")
+    sensitive_info_detect(file_path, text)
+
+
+# .ppt文件读取和提取操作
+def extract_ppt(file_path, nameclean):
+    logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
+    text = ppt_file(file_path, type=".ppt")
     sensitive_info_detect(file_path, text)
 
 
@@ -73,7 +78,20 @@ def extract_xlsx(file_path, nameclean):
 # .wps文件读取和提取操作
 def extract_wps(file_path, nameclean):
     logger.info(TAG+"extract_wps(): " + file_path.split("/")[-1])
-    text = wps_file_text(file_path)
+    wps_file_name = file_path.replace(".wps", ".doc")
+    os.rename(file_path, wps_file_name)
+    text = doc_file(wps_file_name, type=".wps")
+    os.rename(wps_file_name, file_path)
+    sensitive_info_detect(file_path, text)
+
+
+# .dps文件读取和提取操作
+def extract_dps(file_path, nameclean):
+    logger.info(TAG+"extract_dps(): " + file_path.split("/")[-1])
+    wps_file_name = file_path.replace(".dps", ".ppt")
+    os.rename(file_path, wps_file_name)
+    text = ppt_file(wps_file_name, type=".dps")
+    os.rename(wps_file_name, file_path)
     sensitive_info_detect(file_path, text)
 
 
@@ -119,9 +137,11 @@ def extract_eml(file_path, nameclean):
 
 # 源代码文件读取和提取操作
 # TODO:需要重新整理CODE的识别
-def extract_code_file(file_path,nameclean):
-    #TODO: 添加处理
+def extract_code_file(file_path, nameclean):
+    # TODO: 添加处理
     return
+
+
 def is_code_file(code_dir_or_file):
     # 代码后缀文件
     extension_code = [
@@ -209,6 +229,8 @@ def is_bash_history(file_path):
     return False
 
 # token文件读取和提取操作
+
+
 def is_token_file(file_path):
 
     if "token" in file_path:
