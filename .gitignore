@@ -138,8 +138,6 @@ dmypy.json
 cython_debug/
 .vscode
 .idea
-modes/ocr
-test
 *.pptx
 # maker_folder
 maker_folder/unrar
@@ -158,3 +156,5 @@ code/test.py
 code/clean.sh
 code/models
 *.prof
+data_test
+test

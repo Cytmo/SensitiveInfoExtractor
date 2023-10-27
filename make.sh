@@ -19,6 +19,8 @@ pip install whispers
 pip install snakeviz
 pip install colorlog
 pip install pygments    
+pip install scikit-learn
+pip install pyyaml
 
 # linux软件安装
 sudo apt install antiword
