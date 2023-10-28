@@ -1,3 +1,7 @@
+import pickle
+from imblearn.over_sampling import SMOTE
+from collections import Counter
+import re
 from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.decomposition import PCA
@@ -19,10 +23,6 @@ non_password_lengths = [len(non_password) for non_password in non_passwords]
 
 lengths_np = np.array(password_lengths+non_password_lengths)
 
-import re
-from collections import Counter
-
-
 
 def extract_features(text):
     features = {}
@@ -33,27 +33,28 @@ def extract_features(text):
     features['special_count'] = len(re.findall(r'[!@#$%^&*()]', text))
     return features
 
+
 vectorizer = TfidfVectorizer()
-X = np.array([list(extract_features(text).values()) for text in passwords + non_passwords])
+X = np.array([list(extract_features(text).values())
+             for text in passwords + non_passwords])
 y = np.array([1] * len(passwords) + [0] * len(non_passwords))
-from imblearn.over_sampling import SMOTE
 
 # 处理数据不平衡问题（过采样）
 smote = SMOTE(sampling_strategy='minority')
 X_resampled, y_resampled = smote.fit_resample(X, y)
 
 # 数据集拆分
-X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.1, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_resampled, y_resampled, test_size=0.1, random_state=42)
 
 # 支持向量机分类器
-svm_classifier = SVC(kernel='poly',C=10, probability=True)
+svm_classifier = SVC(kernel='poly', C=10, probability=True)
 svm_classifier.fit(X_train, y_train)
 
 # 模型评估
 y_pred = svm_classifier.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy}")
-
 
 
 # # 定义键盘布局
@@ -91,7 +92,7 @@ print(f"Accuracy: {accuracy}")
 #         'special_count': 0,
 #         'keyboard_distance': 0,  # 初始化键盘布局距离
 #     }
-    
+
 #     char_frequency = calculate_character_frequency(text)
 #     for char in text:
 #         if char.isupper():
@@ -102,11 +103,11 @@ print(f"Accuracy: {accuracy}")
 #             features['digit_count'] += 1
 #         elif re.match(r'[!@#$%^&*()]', char):
 #             features['special_count'] += 1
-    
+
 #     # 添加字符出现频率特征
 #     for char, frequency in char_frequency.items():
 #         features[f'{char}_frequency'] = frequency
-    
+
 #     # 计算键盘布局距离
 #     features['keyboard_distance'] = calculate_keyboard_distance(text, layout)
 
@@ -151,10 +152,8 @@ print(f"Accuracy: {accuracy}")
 #         print(f"'{input_str}' is not a password.")
 
 
-
-
-# 是否可视化 
-if(False):
+# 是否可视化
+if (False):
     # 使用PCA降低维度到2D
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_train)
@@ -163,25 +162,24 @@ if(False):
     h = .02  # 步长
     x_min, x_max = X_pca[:, 0].min() - 1, X_pca[:, 0].max() + 1
     y_min, y_max = X_pca[:, 1].min() - 1, X_pca[:, 1].max() + 1
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
 
     # 使用SVC进行预测
-    Z = svm_classifier.predict(pca.inverse_transform(np.c_[xx.ravel(), yy.ravel()]))
+    Z = svm_classifier.predict(
+        pca.inverse_transform(np.c_[xx.ravel(), yy.ravel()]))
     Z = Z.reshape(xx.shape)
 
     # 可视化决策边界
     plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.8)
-    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y_train, cmap=plt.cm.coolwarm, marker='o')
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y_train,
+                cmap=plt.cm.coolwarm, marker='o')
     plt.xlabel('Principal Component 1')
     plt.ylabel('Principal Component 2')
     plt.title('SVC Decision Boundary')
     plt.show()
 
 
-
-
 # 导出模型
-import pickle
 with open("svm_classifier.pkl", "wb") as file:
     pickle.dump(svm_classifier, file)
-
