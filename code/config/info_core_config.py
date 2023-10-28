@@ -1,3 +1,4 @@
+import yaml
 # This dictionary will store placeholders and their corresponding types
 PLACEHOLDERS_CORRESPONDING_TYPE = {}  
 # 保存易混淆内容的位置 infomaion protection
@@ -35,3 +36,6 @@ SPECIAL_KEYWORDS_LIST = [
     "url",
     "driver",
 ]
+# 读取YAML文件
+with open('config/rules-stable.yml', 'r') as yaml_file:
+    sensitive_info_pattern = yaml.safe_load(yaml_file)

@@ -116,7 +116,64 @@ def is_png_text(info):
 
 # TODO:url和端口号成组且支持一个用户对应多个url
 # 从处理过后的字符串中提取成对信息
-class paired_info_pattern_backup():
+class paired_info_pattern():
+    def __init__(self):
+        self.data = {}
+        # add three neccessary attributes
+        self.data["user"] = None
+        self.data["password"] = None
+        self.data["address"] = None
+        self.data["port"] = None
+        self.data["phonenumber"] = None
+
+    def setter(self, name: str, value: Any) -> None:
+        # if name in self.data:
+        #     self.data[name] = value
+        #     return True
+        # return False
+
+        # if name in attr_switch:
+        #     # print("Setting "+str(name)+" " +str( value))
+        #     return attr_switch[name](value)
+        # else:
+        #     return False
+        # TODO 
+        self.data[name] = value
+        return True
+
+    def output(self):
+        result = {}
+        for key in self.data:
+            if self.data[key] != None:
+                result[key] = self.data[key]
+        # check if result have all needed attributes
+        for key in ["user", "password", "address", "port", "phonenumber"]:
+            if key not in result:
+                result[key] = None
+        self.__init__()
+        return result
+
+    def getter(self, name: str):
+        if name in self.data:
+            return self.data[name]
+        else:
+            return None
+
+    def if_same_attr(self, name: str, value: Any) -> bool:
+        # check if name is in self.data
+        if self.data.get(name) == None:
+            return False
+        return self.data.get(name) == value
+
+    def is_None(self):
+        #check if all attributes are None
+        for key in self.data:
+            if self.data[key] != None:
+                return False
+        return True
+
+
+class paired_info_pattern():
 
     def __init__(self):
         self.port = None
@@ -180,51 +237,6 @@ class paired_info_pattern_backup():
 
     def is_None(self):
         return self.__dict__.get("user") == None and self.__dict__.get("password") == None and self.__dict__.get("address") == None and self.__dict__.get("port") == None
-class paired_info_pattern():
-    def __init__(self):
-        self.data = {}
-        # add three neccessary attributes
-        self.data["user"] = None
-        self.data["password"] = None
-        self.data["address"] = None
-
-    def setter(self, name: str, value: Any) -> None:
-        if self.data.get(name) != None:
-            return False
-        self.data[name] = value
-        return True
-
-    def output(self):
-        result = {}
-        for key in self.data:
-            if self.data[key] != None:
-                result[key] = self.data[key]
-        # check if result have all needed attributes
-        for key in ["user", "password", "address"]:
-            if key not in result:
-                result[key] = None
-        self.__init__()
-        return result
-
-    def getter(self, name: str):
-        if name in self.data:
-            return self.data[name]
-        else:
-            return None
-
-    def if_same_attr(self, name: str, value: Any) -> bool:
-        # check if name is in self.data
-        if self.data.get(name) == None:
-            return False
-        return self.data.get(name) == value
-
-    def is_None(self):
-        #check if all attributes are None
-        for key in self.data:
-            if self.data[key] != None:
-                return False
-        return True
-
 
 ##########################预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
@@ -243,7 +255,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
         {'pattern': r'1[3-9]\d{9}', 'type': 'phonenumber'},
         # {'pattern': r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b', 'type': 'port'}
     ]
-
+    match_result = {}
     for pattern_info in patterns:
         pattern = pattern_info['pattern']
         matches = re.finditer(pattern, text, flags=re.IGNORECASE)
@@ -251,13 +263,19 @@ def information_protection(text: str) -> Tuple[str, dict]:
             item = match.group()
             placeholder = f'?{placeholders_counter}?'
             placeholders[placeholder] = item
-            PLACEHOLDERS_CORRESPONDING_TYPE[placeholder] = pattern_info['type']  # Store the corresponding type
+            # if placeholder not in PLACEHOLDERS_CORRESPONDING_TYPE:
+            #     PLACEHOLDERS_CORRESPONDING_TYPE[placeholder] = []
+            # PLACEHOLDERS_CORRESPONDING_TYPE[placeholder].append(pattern_info['type'])  # Store the corresponding type
             # Replace only the first occurrence
+            if item not in match_result:
+                match_result[item] = []
+            match_result[item].append(pattern_info['type'])
             text = text.replace(item, placeholder, 1)
             placeholders_counter += 1
 
-    match_result = {}
 
+
+    sensitive_info_pattern_match_result = {}
     for pattern in sensitive_info_pattern['patterns']:
 
         name = pattern['pattern']['name']
@@ -268,22 +286,31 @@ def information_protection(text: str) -> Tuple[str, dict]:
         match = re.search(regex, text)
 
         if match:
-            print(f"Matched pattern: {name}")
-            print(f"Confidence: {confidence}")
-            print(f"Matched text: {match.group(0)}\n")
+            # print(f"Matched pattern: {name}")
+            # print(f"Confidence: {confidence}")
+            # print(f"Matched text: {match.group(0)}\n")
             if match.group(0) not in match_result:
-                match_result[match.group(0)] = []
-                match_result[match.group(0)].append(name)
-            
-    print(match_result)
-    number = placeholders_counter
-    for key in match_result:
+                sensitive_info_pattern_match_result[match.group(0)] = []
+                sensitive_info_pattern_match_result[match.group(0)].append(name)
+    # 记录计数器位置，防止种类从0开始，取到不存在的键值
+    for key in sensitive_info_pattern_match_result:
         placeholder = f'?{placeholders_counter}?'
-        placeholders[placeholder] = item
-        text = text.replace(item, placeholder, 1)
-
-    print(text)
-
+        placeholders[placeholder] = key
+        text = text.replace(key, placeholder, 1)
+        placeholders_counter += 1
+    match_result.update(sensitive_info_pattern_match_result)
+    for key in placeholders:
+        if key not in PLACEHOLDERS_CORRESPONDING_TYPE:
+            PLACEHOLDERS_CORRESPONDING_TYPE[key] = []
+        # print("place type:"+str(PLACEHOLDERS_CORRESPONDING_TYPE[key]))
+        # print("pl    type:"+str(placeholders[key]))
+        # print("match type:"+str(match_result[key]))
+        # remove space in type to append
+        PLACEHOLDERS_CORRESPONDING_TYPE[key].append(match_result[placeholders[key]])
+    # 遍历字典，去除值中的空格
+    for key, value in PLACEHOLDERS_CORRESPONDING_TYPE.items():
+        # 使用列表解析去除值中的空格
+        PLACEHOLDERS_CORRESPONDING_TYPE[key] = [[item[0].replace(' ', '')] for item in value]
     return text, placeholders
 
 # 防止文件名等并识别为关键字，如user.txt
@@ -531,7 +558,7 @@ def extract_paired_info(text):
 #代码等文件的提取
 def special_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for text')
-    text, item_protection_dict1 = information_protection(text)
+    text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
@@ -592,7 +619,7 @@ def special_processing(text: str) -> dict:
 # 配置文件的提取
 def config_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for config')
-    text, item_protection_dict1 = information_protection(text)
+    text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
@@ -663,7 +690,7 @@ def fuzz_extract(text: str) -> dict:
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after IoC protection: '+text)
         text = eng_text_preprocessing(text)
-    text, item_protection_dict1 = information_protection(text)
+    text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = fuzz_mark(text)
@@ -742,6 +769,7 @@ def plain_text_info_extraction(text: str) -> dict:
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
     if paired_info == []:
         logger.warning(TAG + 'No paired info extracted!')
+        logger.info(TAG + "original_text: "+original_text)
         paired_info = special_processing(original_text)
     return paired_info
 

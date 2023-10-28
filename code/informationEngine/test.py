@@ -58,7 +58,7 @@ docker run -it --rm  --name fasts3-test \
     -e "AWS_SECRET_ACCESS_KEY=$SECRETKEY" \
     $IMG \
     python3 /regression_test.py
-10.1.1.1
+# 10.1.1.1
 echo "Finished, now shutting down local minio."
 docker stop local-minio
 '''
@@ -77,7 +77,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
         {'pattern': r'1[3-9]\d{9}', 'type': 'phonenumber'},
         # {'pattern': r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b', 'type': 'port'}
     ]
-
+    match_result = {}
     for pattern_info in patterns:
         pattern = pattern_info['pattern']
         matches = re.finditer(pattern, text, flags=re.IGNORECASE)
@@ -85,15 +85,20 @@ def information_protection(text: str) -> Tuple[str, dict]:
             item = match.group()
             placeholder = f'?{placeholders_counter}?'
             placeholders[placeholder] = item
-            if placeholder not in PLACEHOLDERS_CORRESPONDING_TYPE:
-                PLACEHOLDERS_CORRESPONDING_TYPE[placeholder] = []
-            PLACEHOLDERS_CORRESPONDING_TYPE[placeholder].append(pattern_info['type'])  # Store the corresponding type
+            # if placeholder not in PLACEHOLDERS_CORRESPONDING_TYPE:
+            #     PLACEHOLDERS_CORRESPONDING_TYPE[placeholder] = []
+            # PLACEHOLDERS_CORRESPONDING_TYPE[placeholder].append(pattern_info['type'])  # Store the corresponding type
             # Replace only the first occurrence
+            if item not in match_result:
+                match_result[item] = []
+            match_result[item].append(pattern_info['type'])
             text = text.replace(item, placeholder, 1)
             placeholders_counter += 1
+            print(f"Generated placeholder: {placeholder} for item: {item}")
 
-    match_result = {}
 
+
+    sensitive_info_pattern_match_result = {}
     for pattern in sensitive_info_pattern['patterns']:
 
         name = pattern['pattern']['name']
@@ -104,24 +109,35 @@ def information_protection(text: str) -> Tuple[str, dict]:
         match = re.search(regex, text)
 
         if match:
-            print(f"Matched pattern: {name}")
-            print(f"Confidence: {confidence}")
-            print(f"Matched text: {match.group(0)}\n")
+            # print(f"Matched pattern: {name}")
+            # print(f"Confidence: {confidence}")
+            # print(f"Matched text: {match.group(0)}\n")
             if match.group(0) not in match_result:
-                match_result[match.group(0)] = []
-                match_result[match.group(0)].append(name)
-
-    print(match_result)
-    for key in match_result:
+                sensitive_info_pattern_match_result[match.group(0)] = []
+                sensitive_info_pattern_match_result[match.group(0)].append(name)
+    # 记录计数器位置，防止种类从0开始，取到不存在的键值
+    print("sensitive_info_pattern_match_result:"+str(sensitive_info_pattern_match_result))
+    for key in sensitive_info_pattern_match_result:
         placeholder = f'?{placeholders_counter}?'
         placeholders[placeholder] = key
         text = text.replace(key, placeholder, 1)
         placeholders_counter += 1
-    print(placeholders)
+    match_result.update(sensitive_info_pattern_match_result)
+    print("placeholders:"+str(placeholders))
     for key in placeholders:
         if key not in PLACEHOLDERS_CORRESPONDING_TYPE:
             PLACEHOLDERS_CORRESPONDING_TYPE[key] = []
+        # print("place type:"+str(PLACEHOLDERS_CORRESPONDING_TYPE[key]))
+        # print("pl    type:"+str(placeholders[key]))
+        # print("match type:"+str(match_result[key]))
+        # remove space in type to append
         PLACEHOLDERS_CORRESPONDING_TYPE[key].append(match_result[placeholders[key]])
+    # 遍历字典，去除值中的空格
+    for key, value in PLACEHOLDERS_CORRESPONDING_TYPE.items():
+        # 使用列表解析去除值中的空格
+        PLACEHOLDERS_CORRESPONDING_TYPE[key] = [[item[0].replace(' ', '')] for item in value]
+
+
     print(text)
     print(PLACEHOLDERS_CORRESPONDING_TYPE)
     return text, placeholders
