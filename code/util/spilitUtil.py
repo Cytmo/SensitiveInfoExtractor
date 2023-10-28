@@ -20,6 +20,7 @@ extension_switch_new = {
     extract_universal: [".txt", ".epub"],
     extract_direct_read: [".md"],
     
+    extract_pdf: [".pdf"],
     extract_doc: [".doc"],
     extract_wps: [".wps"],
     extract_docx: [".docx"],
@@ -136,4 +137,4 @@ def spilit_process_file(file, root_directory):
         return
 
     # TODO: 检查文件编码方式，如果能用文本打开读入就正常读入走文本接口
-    logger.info(TAG+"=>Unsupported file format: "+file_name)
+    logger.warning(TAG+"=>Unsupported file format: "+file_name)

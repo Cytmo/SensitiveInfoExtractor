@@ -21,6 +21,9 @@ res_out = ResOut()
 logger = LoggerSingleton().get_logger()
 
 
+######################### 敏感信息提取api接口 ########################################
+
+
 # 此处更换敏感信息提取api
 def sensitive_info_detect(file_path, text, flag=0):
     if flag == 1:
@@ -30,6 +33,7 @@ def sensitive_info_detect(file_path, text, flag=0):
     res_out.add_new_json(file_path, sensitive_info)
 
 
+######################### 常见文件 #################################################
 # 常用文件提取操作, 如.txt...
 def extract_universal(file_path, nameclean):
     logger.info(TAG+"extract_universal(): " + file_path.split("/")[-1])
@@ -61,10 +65,21 @@ def extract_pic(file_path, nameclean):
     sensitive_info_detect(file_path, text[0])
 
 
+######################### pdf file ###########################################
+
+
+# .pdf文件读取和提取操作
+def extract_pdf(file_path, nameclean):
+    logger.info(TAG+"extract_pdf(): " + file_path.split("/")[-1])
+    text = pdf_file(file_path)
+    sensitive_info_detect(file_path, text)
+
+
 ######################### office/wps file########################################
 # (1).doc/.wps/docx
 # (2).ppt/.dps/.pptx
 # (3).xlsx/.et
+
 
 # (1-1).doc文件读取和提取操作
 def extract_doc(file_path, nameclean):
@@ -133,6 +148,7 @@ def extract_et(file_path, nameclean):
 
 ######################### e-mail file ########################################
 
+
 # .eml文件读取和提取操作
 def extract_eml(file_path, nameclean):
     logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
@@ -154,6 +170,34 @@ def extract_eml(file_path, nameclean):
         "eml_attachment": eml_attachment
     }
     res_out.add_new_json(file_path, result)
+
+
+######################### code config file ################################
+
+
+# TODO 下面两个函数要消除
+# .bash_history文件读取和提取操作
+def is_bash_history(file_path):
+    if "sh_history" in file_path:
+        logger.info(TAG+"is_bash_history(): " + file_path)
+        text = universal_file(file_path)
+        sensitive_info_text = begin_info_extraction(text)
+        logger.info(sensitive_info_text)
+        res_out.add_new_json(file_path, sensitive_info_text)
+        return True
+    return False
+
+
+# token文件读取和提取操作
+def is_token_file(file_path):
+
+    if "token" in file_path:
+        logger.info(TAG+"is_token_file(): " + file_path)
+        text = universal_file(file_path)
+        res_out.add_new_json(file_path, text)
+        return True
+
+    return False
 
 
 ######################### code file########################################
@@ -237,28 +281,3 @@ def is_code_file(code_dir_or_file):
     res = extract_out+result_stdout_copy
     res_out.add_new_json(code_dir_or_file, res)
     return True
-
-
-# TODO 下面两个函数要消除
-# .bash_history文件读取和提取操作
-def is_bash_history(file_path):
-    if "sh_history" in file_path:
-        logger.info(TAG+"is_bash_history(): " + file_path)
-        text = universal_file(file_path)
-        sensitive_info_text = begin_info_extraction(text)
-        logger.info(sensitive_info_text)
-        res_out.add_new_json(file_path, sensitive_info_text)
-        return True
-    return False
-
-
-# token文件读取和提取操作
-def is_token_file(file_path):
-
-    if "token" in file_path:
-        logger.info(TAG+"is_token_file(): " + file_path)
-        text = universal_file(file_path)
-        res_out.add_new_json(file_path, text)
-        return True
-
-    return False
