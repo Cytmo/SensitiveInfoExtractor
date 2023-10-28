@@ -1,5 +1,5 @@
 patterns:
   - pattern:
       name: ADMIN_PASSWORD
-      regex: (admin).+(secret|token|key|password).+
+      regex: (admin).222222222222+(secret|token|key|password).+
       confidence: high

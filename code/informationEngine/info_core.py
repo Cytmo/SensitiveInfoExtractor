@@ -204,6 +204,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
             text = text.replace(item, placeholder, 1)
             placeholders_counter += 1
 
+
     return text, placeholders
 
 # TODO 为什么影响环境信息提取
@@ -277,6 +278,8 @@ def information_protection(text: str) -> Tuple[str, dict]:
     for key, value in PLACEHOLDERS_CORRESPONDING_TYPE.items():
         # 使用列表解析去除值中的空格
         PLACEHOLDERS_CORRESPONDING_TYPE[key] = [[item[0].replace(' ', '')] for item in value]
+    logger.info(TAG + "information_protection(): placeholder extract{}".format(str(PLACEHOLDERS_CORRESPONDING_TYPE)))
+    logger.info(TAG + "information_protection(): placeholders{}".format(str(placeholders)))
     return text, placeholders
 # 防止文件名等并识别为关键字，如user.txt
 def prevent_eng_words_interference(text: str) -> str:
@@ -355,15 +358,18 @@ def explicit_fuzz_mark(text: list) -> list:
     logger.info(TAG+ "explicit_fuzz mark input list: {}".format(text))
     for i in range(len(text)):
         if text[i] in PLACEHOLDERS_CORRESPONDING_TYPE:
-            if PLACEHOLDERS_CORRESPONDING_TYPE[text[i]] == 'url':
+            # TODO: 为什么这里要加[0]
+            # ['url'] PLACEHOLDERS_CORRESPONDING_TYPE[text[i]][0] is a list
+            type_info = PLACEHOLDERS_CORRESPONDING_TYPE[text[i]][0]
+            if 'url' in type_info:
                 tagged_text.append('{address}')
-            elif PLACEHOLDERS_CORRESPONDING_TYPE[text[i]] == 'port':
+            elif 'port' in type_info:
                 tagged_text.append('{port}')
-            elif PLACEHOLDERS_CORRESPONDING_TYPE[text[i]] == 'email':
+            elif 'email' in type_info:
                 tagged_text.append('{user}')
-            elif PLACEHOLDERS_CORRESPONDING_TYPE[text[i]] == 'ip':
+            elif 'ip' in type_info:
                 tagged_text.append('{address}')
-            elif PLACEHOLDERS_CORRESPONDING_TYPE[text[i]] == 'phonenumber':
+            elif 'phonenumber' in type_info:
                 tagged_text.append('{phonenumber}')
             tagged_text.append(text[i])
         else:
