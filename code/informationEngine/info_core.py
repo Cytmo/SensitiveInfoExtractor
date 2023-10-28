@@ -22,6 +22,7 @@ from config.info_core_config import (
     INFO_PATTERN,
     REPLACED_KEYWORDS_LIST,
     SPECIAL_KEYWORDS_LIST,
+    sensitive_info_pattern
 )
 
 ##########################工具函数和类###############################
@@ -115,7 +116,7 @@ def is_png_text(info):
 
 # TODO:url和端口号成组且支持一个用户对应多个url
 # 从处理过后的字符串中提取成对信息
-class paired_info_pattern():
+class paired_info_pattern_backup():
 
     def __init__(self):
         self.port = None
@@ -179,6 +180,53 @@ class paired_info_pattern():
 
     def is_None(self):
         return self.__dict__.get("user") == None and self.__dict__.get("password") == None and self.__dict__.get("address") == None and self.__dict__.get("port") == None
+class paired_info_pattern():
+    def __init__(self):
+        self.data = {}
+        # add three neccessary attributes
+        self.data["user"] = None
+        self.data["password"] = None
+        self.data["address"] = None
+
+    def setter(self, name: str, value: Any) -> None:
+        if self.data.get(name) != None:
+            return False
+        self.data[name] = value
+        return True
+
+    def output(self):
+        result = {}
+        for key in self.data:
+            if self.data[key] != None:
+                result[key] = self.data[key]
+        # check if result have all needed attributes
+        for key in ["user", "password", "address"]:
+            if key not in result:
+                result[key] = None
+        self.__init__()
+        return result
+
+    def getter(self, name: str):
+        if name in self.data:
+            return self.data[name]
+        else:
+            return None
+
+    def if_same_attr(self, name: str, value: Any) -> bool:
+        # check if name is in self.data
+        if self.data.get(name) == None:
+            return False
+        print("self.data:"+str(self.data))
+        print("1if_same_attr: "+str(self.data.get(name)+" "+str(value)))
+        return self.data.get(name) == value
+
+    def is_None(self):
+        #check if all attributes are None
+        for key in self.data:
+            if self.data[key] != None:
+                return False
+        return True
+
 
 ##########################预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
@@ -326,6 +374,28 @@ def implicit_fuzz_mark(text: list) -> list:
             tagged_text.append(text[i])
     logger.info(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text 
+
+
+# 使用规则库对文本进行标记
+def sensitive_pattern_matcher(text: str) -> str:
+    result = {}
+    for pattern in sensitive_info_pattern['patterns']:
+
+        name = pattern['pattern']['name']
+        regex = pattern['pattern']['regex']
+        confidence = pattern['pattern']['confidence']
+
+        # 进行正则表达式匹配
+        match = re.search(regex, text)
+
+        if match:
+            print(f"Matched pattern: {name}")
+            print(f"Confidence: {confidence}")
+            print(f"Matched text: {match.group(0)}\n")
+            result[name] = match.group(0)
+            replaced_text = "{"+{name}+"} "+ match.group(0)
+            text = text.replace(match.group(0), replaced_text)
+    print(result)
 
 # 对标记后的字符串进行调整
 def marked_text_refinement(text: str) -> str:
@@ -663,6 +733,7 @@ def plain_text_info_extraction(text: str) -> dict:
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
         text = eng_text_preprocessing(text)
+    text = sensitive_pattern_matcher(text)
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
