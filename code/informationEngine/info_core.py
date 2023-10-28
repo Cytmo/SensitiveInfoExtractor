@@ -358,19 +358,17 @@ def explicit_fuzz_mark(text: list) -> list:
     logger.info(TAG+ "explicit_fuzz mark input list: {}".format(text))
     for i in range(len(text)):
         if text[i] in PLACEHOLDERS_CORRESPONDING_TYPE:
-            # TODO: 为什么这里要加[0]
-            # ['url'] PLACEHOLDERS_CORRESPONDING_TYPE[text[i]][0] is a list
             type_info = PLACEHOLDERS_CORRESPONDING_TYPE[text[i]][0]
-            if 'url' in type_info:
-                tagged_text.append('{address}')
-            elif 'port' in type_info:
-                tagged_text.append('{port}')
-            elif 'email' in type_info:
-                tagged_text.append('{user}')
-            elif 'ip' in type_info:
-                tagged_text.append('{address}')
-            elif 'phonenumber' in type_info:
-                tagged_text.append('{phonenumber}')
+            switch = {
+                'email': '{user}',
+                'port': '{port}',
+                'url': '{address}',
+                'ip': '{address}',
+                'phonenumber':'{phonenumber}'
+            }
+            # type info looks like ['email']
+            if type_info and type_info[0] in switch:
+                tagged_text.append(switch[type_info[0]])
             tagged_text.append(text[i])
         else:
             tagged_text.append(text[i])
