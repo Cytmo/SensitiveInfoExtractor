@@ -216,8 +216,6 @@ class paired_info_pattern():
         # check if name is in self.data
         if self.data.get(name) == None:
             return False
-        print("self.data:"+str(self.data))
-        print("1if_same_attr: "+str(self.data.get(name)+" "+str(value)))
         return self.data.get(name) == value
 
     def is_None(self):
@@ -230,6 +228,7 @@ class paired_info_pattern():
 
 ##########################预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
+# TODO 修改混淆信息保护函数，加入以上内容，修改混淆信息保护函数输出的字典格式，type改为列表
 def information_protection(text: str) -> Tuple[str, dict]:
     placeholders = {}  # This dictionary will store placeholders and their corresponding content
     placeholders_counter = 1  # Counter for generating placeholders
@@ -245,8 +244,6 @@ def information_protection(text: str) -> Tuple[str, dict]:
         # {'pattern': r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b', 'type': 'port'}
     ]
 
-
-
     for pattern_info in patterns:
         pattern = pattern_info['pattern']
         matches = re.finditer(pattern, text, flags=re.IGNORECASE)
@@ -258,6 +255,34 @@ def information_protection(text: str) -> Tuple[str, dict]:
             # Replace only the first occurrence
             text = text.replace(item, placeholder, 1)
             placeholders_counter += 1
+
+    match_result = {}
+
+    for pattern in sensitive_info_pattern['patterns']:
+
+        name = pattern['pattern']['name']
+        regex = pattern['pattern']['regex']
+        confidence = pattern['pattern']['confidence']
+
+        # 进行正则表达式匹配
+        match = re.search(regex, text)
+
+        if match:
+            print(f"Matched pattern: {name}")
+            print(f"Confidence: {confidence}")
+            print(f"Matched text: {match.group(0)}\n")
+            if match.group(0) not in match_result:
+                match_result[match.group(0)] = []
+                match_result[match.group(0)].append(name)
+            
+    print(match_result)
+    number = placeholders_counter
+    for key in match_result:
+        placeholder = f'?{placeholders_counter}?'
+        placeholders[placeholder] = item
+        text = text.replace(item, placeholder, 1)
+
+    print(text)
 
     return text, placeholders
 
@@ -375,27 +400,6 @@ def implicit_fuzz_mark(text: list) -> list:
     logger.info(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text 
 
-
-# 使用规则库对文本进行标记
-def sensitive_pattern_matcher(text: str) -> str:
-    result = {}
-    for pattern in sensitive_info_pattern['patterns']:
-
-        name = pattern['pattern']['name']
-        regex = pattern['pattern']['regex']
-        confidence = pattern['pattern']['confidence']
-
-        # 进行正则表达式匹配
-        match = re.search(regex, text)
-
-        if match:
-            print(f"Matched pattern: {name}")
-            print(f"Confidence: {confidence}")
-            print(f"Matched text: {match.group(0)}\n")
-            result[name] = match.group(0)
-            replaced_text = "{"+{name}+"} "+ match.group(0)
-            text = text.replace(match.group(0), replaced_text)
-    print(result)
 
 # 对标记后的字符串进行调整
 def marked_text_refinement(text: str) -> str:
@@ -733,7 +737,6 @@ def plain_text_info_extraction(text: str) -> dict:
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
         text = eng_text_preprocessing(text)
-    text = sensitive_pattern_matcher(text)
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
