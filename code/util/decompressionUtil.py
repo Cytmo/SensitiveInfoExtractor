@@ -9,13 +9,9 @@ from util.logUtils import LoggerSingleton
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
 
-'''
-    处理rar解压
 
-    内存泄漏是否处理：是
-'''
-
-
+# 处理rar解压
+# 内存泄漏是否处理：是
 def process_rar_file(filename, nameclean):
     rf = rarfile.RarFile(filename)
     rf.extractall('../workspace')
@@ -27,13 +23,8 @@ def process_rar_file(filename, nameclean):
     del nameclean
 
 
-'''
-    处理zip解压
-
-    内存泄漏是否处理：是
-'''
-
-
+# 处理zip解压
+# 内存泄漏是否处理：是
 def process_zip_file(filename, nameclean):
     zip_file = zipfile.ZipFile(filename)
     zip_file.extractall('../workspace')

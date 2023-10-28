@@ -19,15 +19,18 @@ extension_switch_new = {
     # 各种格式文件提取
     extract_universal: [".txt", ".epub"],
     extract_direct_read: [".md"],
-    extract_ppt: [".ppt"],
+    
+    extract_pdf: [".pdf"],
     extract_doc: [".doc"],
     extract_wps: [".wps"],
+    extract_docx: [".docx"],
+    extract_ppt: [".ppt"],
     extract_dps: [".dps"],
-    extract_et: [".et"],
-    extract_eml: [".eml"],
-
-    # 表格处理
+    extract_pptx: [".pptx"],
     extract_xlsx: [".xlsx"],
+    extract_et: [".et"],
+
+    extract_eml: [".eml"],    
 
     # 图片处理
     extract_pic: [".png", ".jpg"],
@@ -134,4 +137,4 @@ def spilit_process_file(file, root_directory):
         return
 
     # TODO: 检查文件编码方式，如果能用文本打开读入就正常读入走文本接口
-    logger.info(TAG+"=>Unsupported file format: "+file_name)
+    logger.warning(TAG+"=>Unsupported file format: "+file_name)
