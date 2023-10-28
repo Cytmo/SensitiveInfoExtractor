@@ -19,15 +19,17 @@ extension_switch_new = {
     # 各种格式文件提取
     extract_universal: [".txt", ".epub"],
     extract_direct_read: [".md"],
-    extract_ppt: [".ppt"],
+    
     extract_doc: [".doc"],
     extract_wps: [".wps"],
+    extract_docx: [".docx"],
+    extract_ppt: [".ppt"],
     extract_dps: [".dps"],
-    extract_et: [".et"],
-    extract_eml: [".eml"],
-
-    # 表格处理
+    extract_pptx: [".pptx"],
     extract_xlsx: [".xlsx"],
+    extract_et: [".et"],
+
+    extract_eml: [".eml"],    
 
     # 图片处理
     extract_pic: [".png", ".jpg"],

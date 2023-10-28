@@ -46,9 +46,10 @@ def pdf_file_text_and_img(pdf_file_path, result_image_path):
     doc.close()
     return text
 
+######################### office/wps file ########################################
 
-# 提取.doc中的文本(兼容.wps)
-def doc_file(file_path, type):
+# 1-1.解析.doc/.wps/.docx
+def docs_file(file_path, type):
     if type == ".doc":
         doc_file_dir = "../workspace/office/doc/"
         result_image_path = "../workspace/image/office/doc"
@@ -59,11 +60,15 @@ def doc_file(file_path, type):
         result_image_path = "../workspace/image/wps/wps"
         docx_path = doc_file_dir + \
             file_path.replace(".doc", ".docx").split("/")[-1]
+    elif type == ".docx":
+        result_image_path = "../workspace/image/wps/wps"
+        image_dir = f"{result_image_path}/{doc_docx_name}/"
+        return docx_file_info_extract(file_path, image_dir)
     else:
         return ""
 
     os.makedirs(doc_file_dir, exist_ok=True)
-    logger.info(TAG+"doc_file(): "+docx_path)
+    logger.info(TAG+"docs_file(): "+docx_path)
 
     os.makedirs(result_image_path, exist_ok=True)
     doc_docx_name = file_path.split("/")[-1]
@@ -71,8 +76,15 @@ def doc_file(file_path, type):
     # 使用Aspose.Words将.doc转换为.docx
     doc = aw.Document(file_path)
     doc.save(docx_path, aw.SaveFormat.DOCX)
-    logger.info(TAG+"doc_file(): "+"Document conversion successful!")
+    logger.info(TAG+"docs_file(): "+"Document conversion successful!")
 
+    image_dir = f"{result_image_path}/{doc_docx_name}/"
+
+    return docx_file_info_extract(docx_path, image_dir)
+
+
+# 1-2.提取.docx中的文本和图片文本信息
+def docx_file_info_extract(docx_path, image_dir):
     try:
         target_docx = docx.Document(docx_path)
 
@@ -82,7 +94,6 @@ def doc_file(file_path, type):
             target_docx_text += paragraph.text + "\n"
 
         # 保存照片
-        image_dir = f"{result_image_path}/{doc_docx_name}/"
         os.makedirs(image_dir, exist_ok=True)
         dict_rel = target_docx.part.rels
         for rel in dict_rel:
@@ -99,15 +110,14 @@ def doc_file(file_path, type):
     except Exception as e:
         logger.error(e)
 
-    logger.info(TAG+"doc_file()-文本信息-"+target_docx_text)
+    logger.info(TAG+"docx_file_info_extract()-文本信息-"+target_docx_text)
 
     # 解析图片信息
     image_all_text_res = ""
     if globalVar.flag_list[0] == True:
-        image_folder_path = f"{result_image_path}/{doc_docx_name}/"
-        image_all_text = ocr_table_batch(image_folder_path)
-        # image_all_text = ocr_batch_textract(image_folder_path)
-        logger.info(TAG+"doc_file()-image_all_text: ")
+        image_all_text = ocr_table_batch(image_dir)
+        # image_all_text = ocr_batch_textract(image_dir)
+        logger.info(TAG+"docx_file_info_extract()-image_all_text: ")
         for row in image_all_text:
             # logger.info(row)
             try:
@@ -117,15 +127,15 @@ def doc_file(file_path, type):
             except IndexError as e:
                 # 处理 IndexError 异常
                 logger.error(e)
-        logger.info(TAG+"doc_file()-图片文本信息-"+image_all_text_res)
+        logger.info(TAG+"docx_file_info_extract()-图片文本信息-"+image_all_text_res)
     else:
-        logger.info(TAG+"doc_file()-不处理文件内部的图片!!")
+        logger.info(TAG+"docx_file_info_extract()-不处理文件内部的图片!!")
 
     return target_docx_text+"\n"+image_all_text_res
 
 
-# 提取.ppt中的文本和图片(兼容dps)
-def ppt_file(file_path, type):
+# 2-1.解析.ppt/.dps/.pptx
+def ppts_file(file_path, type):
     if type == ".ppt":
         ppt_file_dir = "../workspace/office/ppt/"
         result_image_path = "../workspace/image/office/ppt"
@@ -136,6 +146,11 @@ def ppt_file(file_path, type):
         result_image_path = "../workspace/image/wps/dps"
         pptx_path = ppt_file_dir + \
             file_path.replace(".dps", ".pptx").split("/")[-1]
+    elif type == ".pptx":
+        ppt_file_dir = "../workspace/wps/pptx/"
+        result_image_path = "../workspace/image/office/pptx"
+        ppt_pptx_name = file_path.replace(".dps", ".pptx").split("/")[-1]
+        return pptx_file_info_extract(file_path,result_image_path,ppt_pptx_name)
     else:
         return ""
 
@@ -145,6 +160,12 @@ def ppt_file(file_path, type):
     ppt_pptx_name = file_path.split("/")[-1]
     with slides.Presentation(file_path) as presentation:
         presentation.save(pptx_path, slides.export.SaveFormat.PPTX)
+
+    return pptx_file_info_extract(pptx_path,result_image_path,ppt_pptx_name)
+
+
+# 2-2.提取.pptx中的文本和图片文本信息
+def pptx_file_info_extract(pptx_path,result_image_path,ppt_pptx_name):
 
     presentation = Presentation(pptx_path)
     slide_text = ""
@@ -176,7 +197,7 @@ def ppt_file(file_path, type):
         "Created with Aspose.Slides for .NET Standard 2.0 23.9", "")
     slide_text = slide_text.replace(
         "Copyright 2004-2023Aspose Pty Ltd.", "")
-    logger.info(TAG+"文本信息-"+slide_text)
+    logger.info(TAG+"pptx_file_info_extract()-文本信息-"+slide_text)
 
     # 解析图片信息
     image_all_text_res = ""
@@ -194,12 +215,11 @@ def ppt_file(file_path, type):
             except IndexError as e:
                 # 处理 IndexError 异常
                 logger.error(e)
-        logger.info(TAG+"ppt_file(): 图片文本信息-"+image_all_text_res)
+        logger.info(TAG+"pptx_file_info_extract(): 图片文本信息-"+image_all_text_res)
     else:
-        logger.info(TAG+"ppt_file(): 不处理文件内部的图片!!")
+        logger.info(TAG+"pptx_file_info_extract(): 不处理文件内部的图片!!")
 
     return slide_text+"\n"+image_all_text_res
-
 
 # 提取.xlsx中的文本
 # TODO:需要更新

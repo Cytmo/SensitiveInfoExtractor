@@ -54,48 +54,74 @@ def extract_config(file_path, nameclean):
     sensitive_info_detect(file_path, text, flag=1)
 
 
-# .doc文件读取和提取操作
+# 图片文件ocr读取和提取操作, 如.jpg/.png...
+def extract_pic(file_path, nameclean):
+    logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
+    text = ocr_table_batch(file_path)
+    sensitive_info_detect(file_path, text[0])
+
+
+######################### office/wps file########################################
+# (1).doc/.wps/docx
+# (2).ppt/.dps/.pptx
+# (3).xlsx/.et
+
+# (1-1).doc文件读取和提取操作
 def extract_doc(file_path, nameclean):
-    logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    text = doc_file(file_path, type=".doc")
+    logger.info(TAG+"extract_doc(): " + file_path.split("/")[-1])
+    text = docs_file(file_path, type=".doc")
     sensitive_info_detect(file_path, text)
 
 
-# .ppt文件读取和提取操作
+# (1-2).wps文件读取和提取操作
+def extract_wps(file_path, nameclean):
+    logger.info(TAG+"extract_wps(): " + file_path.split("/")[-1])
+    wps_file_name = file_path.replace(".wps", ".doc")
+    os.rename(file_path, wps_file_name)
+    text = docs_file(wps_file_name, type=".wps")
+    os.rename(wps_file_name, file_path)
+    sensitive_info_detect(file_path, text)
+
+
+# (1-3).docx文件读取和提取操作
+def extract_docx(file_path, nameclean):
+    logger.info(TAG+"extract_docx(): " + file_path.split("/")[-1])
+    text = docs_file(file_path, type=".docx")
+    sensitive_info_detect(file_path, text)
+
+
+# (2-1).ppt文件读取和提取操作
 def extract_ppt(file_path, nameclean):
     logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
-    text = ppt_file(file_path, type=".ppt")
+    text = ppts_file(file_path, type=".ppt")
     sensitive_info_detect(file_path, text)
 
 
-# .xlsx文件读取和提取操作
+# (2-2).dps文件读取和提取操作
+def extract_dps(file_path, nameclean):
+    logger.info(TAG+"extract_dps(): " + file_path.split("/")[-1])
+    wps_file_name = file_path.replace(".dps", ".ppt")
+    os.rename(file_path, wps_file_name)
+    text = ppts_file(wps_file_name, type=".dps")
+    os.rename(wps_file_name, file_path)
+    sensitive_info_detect(file_path, text)
+
+
+# (2-3).pptx文件读取和提取操作
+def extract_pptx(file_path, nameclean):
+    logger.info(TAG+"extract_pptx(): " + file_path.split("/")[-1])
+    text = ppts_file(file_path, type=".pptx")
+    sensitive_info_detect(file_path, text)
+
+
+# (3-1).xlsx文件读取和提取操作
 def extract_xlsx(file_path, nameclean):
     logger.info(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
     text = xlsx_file(file_path)
     res_out.add_new_json(file_path, text)
 
 
-# .wps文件读取和提取操作
-def extract_wps(file_path, nameclean):
-    logger.info(TAG+"extract_wps(): " + file_path.split("/")[-1])
-    wps_file_name = file_path.replace(".wps", ".doc")
-    os.rename(file_path, wps_file_name)
-    text = doc_file(wps_file_name, type=".wps")
-    os.rename(wps_file_name, file_path)
-    sensitive_info_detect(file_path, text)
-
-
-# .dps文件读取和提取操作
-def extract_dps(file_path, nameclean):
-    logger.info(TAG+"extract_dps(): " + file_path.split("/")[-1])
-    wps_file_name = file_path.replace(".dps", ".ppt")
-    os.rename(file_path, wps_file_name)
-    text = ppt_file(wps_file_name, type=".dps")
-    os.rename(wps_file_name, file_path)
-    sensitive_info_detect(file_path, text)
-
-
-# .et文件读取和提取操作
+# (3-2).et文件读取和提取操作
 def extract_et(file_path, nameclean):
     logger.info(TAG+"extract_et(): " + file_path.split("/")[-1])
     et_doc_name = file_path.replace(".et", ".xlsx")
@@ -105,12 +131,7 @@ def extract_et(file_path, nameclean):
     res_out.add_new_json(file_path, text)
 
 
-# 图片文件ocr读取和提取操作, 如.jpg/.png...
-def extract_pic(file_path, nameclean):
-    logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
-    text = ocr_table_batch(file_path)
-    sensitive_info_detect(file_path, text[0])
-
+######################### e-mail file ########################################
 
 # .eml文件读取和提取操作
 def extract_eml(file_path, nameclean):
@@ -134,6 +155,8 @@ def extract_eml(file_path, nameclean):
     }
     res_out.add_new_json(file_path, result)
 
+
+######################### code file########################################
 
 # 源代码文件读取和提取操作
 # TODO:需要重新整理CODE的识别
@@ -228,9 +251,8 @@ def is_bash_history(file_path):
         return True
     return False
 
+
 # token文件读取和提取操作
-
-
 def is_token_file(file_path):
 
     if "token" in file_path:
