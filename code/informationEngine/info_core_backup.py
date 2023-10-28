@@ -173,40 +173,74 @@ class paired_info_pattern():
         return True
 
 
+class paired_info_pattern():
+
+    def __init__(self):
+        self.port = None
+        self.address = None
+        self.user = None
+        self.password = None
+        self.phonenumber = None
+
+    def set_port(self, port):
+        self.port = port
+
+    def set_address(self, address):
+        self.address = address
+
+    def set_user(self, user):
+        self.user = user
+
+    def set_password(self, password):
+        self.password = password
+
+    def set_phonenumber(self, phonenumber):
+        self.phonenumber = phonenumber
+
+    def setter(self, name: str, value: Any) -> None:
+        # if self.__dict__.get(name) != None and self.__dict__.get(name) != value:
+        #     return False
+        attr_switch = {
+            "port": lambda x: self.set_port(x),
+            "address": lambda x: self.set_address(x),
+            "user": lambda x: self.set_user(x),
+            "password": lambda x: self.set_password(x),
+            "phonenumber": lambda x: self.set_phonenumber(x)
+        }
+        if name in attr_switch:
+            # print("Setting "+str(name)+" " +str( value))
+            return attr_switch[name](value)
+        else:
+            return False
+
+    def output(self):
+        result = {
+            "user": self.user,
+            "password": self.password,
+            "address": self.address,
+            "port": self.port,
+            "phonenumber": self.phonenumber
+        }
+        # remove None attributes
+        
+        self.__init__()
+        return result
+
+    def getter(self, name: str):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        else:
+            return None
+
+    def if_same_attr(self, name: str, value: Any) -> bool:
+        return self.__dict__.get(name) == value
+
+    def is_None(self):
+        return self.__dict__.get("user") == None and self.__dict__.get("password") == None and self.__dict__.get("address") == None and self.__dict__.get("port") == None
+
 ##########################预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
-def information_protection(text: str) -> Tuple[str, dict]:
-    placeholders = {}  # This dictionary will store placeholders and their corresponding content
-    placeholders_counter = 1  # Counter for generating placeholders
-    global PLACEHOLDERS_CORRESPONDING_TYPE
-    PLACEHOLDERS_CORRESPONDING_TYPE = {}
-    # Define a list of dictionaries with patterns and their corresponding types
-    patterns = [
-        {'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', 'type': 'email'},
-        {'pattern': r'jdbc:mysql://[a-zA-Z0-9:/._-]+', 'type': 'jdbc_url'},
-        {'pattern': r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 'type': 'url'},
-        {'pattern': r'(?:\d{1,3}\.){3}\d{1,3}|localhost', 'type': 'ip'},
-        {'pattern': r'1[3-9]\d{9}', 'type': 'phonenumber'},
-        # {'pattern': r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b', 'type': 'port'}
-    ]
-
-
-
-    for pattern_info in patterns:
-        pattern = pattern_info['pattern']
-        matches = re.finditer(pattern, text, flags=re.IGNORECASE)
-        for match in matches:
-            item = match.group()
-            placeholder = f'?{placeholders_counter}?'
-            placeholders[placeholder] = item
-            PLACEHOLDERS_CORRESPONDING_TYPE[placeholder] = pattern_info['type']  # Store the corresponding type
-            # Replace only the first occurrence
-            text = text.replace(item, placeholder, 1)
-            placeholders_counter += 1
-
-    return text, placeholders
-
-# TODO 为什么影响环境信息提取
+# TODO 修改混淆信息保护函数，加入以上内容，修改混淆信息保护函数输出的字典格式，type改为列表
 def information_protection(text: str) -> Tuple[str, dict]:
     placeholders = {}  # This dictionary will store placeholders and their corresponding content
     placeholders_counter = 1  # Counter for generating placeholders
@@ -278,6 +312,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
         # 使用列表解析去除值中的空格
         PLACEHOLDERS_CORRESPONDING_TYPE[key] = [[item[0].replace(' ', '')] for item in value]
     return text, placeholders
+
 # 防止文件名等并识别为关键字，如user.txt
 def prevent_eng_words_interference(text: str) -> str:
     # 文件后缀列表
@@ -391,6 +426,7 @@ def implicit_fuzz_mark(text: list) -> list:
             tagged_text.append(text[i])
     logger.info(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text 
+
 
 # 对标记后的字符串进行调整
 def marked_text_refinement(text: str) -> str:
@@ -522,7 +558,7 @@ def extract_paired_info(text):
 #代码等文件的提取
 def special_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for text')
-    text, item_protection_dict1 = information_protection(text)
+    text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
@@ -583,7 +619,7 @@ def special_processing(text: str) -> dict:
 # 配置文件的提取
 def config_processing(text: str) -> dict:
     logger.info(TAG + 'Special processing for config')
-    text, item_protection_dict1 = information_protection(text)
+    text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
@@ -654,7 +690,7 @@ def fuzz_extract(text: str) -> dict:
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after IoC protection: '+text)
         text = eng_text_preprocessing(text)
-    text, item_protection_dict1 = information_protection(text)
+    text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = fuzz_mark(text)
@@ -733,6 +769,7 @@ def plain_text_info_extraction(text: str) -> dict:
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
     if paired_info == []:
         logger.warning(TAG + 'No paired info extracted!')
+        logger.info(TAG + "original_text: "+original_text)
         paired_info = special_processing(original_text)
     return paired_info
 
