@@ -11,43 +11,18 @@ import re
 from typing import Tuple
 
 ##########################全局变量###############################
-# This dictionary will store placeholders and their corresponding types
-PLACEHOLDERS_CORRESPONDING_TYPE = {}  
-# 保存易混淆内容的位置 infomaion protection
-ITEM_PROTECTION_DICT = {}
-# 英文关键词列表
-ENG_KEYWORDS_LIST = ["-u", "-p", "IP", "port", "-h",
-                 "user", "password", "passw0rd", "address", "name", '\n']
-# 英文替换词列表
-ENG_REPLACEMENT_DICT = {"-p": "password", "port": "port", "-u": "user", "user": "user", "password": "password",
-                    "-h": "address", "IP":"address","address": "address", "name": "name", "passw0rd": "password"}
-# 中文关键字列表
-CHN_KEYWORDS_LIST = ["账号", "IP", "端口", "名称", "地址",
-                     "姓名", "学号", "用户名", "密码", "密钥为", '\n']
-# 中文替换列表
-CHN_REPLACEMENT_DICT = {"账号": "user", "端口": "port", "名称": "user", "学号": "user", "用户名": "user",
-                        "密钥为": "password", "密码": "password", "IP":"address","地址": "address", "姓名": "name"}
-# 信息提取列表
-INFO_PATTERN = {"user": "user", "password": "password",
-                "address": "address", "port": "port","phonenumber":"phonenumber"}
-# 信息提取替换词列表
-REPLACED_KEYWORDS_LIST = ["{user}", "{password}", "{address}", "{port}", "{phonenumber}"]
-# 代码提取词列表
-SPECIAL_KEYWORDS_LIST = [
-    "user",
-    "pass",
-    "address",
-    "name",
-    "port",
-    "key",
-    "auth",
-    "salt",
-    "host",
-    "password",
-    "username",
-    "url",
-    "driver",
-]
+# 导入全局变量
+from config.info_core_config import (
+    PLACEHOLDERS_CORRESPONDING_TYPE,
+    ITEM_PROTECTION_DICT,
+    ENG_KEYWORDS_LIST,
+    ENG_REPLACEMENT_DICT,
+    CHN_KEYWORDS_LIST,
+    CHN_REPLACEMENT_DICT,
+    INFO_PATTERN,
+    REPLACED_KEYWORDS_LIST,
+    SPECIAL_KEYWORDS_LIST,
+)
 
 ##########################工具函数和类###############################
 # 分割字符串并移除空项
