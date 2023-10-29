@@ -761,7 +761,7 @@ def fuzz_extract(text: str) -> dict:
 # 从处理过后的纯文本字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
-def plain_text_info_extraction(text: str):
+def plain_text_info_extraction(text: str) -> dict:
     original_text = text
     # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除代码注释 // # 等
@@ -777,9 +777,9 @@ def plain_text_info_extraction(text: str):
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
-    # if paired_info == []:
-    #     logger.warning(TAG + 'No paired info extracted!')
-    #     return original_text
+    if paired_info == []:
+        logger.warning(TAG + 'No paired info extracted!')
+        paired_info = special_processing(original_text)
     return paired_info
 
 # info_core入口 根据输入内容的类型（表格，文本）进行不同的处理
@@ -799,17 +799,7 @@ def begin_info_extraction(info,flag=0) -> dict:
                 return plain_text_info_extraction(info)
             return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
-        result = plain_text_info_extraction(info)
-        if result == []:
-            logger.warning(TAG + 'No paired info extracted during plain text info extraction!')
-            result = fuzz_extract(info)
-        if result == []:
-            logger.warning(TAG + 'No paired info extracted during fuzz extract!')
-            result = special_processing(info)
-        if result == []:
-            logger.warning(TAG + 'No paired info extracted during special processing!')
-            # result = config_processing(info)
-        return result
+        return plain_text_info_extraction(info)
     # 表格
     elif isinstance(info, list):
         if is_png_text(info):
