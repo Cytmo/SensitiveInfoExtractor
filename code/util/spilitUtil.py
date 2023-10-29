@@ -17,9 +17,9 @@ extension_switch_new = {
     process_zip_file: [".zip"],
 
     # 各种格式文件提取
-    extract_universal: [".txt", ".epub"],
+    extract_universal: [".txt", ".epub", ".bash_history"],
     extract_direct_read: [".md"],
-    
+
     extract_pdf: [".pdf"],
     extract_doc: [".doc"],
     extract_wps: [".wps"],
@@ -30,7 +30,7 @@ extension_switch_new = {
     extract_xlsx: [".xlsx"],
     extract_et: [".et"],
 
-    extract_eml: [".eml"],    
+    extract_eml: [".eml"],
 
     # 图片处理
     extract_pic: [".png", ".jpg"],
@@ -129,9 +129,7 @@ def spilit_process_file(file, root_directory):
         return
 
     # TODO: 下面更改放入通用提取接口
-    # 判断是否是命令行历史记录
-    if is_bash_history(file_name):
-        return
+
     # 判断是否是token文件
     if is_token_file(file_name):
         return

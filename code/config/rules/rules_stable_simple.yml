@@ -1,12 +1,8 @@
 patterns:
 - pattern:
-    confidence: high
-    name: ADMIN_PASSWORD
-    regex: (admin).+(secret|token|key|password).+
-- pattern:
-    confidence: high
+    confidence: low
     name: AWS API Gateway
-    regex: '[0-9a-z]+.execute-api.[0-9a-z.-_]+.amazonaws.com'
+    regex: '[0-9a-z]+.execute-api.[0-9a-z._-]+.amazonaws.com'
 - pattern:
     confidence: high
     name: AWS API Key
@@ -25,20 +21,12 @@ patterns:
     regex: da2-[a-z0-9]{26}
 - pattern:
     confidence: low
-    name: AWS CloudFront
-    regex: '[0-9a-z.-_]+.cloudfront.net'
-- pattern:
-    confidence: low
-    name: AWS Cognito Pool ID
-    regex: :[0-9A-Za-z]{8}-[0-9A-Za-z]{4}-[0-9A-Za-z]{4}-[0-9A-Za-z]{4}-[0-9A-Za-z]{12}
-- pattern:
-    confidence: low
     name: AWS ELB
-    regex: '[0-9a-z.-_]+.elb.amazonaws.com'
+    regex: '[0-9a-z._-]+.elb.amazonaws.com'
 - pattern:
     confidence: low
     name: AWS ElasticCache
-    regex: '[0-9a-z.-_]+.cache.amazonaws.com'
+    regex: '[0-9a-z._-]+.cache.amazonaws.com'
 - pattern:
     confidence: low
     name: AWS MWS ID
@@ -50,17 +38,13 @@ patterns:
 - pattern:
     confidence: high
     name: AWS RDS
-    regex: '[0-9a-z.-_]+.rds.amazonaws.com'
+    regex: '[0-9a-z._-]+.rds.amazonaws.com'
 - pattern:
     confidence: high
     name: AWS S3 Bucket
-    regex: s3://[0-9a-z.-_/]+
+    regex: s3://[0-9a-z._/-]+
 - pattern:
-    confidence: high
-    name: AWS S3 Endpoint
-    regex: '[a-zA-Z0-9.-_]+.s3.[a-zA-Z0-9.-_]+.amazonaws.com'
-- pattern:
-    confidence: high
+    confidence: low
     name: AWS client ID
     regex: (A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}
 - pattern:
@@ -73,14 +57,6 @@ patterns:
     regex: \b(aio\_[a-zA-Z0-9]{28})\b
 - pattern:
     confidence: high
-    name: Airtableapikey
-    regex: \b(key[a-zA-Z0-9_-]{14})\b
-- pattern:
-    confidence: high
-    name: Alibaba - 1
-    regex: \b([a-zA-Z0-9]{30})\b
-- pattern:
-    confidence: high
     name: Alibaba - 2
     regex: \b(LTAI[a-zA-Z0-9]{17,21})[\"' ;\s]*
 - pattern:
@@ -89,32 +65,12 @@ patterns:
     regex: arn:aws:sns:[a-z0-9\-]+:[0-9]+:[A-Za-z0-9\-_]+
 - pattern:
     confidence: high
-    name: Anypoint - 2
-    regex: \b([0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
-- pattern:
-    confidence: high
     name: Apideck - 1
     regex: \b(sk_live_[a-z0-9A-Z-]{93})\b
 - pattern:
     confidence: high
     name: Apify
     regex: \b(apify\_api\_[a-zA-Z-0-9]{36})\b
-- pattern:
-    confidence: high
-    name: Artifactory - 1
-    regex: \b([a-zA-Z0-9]{73})
-- pattern:
-    confidence: high
-    name: Auth0oauth - 2
-    regex: \b([a-zA-Z0-9_-]{64,})\b
-- pattern:
-    confidence: high
-    name: Aws - 2
-    regex: \b([A-Za-z0-9+/]{40})\b
-- pattern:
-    confidence: low
-    name: Basic token
-    regex: basic [a-zA-Z0-9_\-:\.=]+
 - pattern:
     confidence: low
     name: Bearer token
@@ -133,28 +89,12 @@ patterns:
     regex: \b([0-9A-Za-z]{3,20}.try.clickhelp.co)\b
 - pattern:
     confidence: high
-    name: Clicksendsms - 1
-    regex: \b([A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12})\b
-- pattern:
-    confidence: high
     name: Closecrm
     regex: \b(api_[a-z0-9A-Z.]{45})\b
 - pattern:
     confidence: high
-    name: Cloudflareglobalapikey - 1
-    regex: \b([a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)\b
-- pattern:
-    confidence: high
     name: Cloudinary Credentials
     regex: cloudinary://[0-9]+:[A-Za-z0-9\-_\.]+@[A-Za-z0-9\-_\.]+
-- pattern:
-    confidence: high
-    name: Contentfulpersonalaccesstoken
-    regex: \b([CFPAT\-a-zA-Z-0-9]{49})\b
-- pattern:
-    confidence: high
-    name: Copper - 1
-    regex: \b([a-z0-9]{4,25}@[a-zA-Z0-9]{2,12}.[a-zA-Z0-9]{2,6})\b
 - pattern:
     confidence: high
     name: Databricks
@@ -208,7 +148,7 @@ patterns:
     name: Facebook Access Token
     regex: EAACEdEose0cBA[0-9A-Za-z]+
 - pattern:
-    confidence: high
+    confidence: low
     name: Facebook OAuth
     regex: '[fF][aA][cC][eE][bB][oO][oO][kK].*[''|"][0-9a-f]{32}[''|"]'
 - pattern:
@@ -216,11 +156,11 @@ patterns:
     name: Finage
     regex: \b(API_KEY[0-9A-Z]{32})\b
 - pattern:
-    confidence: high
+    confidence: low
     name: Firebase Database Detect - 1
     regex: '[a-z0-9.-]+\.firebaseio\.com'
 - pattern:
-    confidence: high
+    confidence: low
     name: Firebase Database Detect - 2
     regex: '[a-z0-9.-]+\.firebaseapp\.com'
 - pattern:
@@ -273,20 +213,12 @@ patterns:
     regex: BEGIN PGP PRIVATE KEY BLOCK
 - pattern:
     confidence: low
-    name: Generic - 1706
-    regex: '[a-z0-9.-]+\.s3\.amazonaws\.com'
-- pattern:
-    confidence: low
     name: Generic - 1707
     regex: '[a-z0-9.-]+\.s3-[a-z0-9-]\.amazonaws\.com'
 - pattern:
     confidence: low
     name: Generic - 1708
     regex: '[a-z0-9.-]+\.s3-website[.-](eu|ap|us|ca|sa|cn)'
-- pattern:
-    confidence: low
-    name: Generic - 1709
-    regex: s3\.amazonaws\.com/[a-z0-9._-]+
 - pattern:
     confidence: high
     name: Generic - 1710
@@ -504,27 +436,15 @@ patterns:
     name: Generic - 1765
     regex: s3-[a-z0-9-]+\.amazonaws\.com/[a-z0-9._-]+
 - pattern:
-    confidence: high
+    confidence: low
     name: Generic Secret
     regex: '[sS][eE][cC][rR][eE][tT].*[''|"][0-9a-zA-Z]{32,45}[''|"]'
-- pattern:
-    confidence: high
-    name: Generic key
-    regex: (private|public|api|secret|password|pass|passphrase|access).+(key|token|secret|password).+
-- pattern:
-    confidence: low
-    name: Generic secret text
-    regex: secret.+
-- pattern:
-    confidence: low
-    name: Generic token
-    regex: token.+
 - pattern:
     confidence: low
     name: Generic webhook secret
     regex: (webhook).+(secret|token|key).+
 - pattern:
-    confidence: high
+    confidence: low
     name: GitHub
     regex: '[gG][iI][tT][hH][uU][bB].*[''|"][0-9a-zA-Z]{35,40}[''|"]'
 - pattern:
@@ -561,36 +481,16 @@ patterns:
     regex: AIza[0-9a-z-_]{35}
 - pattern:
     confidence: high
-    name: Google Cloud Platform OAuth
-    regex: '[0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com'
-- pattern:
-    confidence: high
     name: Google OAuth Access Token
     regex: ya29\.[0-9A-Za-z\-_]+
-- pattern:
-    confidence: high
-    name: Google Oauth ID
-    regex: '[0-9]+-[0-9a-z_]{32}.apps.googleusercontent.com'
 - pattern:
     confidence: high
     name: Graphcms - 2
     regex: \b(ey[a-zA-Z0-9]{73}.ey[a-zA-Z0-9]{365}.[a-zA-Z0-9_-]{683})\b
 - pattern:
     confidence: high
-    name: Guardianapi
-    regex: \b([0-9Aa-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12})\b
-- pattern:
-    confidence: low
-    name: Instagram oauth
-    regex: '[0-9a-fA-F]{7}.[0-9a-fA-F]{32}'
-- pattern:
-    confidence: high
     name: Invoiceocean - 2
     regex: \b([0-9a-z]{1,}.invoiceocean.com)\b
-- pattern:
-    confidence: high
-    name: JWT Token
-    regex: eyJ[a-zA-Z0-9]{10,}\.eyJ[a-zA-Z0-9]{10,}\.[a-zA-Z0-9_\-]{10,}
 - pattern:
     confidence: high
     name: Kanban - 2
@@ -612,13 +512,9 @@ patterns:
     name: Mailgun API Key - 1
     regex: key-[0-9a-zA-Z]{32}
 - pattern:
-    confidence: high
+    confidence: low
     name: Mailgun API key - 2
     regex: (mailgun|mg)[0-9a-z]{32}
-- pattern:
-    confidence: high
-    name: Mapbox - 1
-    regex: ([a-zA-Z-0-9]{4,32})
 - pattern:
     confidence: high
     name: Mapbox - 2
@@ -641,10 +537,6 @@ patterns:
     regex: \b([0-9a-z-]{1,}.mite.yo.lk)\b
 - pattern:
     confidence: high
-    name: Mrticktock - 2
-    regex: \b([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-z]+)\b
-- pattern:
-    confidence: high
     name: Newrelic Admin API Key
     regex: NRAA-[a-f0-9]{27}
 - pattern:
@@ -659,14 +551,6 @@ patterns:
     confidence: high
     name: Notion
     regex: \b(secret_[A-Za-z0-9]{43})\b
-- pattern:
-    confidence: high
-    name: Okta - 2
-    regex: 00[a-zA-Z0-9_-]{40}
-- pattern:
-    confidence: high
-    name: Onelogin - 1
-    regex: id[a-zA-Z0-9_' "=]{0,20}([a-z0-9]{64})
 - pattern:
     confidence: high
     name: Onelogin - 2
@@ -684,11 +568,11 @@ patterns:
     name: PayPal Braintree access token
     regex: access_token\$production\$[0-9a-z]{16}\$[0-9a-f]{32}
 - pattern:
-    confidence: high
+    confidence: low
     name: Paypaloauth - 1
     regex: \b([A-Za-z0-9_\.]{7}-[A-Za-z0-9_\.]{72})\b
 - pattern:
-    confidence: high
+    confidence: low
     name: Paypaloauth - 2
     regex: \b([A-Za-z0-9_\.]{69}-[A-Za-z0-9_\.]{10})\b
 - pattern:
@@ -812,10 +696,6 @@ patterns:
     name: Slackwebhook
     regex: (https:\/\/hooks.slack.com\/services\/[A-Za-z0-9+\/]{44,46})
 - pattern:
-    confidence: high
-    name: Sparkpost
-    regex: \b([a-zA-Z0-9]{40})\b
-- pattern:
     confidence: low
     name: Square API Key
     regex: sq0(atp|csp)-[0-9a-z-_]{22,43}
@@ -889,30 +769,18 @@ patterns:
     regex: \b([A-Za-z0-9]{14}.atlasv1.[A-Za-z0-9]{67})\b
 - pattern:
     confidence: high
-    name: Testdetector
-    regex: \b(test)\b
-- pattern:
-    confidence: high
     name: Trello URL
     regex: https://trello.com/b/[0-9a-z]/[0-9a-z_-]+
-- pattern:
-    confidence: high
-    name: Trelloapikey - 1
-    regex: \b([a-zA-Z-0-9]{64})\b
 - pattern:
     confidence: high
     name: Twilio - 1
     regex: \bAC[0-9a-f]{32}\b
 - pattern:
     confidence: high
-    name: Twilio - 2
-    regex: \b[0-9a-f]{32}\b
-- pattern:
-    confidence: high
     name: Twilio API Key
     regex: SK[0-9a-fA-F]{32}
 - pattern:
-    confidence: high
+    confidence: low
     name: Twitter Access Token
     regex: '[tT][wW][iI][tT][tT][eE][rR].*[1-9][0-9]+-[0-9a-zA-Z]{40}'
 - pattern:
@@ -920,7 +788,7 @@ patterns:
     name: Twitter Client ID
     regex: twitter[0-9a-z]{18,25}
 - pattern:
-    confidence: high
+    confidence: low
     name: Twitter OAuth
     regex: '[tT][wW][iI][tT][tT][eE][rR].*[''|"][0-9a-zA-Z]{35,44}[''|"]'
 - pattern:
@@ -932,33 +800,13 @@ patterns:
     name: Ubidots
     regex: \b(BBFF-[0-9a-zA-Z]{30})\b
 - pattern:
-    confidence: low
-    name: Vault Token
-    regex: ([sb]\.[a-zA-Z0-9]{24})
-- pattern:
-    confidence: high
-    name: Wepay - 1
-    regex: \b(\d{6})\b
-- pattern:
     confidence: high
     name: Zapierwebhook
     regex: (https:\/\/hooks.zapier.com\/hooks\/catch\/[A-Za-z0-9\/]{16})
 - pattern:
-    confidence: high
-    name: Zendeskapi - 1
-    regex: \b([a-zA-Z-0-9]{3,16}\.zendesk\.com)\b
-- pattern:
-    confidence: high
-    name: Zendeskapi - 2
-    regex: \b([a-zA-Z-0-9-]{5,16}\@[a-zA-Z-0-9]{4,16}\.[a-zA-Z-0-9]{3,6})\b
-- pattern:
     confidence: low
     name: appclientsecret
     regex: appclientsecret(=| =|:| :)
-- pattern:
-    confidence: low
-    name: aws_s3
-    regex: ([a-zA-Z0-9_-]+.s3.[a-z0-9_-]+.amazonaws.com)
 - pattern:
     confidence: low
     name: awsaccesskeyid
@@ -967,10 +815,6 @@ patterns:
     confidence: low
     name: awssecretkey
     regex: awssecretkey(=| =|:| :)
-- pattern:
-    confidence: low
-    name: basic_auth_credentials
-    regex: ([a-zA-Z0-9]+:[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z]+)
 - pattern:
     confidence: low
     name: bintraykey
@@ -988,25 +832,13 @@ patterns:
     name: facebook_access_token
     regex: (EAACEdEose0cBA[0-9A-Za-z]+)
 - pattern:
-    confidence: high
+    confidence: low
     name: facebook_oauth
     regex: '[f|F][a|A][c|C][e|E][b|B][o|O][o|O][k|K].*[''|"][0-9a-f]{32}[''|"]'
 - pattern:
     confidence: low
-    name: gcp_api_key
-    regex: (AIza[0-9A-Za-z-_]{35})
-- pattern:
-    confidence: low
-    name: generic password
-    regex: password.+
-- pattern:
-    confidence: low
     name: github_access_token - 2
     regex: '[a-zA-Z0-9_-]*:[a-zA-Z0-9_-]+@github.com*'
-- pattern:
-    confidence: low
-    name: google_captcha
-    regex: (6L[0-9A-Za-z-_]{38})
 - pattern:
     confidence: high
     name: google_oauth
@@ -1023,10 +855,6 @@ patterns:
     confidence: low
     name: jdbc
     regex: 'mysql: jdbc:mysql(=| =|:| :)'
-- pattern:
-    confidence: low
-    name: json_web1_token
-    regex: (eyJ[a-zA-Z0-9-]{10,}.eyJ[a-zA-Z0-9-]{10,}.[a-zA-Z0-9-]{10,})
 - pattern:
     confidence: low
     name: kubeconfig
@@ -1069,10 +897,6 @@ patterns:
     regex: nexuspassword(=| =|:| :)
 - pattern:
     confidence: low
-    name: npm_token - 2
-    regex: ([a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12})
-- pattern:
-    confidence: low
     name: nuget_api_key - 1
     regex: (oy2[a-z0-9]{43})
 - pattern:
@@ -1083,10 +907,6 @@ patterns:
     confidence: low
     name: passwordtravis
     regex: passwordtravis(=| =|:| :)
-- pattern:
-    confidence: low
-    name: paypal
-    regex: '[a-zA-Z0-9]{1,2}([E][A-Z]{1}[a-zA-Z0-9_-]{78})[a-zA-Z0-9]{1,2}'
 - pattern:
     confidence: low
     name: paypal_braintree_access_token
@@ -1111,10 +931,6 @@ patterns:
     confidence: low
     name: sendgrid - 2
     regex: sendgrid(=| =|:| :)
-- pattern:
-    confidence: low
-    name: sendgrid_api_key - 2
-    regex: (SG.[a-zA-Z0-9-]{16,32}.[a-zA-Z0-9-]{16,64})
 - pattern:
     confidence: low
     name: setdstaccesskey
@@ -1163,14 +979,6 @@ patterns:
     confidence: low
     name: stripe_standard_api
     regex: (sk_live_[0-9a-zA-Z]{24,34})
-- pattern:
-    confidence: low
-    name: test
-    regex: test
-- pattern:
-    confidence: high
-    name: twitter
-    regex: ([a-zA-Z0-9]{1,2}([a-zA-Z0-9]{50})[a-zA-Z0-9]{1,2})
 - pattern:
     confidence: high
     name: twitteroauthaccesssecret

@@ -1,6 +1,7 @@
 import yaml
 
 
+# 去除带问号的正则表达式
 def simplify_rules(input_filename, output_filename):
     # 清空输出文件内容
     open(output_filename, 'w').close()
@@ -31,7 +32,7 @@ def simplify_rules(input_filename, output_filename):
             'pattern': {
                 'name': rule['pattern']['name'],
                 'regex': rule['pattern']['regex'],
-                'confidence': rule['pattern']['confidence']
+                'confidence': rule['pattern']['confidence'],
             }
         }
         new_rules.append(new_rule)
@@ -48,6 +49,6 @@ def simplify_rules(input_filename, output_filename):
 
 # 目前只删除了带?的
 # 调用函数并传递输入和输出文件名
-input_file = 'rules_complete.yml'
-output_file = '../rules_simple.yml'
+input_file = '../rules-stable.yml'
+output_file = '../rules/rules_simple.yml'
 simplify_rules(input_file, output_file)
