@@ -23,6 +23,7 @@ pip install scikit-learn
 pip install pyyaml
 pip install aspose-words
 pip install imbalanced-learn
+pip install python-magic
 
 
 # linux软件安装

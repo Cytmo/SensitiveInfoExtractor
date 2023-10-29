@@ -174,20 +174,6 @@ def extract_eml(file_path, nameclean):
 
 ######################### code config file ################################
 
-
-# TODO 下面两个函数要消除
-# .bash_history文件读取和提取操作
-def is_bash_history(file_path):
-    if "sh_history" in file_path:
-        logger.info(TAG+"is_bash_history(): " + file_path)
-        text = universal_file(file_path)
-        sensitive_info_text = begin_info_extraction(text)
-        logger.info(sensitive_info_text)
-        res_out.add_new_json(file_path, sensitive_info_text)
-        return True
-    return False
-
-
 # token文件读取和提取操作
 def is_token_file(file_path):
 

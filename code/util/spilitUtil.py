@@ -17,9 +17,9 @@ extension_switch_new = {
     process_zip_file: [".zip"],
 
     # 各种格式文件提取
-    extract_universal: [".txt", ".epub"],
+    extract_universal: [".txt", ".epub", ".bash_history"],
     extract_direct_read: [".md"],
-    
+
     extract_pdf: [".pdf"],
     extract_doc: [".doc"],
     extract_wps: [".wps"],
@@ -30,7 +30,7 @@ extension_switch_new = {
     extract_xlsx: [".xlsx"],
     extract_et: [".et"],
 
-    extract_eml: [".eml"],    
+    extract_eml: [".eml"],
 
     # 图片处理
     extract_pic: [".png", ".jpg"],
@@ -102,10 +102,6 @@ def spilit_process_file(file, root_directory):
     # 系统关键敏感信息提取开始
     # 判断文件是win reg 文件
     if is_win_reg_file(file_name):
-        process_win_reg_file(file_name)
-        return
-    # 判断文件是否是win reg绑定文件
-    if rela_win_reg_file(file_name):
         return
 
     # 判断是否是passwd文件
@@ -129,12 +125,18 @@ def spilit_process_file(file, root_directory):
         return
 
     # TODO: 下面更改放入通用提取接口
-    # 判断是否是命令行历史记录
-    if is_bash_history(file_name):
-        return
+
     # 判断是否是token文件
     if is_token_file(file_name):
         return
 
-    # TODO: 检查文件编码方式，如果能用文本打开读入就正常读入走文本接口
-    logger.warning(TAG+"=>Unsupported file format: "+file_name)
+    try:
+        with open(file_name, 'r') as file:
+            first_line = file.readline()
+            # 如果成功读取第一行数据，继续处理
+            if first_line:
+                extract_direct_read(file_name, os.path.splitext(file_name)[0])
+            else:
+                logger.warning(TAG + "=>Unsupported file format: " + file_name)
+    except Exception as e:
+        logger.warning(TAG + "=>Unsupported file format: " + file_name)

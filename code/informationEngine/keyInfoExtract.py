@@ -4,11 +4,13 @@ from informationEngine.keySensitiveInfoUtil import *
 from util.resultUtil import ResOut
 from util.simpleUtil import *
 import re
+import os
 from util import globalVar
 TAG = "util.extractInfo.py-"
 
 # 添加结果输出模块
 res_out = ResOut()
+
 
 def if_passwd_file(filename, nameclean):
     if nameclean == "passwd":
@@ -43,12 +45,11 @@ def if_private_keys_file(filename, nameclean):
         return False
 
 
-
 # 解析 windows registry file: sam.hiv/system.hiv/sam/system
 def win_reg_file(sam_path, system_path):
     # 使用samdump2解析
     command = "samdump2 {} {}".format(sam_path, system_path)
-    
+
     result = subprocess.run(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
@@ -59,24 +60,53 @@ def win_reg_file(sam_path, system_path):
         return ""
     return result.stdout
 
+
+# 判断文件是否是注册表文件
+def is_registry_file(file_path):
+    try:
+        result = subprocess.check_output(["file", file_path]).decode("utf-8")
+        if "Windows registry file" in result:
+            return True
+        else:
+            return False
+    except Exception as e:
+        return False
+
+
+# 检测文件是否存在
+def check_file_existence(file_path):
+    if os.path.exists(file_path):
+        return True
+    else:
+        return False
+
+
 # 识别win 注册表文件
 def is_win_reg_file(file_path):
-    if "system.hiv" in file_path or "sam/system" in file_path:
-        logger.info(TAG+"is_win_reg_file(): " + file_path)
-        # TODO 额外判断sam的存在情况
-        return True
-    return False
 
-# 识别win 附属文件
-def rela_win_reg_file(file_path):
+    # 检测system.hiv
+    if not is_registry_file(file_path):
+        return False
+
+    # 识别win 附属文件
     if "sam.hiv" in file_path or "sam/sam" in file_path:
         return True
+
+    if "system.hiv" in file_path or "sam/system" in file_path:
+        logger.info(TAG+"is_win_reg_file(): " + file_path)
+
+        sam_file_path = os.path.dirname(
+            file_path)+"/"+os.path.basename(file_path).replace("system", "sam")
+        if check_file_existence(sam_file_path):
+            process_win_reg_file(file_path)
+        return True
+
     return False
 
 
 # 处理win 注册表文件
 def process_win_reg_file(file_path):
-    logger.info("process_win_reg_file: " + file_path)
+    logger.info(TAG+"process_win_reg_file: " + file_path)
     reg_info = win_reg_file(
         file_path, file_path.replace("/system", "/sam"))
     if reg_info == "":
@@ -110,8 +140,6 @@ def process_win_reg_file(file_path):
                 user["Username"] = "None"
     print(users)
     reg_info_parsed = json.dumps(users, indent=4)
-    # data_list = [line for line in reg_info.split('\n') if line.strip()]
-    # cleaned_list = [line.replace('\x14', '') for line in data_list]
     file_path_tip = file_path+" "+"with " + \
         file_path.split("/")[-1].replace("system", "sam")
     res_out.add_new_json(file_path_tip, users)
