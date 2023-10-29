@@ -31,8 +31,9 @@ def match_rules(input_string, rules_file):
 
 
 # 输入的字符串
-input_string = "myapi.execute-api.us-east-1.amazonaws.com"
-rules_file = '../rules-stable.yml'
+input_string = "AKIAIOSFODMM7EXAMPLE"
+# rules_file = '../rules/rules_simple.yml'
+rules_file = '../rules/rules_stable.yml'
 
 # 调用函数并输出匹配的规则名称
 matched_rules = match_rules(input_string, rules_file)

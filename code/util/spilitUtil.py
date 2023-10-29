@@ -102,10 +102,6 @@ def spilit_process_file(file, root_directory):
     # 系统关键敏感信息提取开始
     # 判断文件是win reg 文件
     if is_win_reg_file(file_name):
-        process_win_reg_file(file_name)
-        return
-    # 判断文件是否是win reg绑定文件
-    if rela_win_reg_file(file_name):
         return
 
     # 判断是否是passwd文件
