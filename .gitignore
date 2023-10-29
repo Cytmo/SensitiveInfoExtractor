@@ -157,3 +157,4 @@ code/clean.sh
 code/models
 *.prof
 time_info.txt
+data_test

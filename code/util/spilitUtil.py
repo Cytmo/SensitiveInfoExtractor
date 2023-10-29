@@ -134,5 +134,13 @@ def spilit_process_file(file, root_directory):
     if is_token_file(file_name):
         return
 
-    # TODO: 检查文件编码方式，如果能用文本打开读入就正常读入走文本接口
-    logger.warning(TAG+"=>Unsupported file format: "+file_name)
+    try:
+        with open(file_name, 'r') as file:
+            first_line = file.readline()
+            # 如果成功读取第一行数据，继续处理
+            if first_line:
+                extract_direct_read(file_name, os.path.splitext(file_name)[0])
+            else:
+                logger.warning(TAG + "=>Unsupported file format: " + file_name)
+    except Exception as e:
+        logger.warning(TAG + "=>Unsupported file format: " + file_name)
