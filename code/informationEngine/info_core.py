@@ -130,6 +130,9 @@ def is_protected_item(item: str) -> bool:
     pattern = r'\?\d\?'
     return bool(re.search(pattern, item))
 
+def is_a_mark(item: str) -> bool:
+    pattern = r'\{.*\}'
+    return bool(re.search(pattern, item))
 
 # 判断图片识别结果（表格形式）还是文本
 def is_png_text(info):
@@ -142,7 +145,6 @@ def is_png_text(info):
     return True
 
 
-# TODO:url和端口号成组且支持一个用户对应多个url
 # 从处理过后的字符串中提取成对信息
 class paired_info_pattern():
     def __init__(self):
@@ -235,9 +237,10 @@ def information_protection(text: str) -> Tuple[str, dict]:
 
     return text, placeholders
 
-# TODO 为什么影响环境信息提取
+placeholders = {}  # This dictionary will store placeholders and their corresponding content
 def information_protection(text: str) -> Tuple[str, dict]:
-    placeholders = {}  # This dictionary will store placeholders and their corresponding content
+    global placeholders
+    placeholders = {}  
     placeholders_counter = 1  # Counter for generating placeholders
     global PLACEHOLDERS_CORRESPONDING_TYPE
     PLACEHOLDERS_CORRESPONDING_TYPE = {}
@@ -266,10 +269,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
                 match_result[item] = []
             match_result[item].append(pattern_info['type'])
             text = text.replace(item, placeholder, 1)
-            placeholders_counter += 1
-
-
-
+            placeholders_counter += 1      
     sensitive_info_pattern_match_result = {}
     for pattern in sensitive_info_pattern['patterns']:
 
@@ -281,6 +281,10 @@ def information_protection(text: str) -> Tuple[str, dict]:
         match = re.search(regex, text)
 
         if match:
+            logger.info(TAG + "information_protection(): Matched pattern: {}".format(name))
+            logger.info(TAG + "information_protection(): Confidence: {}".format(confidence))
+            logger.info(TAG + "information_protection(): Matched text: {}\n".format(match.group(0)))
+            logger.info(TAG + "information_protection(): Matched text: {}\n".format(match))
             # print(f"Matched pattern: {name}")
             # print(f"Confidence: {confidence}")
             # print(f"Matched text: {match.group(0)}\n")
@@ -309,6 +313,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
     logger.info(TAG + "information_protection(): placeholder extract{}".format(str(PLACEHOLDERS_CORRESPONDING_TYPE)))
     logger.info(TAG + "information_protection(): placeholders{}".format(str(placeholders)))
     return text, placeholders
+
 # 防止文件名等并识别为关键字，如user.txt
 def prevent_eng_words_interference(text: str) -> str:
     # 文件后缀列表
@@ -328,7 +333,7 @@ def prevent_eng_words_interference(text: str) -> str:
 # 预处理英文自然语言文本
 def eng_text_preprocessing(text: str) -> str:
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
-    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
+    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!=\-\"'()/])+"
 
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text)
@@ -441,11 +446,21 @@ def marked_text_refinement(text: str) -> str:
 
     def is_valid_password(password):
         return True
+
+
+    # 根据 PLACEHOLDERS_CORRESPONDING_TYPE 全局变量，对文本进行调整
+    for key in PLACEHOLDERS_CORRESPONDING_TYPE:
+        if PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0] not in INFO_PATTERN:
+            replaced_content = " {" + PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0] + "} "+ key + " "
+            logger.debug(TAG + 'marked_text_refinement(): Replacing {} with {}'.format(key, replaced_content))
+            logger.debug(TAG + 'marked_text_refinement(): Text before replacement: '+str(text))
+            text = text.replace(key, replaced_content)
+            logger.debug(TAG + 'marked_text_refinement(): Text after replacement: '+str(text))
+
     # 调整关键词和指示词的相对位置，保持关键词在指示词的后部
     text = text.split()
     MAX_DISTANCE = 2
     keyword = "{port}"
-    
     for i in range(len(text)):
         # 处理端口号
         if text[i] == keyword:           
@@ -460,21 +475,21 @@ def marked_text_refinement(text: str) -> str:
 
     # 移除连续出现的，其后无有效关键词的指示词
     for i in range(len(text)-1):
-        if text[i] in REPLACED_KEYWORDS_LIST and text[i+1] in REPLACED_KEYWORDS_LIST:
+        if is_a_mark(text[i]) and is_a_mark(text[i+1]):
             text[i] = ""
     
     # 移除指示词和其后的关键词之外的内容
     new_text = []
     for i in range(len(text)-1):
-        if text[i] in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
+        if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
             new_text.append(text[i])
             new_text.append(text[i+1])
     text = new_text
 
-
+    logger.debug(TAG + 'Text after removing invalid keywords: '+str(text))
     # 移除关键词无效的指示词，如 地址后不是有效地址
     for i in range(len(text)-1):
-        if text[i] in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
+        if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
             if text[i] == "{address}" and not is_valid_address(text[i+1]):
                 text[i] = ""
                 text[i+1] = ""
@@ -491,6 +506,11 @@ def marked_text_refinement(text: str) -> str:
     # 移除空项
     text = [item for item in text if item != ""]
     text = " ".join(text)
+
+
+
+
+
     logger.debug(TAG + 'Text after repeated keywords adjustment: '+str(text))
     return text
 

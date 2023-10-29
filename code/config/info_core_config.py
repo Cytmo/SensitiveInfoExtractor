@@ -17,7 +17,7 @@ CHN_REPLACEMENT_DICT = {"账号": "user", "端口": "port", "名称": "user", "�
                         "密钥为": "password", "密码": "password", "IP":"address","地址": "address", "姓名": "name"}
 # 信息提取列表
 INFO_PATTERN = {"user": "user", "password": "password",
-                "address": "address", "port": "port","phonenumber":"phonenumber"}
+                "address": "address", "port": "port","phonenumber":"phonenumber","email":"email"}
 
 # 单项依赖信息组---前者需要后者存在
 ONE_WAY_CONNECTED_INFO = {"port": "address",}
@@ -26,7 +26,7 @@ ONE_WAY_CONNECTED_INFO = {"port": "address",}
 TWO_WAY_CONNECTED_INFO = {"AK": "SK",}
 
 # 信息提取替换词列表
-REPLACED_KEYWORDS_LIST = ["{user}", "{password}", "{address}", "{port}", "{phonenumber}"]
+REPLACED_KEYWORDS_LIST = ["{user}", "{password}", "{address}", "{port}", "{phonenumber}", "{email}"]
 
 # 代码提取词列表
 SPECIAL_KEYWORDS_LIST = [
