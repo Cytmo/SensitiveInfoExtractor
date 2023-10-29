@@ -151,6 +151,14 @@ def docx_file_info_extract(docx_path, image_dir):
                 img_name = f'{word_name}-{img_name}'
                 with open(os.path.join(image_dir, img_name), "wb") as f:
                     f.write(rel.target_part.blob)
+         # 去除水印文字
+        target_docx_text = target_docx_text.replace("Evaluation only.", "")
+        # 去除版权信息 去除含有aspose的行
+        target_docx_text = target_docx_text.split("\n")
+        for i in range(len(target_docx_text)):
+            if "Aspose" in target_docx_text[i]:
+                target_docx_text[i] = ""
+        target_docx_text = "\n".join(target_docx_text)
 
         logger.info(TAG+"docx_file_info_extract()-文本信息-"+target_docx_text)
 
@@ -251,10 +259,12 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
 
         # 去除水印文字
         slide_text = slide_text.replace("Evaluation only.", "")
-        slide_text = slide_text.replace(
-            "Created with Aspose.Slides for .NET Standard 2.0 23.9", "")
-        slide_text = slide_text.replace(
-            "Copyright 2004-2023Aspose Pty Ltd.", "")
+        # 去除版权信息 去除含有aspose的行
+        slide_text = slide_text.split("\n")
+        for i in range(len(slide_text)):
+            if "Aspose" in slide_text[i]:
+                slide_text[i] = ""
+        slide_text = "\n".join(slide_text)
         logger.info(TAG+"pptx_file_info_extract()-文本信息-"+slide_text)
 
         # 解析图片信息

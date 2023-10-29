@@ -9,7 +9,7 @@ TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
 import re
 from typing import Tuple
-
+import magic
 ##########################全局变量###############################
 # 导入全局变量
 from config.info_core_config import (
@@ -22,12 +22,38 @@ from config.info_core_config import (
     INFO_PATTERN,
     REPLACED_KEYWORDS_LIST,
     SPECIAL_KEYWORDS_LIST,
+    CODE_FILE_EXTENSION,
+    CONFIG_FILE_EXTENSION,
+    IMAGE_FILE_EXTENSION,
     sensitive_info_pattern,
-    ONE_WAY_CONNECTED_INFO,
-    TWO_WAY_CONNECTED_INFO
 )
 
 ##########################工具函数和类###############################
+
+def determine_file_type(file_name,info):
+    if file_name.endswith(tuple(CODE_FILE_EXTENSION)):
+        return "code"
+    elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
+        return "config"
+    elif file_name.endswith(tuple(IMAGE_FILE_EXTENSION)):
+        result = magic.from_buffer(info, mime=True)   
+        logger.info(TAG + "determine_file_type(): image's content's file type: "+str(result)) 
+        switch = {
+            "text/plain": "code",
+            "application/json": "config",
+            "application/xml": "config",
+            "application/yaml": "config",
+            "application/x-ini": "config",
+            "application/toml": "config",
+            "text/x-python": "code",
+            "application/javascript": "code",
+            "text/x-java-source": "code",
+            "text/x-go": "code",
+            # Add more MIME types for code and config as needed
+        }
+        return switch.get(result) if switch.get(result) else "unknown"
+    return "unknown"
+    
 # 分割字符串并移除空项
 def text_split(text: str) -> list:
     logger.info(TAG + "text_split(): text split input: "+str(text))
@@ -128,48 +154,6 @@ class paired_info_pattern():
         self.data["port"] = None
         self.data["phonenumber"] = None
 
-        self.check_header = {"user": False, "password": False}
-
-    def reset_data(self):
-        #后续可以仿照下面改成递推式
-        self.data = {}
-        self.data["user"] = None
-        self.data["password"] = None
-        self.data["address"] = None
-        self.data["port"] = None
-        self.data["phonenumber"] = None
-
-    def reset_headers(self):
-        self.check_header.update({k:False for k, v in self.data.items()})
-
-    # 判断是否一个对象存在关键对象
-    def check_header_complete(self):
-        return not all(value is False for value in self.check_header.values())
-
-    def check_data_headers(self,data):
-        for k,v in self.check_header.items():
-            if data == "{"+k+"}" and v:
-                return True
-        return False
-    
-    def set_data_headers(self,data):
-        for k in self.check_header.keys():
-            if data == "{"+k+"}" :
-                self.check_header[k] = True
-
-    def remake_data(self):
-        # 依赖整合
-        for k,v in ONE_WAY_CONNECTED_INFO.items():
-            if self.data.get(v) == None and self.data.get(k) != None:
-                self.data[k] = None
-        
-        # 对称整合
-        for k,v in TWO_WAY_CONNECTED_INFO.items():
-            if self.data.get(v) == None or self.data.get(k) != None:
-                self.data[k] = None
-            if self.data.get(v) != None or self.data.get(k) == None:
-                self.data[v] = None
-
     def setter(self, name: str, value: Any) -> None:
         # if name in self.data:
         #     self.data[name] = value
@@ -191,7 +175,6 @@ class paired_info_pattern():
             if self.data[key] != None:
                 result[key] = self.data[key]
         # check if result have all needed attributes
-        # TODO() 可能要修改
         for key in ["user", "password", "address", "port", "phonenumber"]:
             if key not in result:
                 result[key] = None
@@ -352,7 +335,6 @@ def eng_text_preprocessing(text: str) -> str:
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
-
     # 替换中文关键词
     for keyword in ENG_KEYWORDS_LIST:
         if keyword in ENG_REPLACEMENT_DICT:
@@ -378,7 +360,6 @@ def chn_text_preprocessing(text: str) -> str:
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
-
     # 替换中文关键词
     for keyword in CHN_KEYWORDS_LIST:
         if keyword in CHN_REPLACEMENT_DICT:
@@ -519,35 +500,40 @@ def extract_paired_info(text):
     result_pair = []
     a_paired_info = paired_info_pattern()
     text = text.split()
-
+    has_user = False
+    has_address = False
     for i in range(len(text)-1):
         # 密码不会最先出现
         if text[i].strip() == "{password}" and a_paired_info.is_None():
             continue
-
         if text[i].strip() in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
-            if a_paired_info.check_data_headers(text[i]):
+            if (text[i] == "{user}" and has_user) or (text[i] == "{address}" and has_address):
                 if a_paired_info.getter("password") != None:
-                    a_paired_info.remake_data()
                     result_pair.append(a_paired_info.output())
                 else:
                     a_paired_info.setter(INFO_PATTERN[text[i].replace(
                         '{', '').replace('}', '')], text[i+1])
-
+                has_user = False
+                has_address = False
             logger.debug(TAG + 'Adding attr to paired info: '+text[i]+" "+text[i+1])
             a_paired_info.setter(INFO_PATTERN[text[i].replace(
                 '{', '').replace('}', '')], text[i+1])
-            
+            if text[i] == "{user}":
+                has_user = True
+            if text[i] == "{address}":
+                has_address = True
+    last_output = a_paired_info.output()
 
-    if a_paired_info.check_header_complete():
-        a_paired_info.remake_data()
-        result_pair.append(a_paired_info.output())
+    if last_output["user"] != None or last_output["address"] != None:
+        result_pair.append(last_output)
 
+   # 移除没有地址的端口号
+    for item in result_pair:
+        if item["address"] is None and item["port"] is not None:
+            item["port"] = None
     # 移除空项
     logger.debug(TAG + 'Paired info before filtering: '+str(result_pair))
     filtered_result_pair = []
-
-    # 不太清楚为啥要有这个判断，不敢动，和上文的output中补充联动
     for item in result_pair:
         if ("user" in item and "address" in item and "password" in item) and \
             (item["user"] is not None or item["address"] is not None) and \
@@ -566,8 +552,8 @@ def extract_paired_info(text):
     return result_pair
 
 #代码等文件的提取
-def special_processing(text: str) -> dict:
-    logger.info(TAG + 'Special processing for text')
+def code_info_extract(text: str) -> dict:
+    logger.info(TAG + 'Code processing for text')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -627,7 +613,7 @@ def special_processing(text: str) -> dict:
     return result_dict
 
 # 配置文件的提取
-def config_processing(text: str) -> dict:
+def config_info_extract(text: str) -> dict:
     logger.info(TAG + 'Special processing for config')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
@@ -691,7 +677,7 @@ def fuzz_extract(text: str) -> dict:
     # 移除代码注释 // # 等
     # 已移除，影响地址的提取
     # text = re.sub(r'//.*', '', text)
-    logger.debug(TAG + 'Text before IoC protection: '+text)
+    logger.debug(TAG + 'Text before sensitive info protection: '+text)
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
@@ -761,7 +747,7 @@ def fuzz_extract(text: str) -> dict:
 # 从处理过后的纯文本字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
-def plain_text_info_extraction(text: str) -> dict:
+def plain_text_info_extraction(text: str):
     original_text = text
     # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除代码注释 // # 等
@@ -777,17 +763,17 @@ def plain_text_info_extraction(text: str) -> dict:
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
-    if paired_info == []:
-        logger.warning(TAG + 'No paired info extracted!')
-        paired_info = special_processing(original_text)
+    # if paired_info == []:
+    #     logger.warning(TAG + 'No paired info extracted!')
+    #     return original_text
     return paired_info
 
 # info_core入口 根据输入内容的类型（表格，文本）进行不同的处理
 # flag: 0: text 1: table
 IS_CONFIG_FILE = 1
-def begin_info_extraction(info,flag=0) -> dict:
+def begin_info_extraction(info,flag=0,file_path='') -> dict:
     if flag == IS_CONFIG_FILE:
-        return config_processing(info)
+        return config_info_extract(info)
     # 纯文本
     if isinstance(info, str):
         # 若文本中不存在中文和英文关键词，进行模糊提取
@@ -796,10 +782,15 @@ def begin_info_extraction(info,flag=0) -> dict:
             logger.info(TAG + "info_extraction(): fuzz extract")
             # 判断是否中文
             if is_chinese_text(info):
-                return plain_text_info_extraction(info)
+                logger.info(TAG + 'This is a Chinese text.')
+                result = plain_text_info_extraction(info)
+                logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
+                return result
             return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
-        return plain_text_info_extraction(info)
+        result = plain_text_info_extraction(info)
+
+        return result_manager(result,info,file_path)
     # 表格
     elif isinstance(info, list):
         if is_png_text(info):
@@ -807,11 +798,34 @@ def begin_info_extraction(info,flag=0) -> dict:
             for item in info[1:]:
                 item_to_string = "\n".join(item)
                 text = text+"\n"+item_to_string
-            return plain_text_info_extraction(text)
+            result =  plain_text_info_extraction(text)
+            return result_manager(result,text,file_path)
         else:
             result_table = one_table_remove_irrelevant_columns(
                 globalVar.get_sensitive_word(), info[1:])
             return result_table
+
+# 在常规提取失败后，使用特殊方法提取信息
+def result_manager(result,info,file_path) -> dict:
+    # file_extension = file_path.split(".")[-1]
+    logger.info(TAG + "result_manager(): plain text info extract result: {}".format(str(result)))
+    file_type = determine_file_type(file_path,info)
+    switch = {
+        'code': code_info_extract,
+        'config': config_info_extract
+    }
+    if result == []:
+        logger.warning(TAG + 'No paired info extracted during plain text info extraction!')     
+        logger.info(TAG + "result_manager(): input type is {}".format(file_type))
+        if file_type in switch:
+            logger.info(TAG + "result_manager(): input is code/config")
+            # result = code_info_extract(info)
+            result = switch[file_type](info)
+        else:
+            logger.info(TAG + "result_manager(): unknown input")
+            result = fuzz_extract(info)
+            logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
+    return result
 
 if __name__ == '__main__':
     # file = open("test/.bash_history", "r")
@@ -823,5 +837,5 @@ if __name__ == '__main__':
     with open(args.file, "r") as f:
         text = f.read()
     # begin_info_extraction(text)
-    special_processing(text)
+    code_info_extract(text)
     exit(0)

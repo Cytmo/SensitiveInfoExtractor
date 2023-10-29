@@ -44,6 +44,16 @@ SPECIAL_KEYWORDS_LIST = [
     "url",
     "driver",
 ]
+
+CODE_FILE_EXTENSION = [
+    '.java', '.py', '.go', '.js', '.php', '.c', '.cpp', '.cs', '.scala', '.html', '.css', '.xml', '.sh', '.bat', '.ps1', 'Dockerfile', '.h'
+]
+CONFIG_FILE_EXTENSION = [
+    '.yml', '.yaml', '.json', '.toml', '.properties', '.ini'
+]
+IMAGE_FILE_EXTENSION = [
+    '.jpg', '.png', '.bmp', '.jpeg', '.gif', '.svg'
+]
 # 读取YAML文件
 with open('config/rules-stable.yml', 'r') as yaml_file:
     sensitive_info_pattern = yaml.safe_load(yaml_file)
