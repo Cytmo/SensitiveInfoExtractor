@@ -9,7 +9,7 @@ TAG = "informationEngine.info_core.py: "
 logger = LoggerSingleton().get_logger()
 import re
 from typing import Tuple
-
+import magic
 ##########################全局变量###############################
 # 导入全局变量
 from config.info_core_config import (
@@ -22,10 +22,38 @@ from config.info_core_config import (
     INFO_PATTERN,
     REPLACED_KEYWORDS_LIST,
     SPECIAL_KEYWORDS_LIST,
-    sensitive_info_pattern
+    CODE_FILE_EXTENSION,
+    CONFIG_FILE_EXTENSION,
+    IMAGE_FILE_EXTENSION,
+    sensitive_info_pattern,
 )
 
 ##########################工具函数和类###############################
+
+def determine_file_type(file_name,info):
+    if file_name.endswith(tuple(CODE_FILE_EXTENSION)):
+        return "code"
+    elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
+        return "config"
+    elif file_name.endswith(tuple(IMAGE_FILE_EXTENSION)):
+        result = magic.from_buffer(info, mime=True)   
+        logger.info(TAG + "determine_file_type(): image's content's file type: "+str(result)) 
+        switch = {
+            "text/plain": "code",
+            "application/json": "config",
+            "application/xml": "config",
+            "application/yaml": "config",
+            "application/x-ini": "config",
+            "application/toml": "config",
+            "text/x-python": "code",
+            "application/javascript": "code",
+            "text/x-java-source": "code",
+            "text/x-go": "code",
+            # Add more MIME types for code and config as needed
+        }
+        return switch.get(result) if switch.get(result) else "unknown"
+    return "unknown"
+    
 # 分割字符串并移除空项
 def text_split(text: str) -> list:
     logger.info(TAG + "text_split(): text split input: "+str(text))
@@ -524,8 +552,8 @@ def extract_paired_info(text):
     return result_pair
 
 #代码等文件的提取
-def special_processing(text: str) -> dict:
-    logger.info(TAG + 'Special processing for text')
+def code_info_extract(text: str) -> dict:
+    logger.info(TAG + 'Code processing for text')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -585,7 +613,7 @@ def special_processing(text: str) -> dict:
     return result_dict
 
 # 配置文件的提取
-def config_processing(text: str) -> dict:
+def config_info_extract(text: str) -> dict:
     logger.info(TAG + 'Special processing for config')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
@@ -649,7 +677,7 @@ def fuzz_extract(text: str) -> dict:
     # 移除代码注释 // # 等
     # 已移除，影响地址的提取
     # text = re.sub(r'//.*', '', text)
-    logger.debug(TAG + 'Text before IoC protection: '+text)
+    logger.debug(TAG + 'Text before sensitive info protection: '+text)
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
@@ -743,9 +771,9 @@ def plain_text_info_extraction(text: str):
 # info_core入口 根据输入内容的类型（表格，文本）进行不同的处理
 # flag: 0: text 1: table
 IS_CONFIG_FILE = 1
-def begin_info_extraction(info,flag=0) -> dict:
+def begin_info_extraction(info,flag=0,file_path='') -> dict:
     if flag == IS_CONFIG_FILE:
-        return config_processing(info)
+        return config_info_extract(info)
     # 纯文本
     if isinstance(info, str):
         # 若文本中不存在中文和英文关键词，进行模糊提取
@@ -754,20 +782,15 @@ def begin_info_extraction(info,flag=0) -> dict:
             logger.info(TAG + "info_extraction(): fuzz extract")
             # 判断是否中文
             if is_chinese_text(info):
-                return plain_text_info_extraction(info)
+                logger.info(TAG + 'This is a Chinese text.')
+                result = plain_text_info_extraction(info)
+                logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
+                return result
             return fuzz_extract(info)
         logger.info(TAG + "info_extraction(): input is string")
         result = plain_text_info_extraction(info)
-        if result == []:
-            logger.warning(TAG + 'No paired info extracted during plain text info extraction!')
-            result = fuzz_extract(info)
-        if result == []:
-            logger.warning(TAG + 'No paired info extracted during fuzz extract!')
-            result = special_processing(info)
-        if result == []:
-            logger.warning(TAG + 'No paired info extracted during special processing!')
-            # result = config_processing(info)
-        return result
+
+        return result_manager(result,info,file_path)
     # 表格
     elif isinstance(info, list):
         if is_png_text(info):
@@ -775,11 +798,34 @@ def begin_info_extraction(info,flag=0) -> dict:
             for item in info[1:]:
                 item_to_string = "\n".join(item)
                 text = text+"\n"+item_to_string
-            return plain_text_info_extraction(text)
+            result =  plain_text_info_extraction(text)
+            return result_manager(result,text,file_path)
         else:
             result_table = one_table_remove_irrelevant_columns(
                 globalVar.get_sensitive_word(), info[1:])
             return result_table
+
+# 在常规提取失败后，使用特殊方法提取信息
+def result_manager(result,info,file_path) -> dict:
+    # file_extension = file_path.split(".")[-1]
+    logger.info(TAG + "result_manager(): plain text info extract result: {}".format(str(result)))
+    file_type = determine_file_type(file_path,info)
+    switch = {
+        'code': code_info_extract,
+        'config': config_info_extract
+    }
+    if result == []:
+        logger.warning(TAG + 'No paired info extracted during plain text info extraction!')     
+        logger.info(TAG + "result_manager(): input type is {}".format(file_type))
+        if file_type in switch:
+            logger.info(TAG + "result_manager(): input is code/config")
+            # result = code_info_extract(info)
+            result = switch[file_type](info)
+        else:
+            logger.info(TAG + "result_manager(): unknown input")
+            result = fuzz_extract(info)
+            logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
+    return result
 
 if __name__ == '__main__':
     # file = open("test/.bash_history", "r")
@@ -791,5 +837,5 @@ if __name__ == '__main__':
     with open(args.file, "r") as f:
         text = f.read()
     # begin_info_extraction(text)
-    special_processing(text)
+    code_info_extract(text)
     exit(0)

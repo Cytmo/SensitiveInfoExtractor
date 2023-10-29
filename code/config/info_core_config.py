@@ -18,8 +18,16 @@ CHN_REPLACEMENT_DICT = {"账号": "user", "端口": "port", "名称": "user", "�
 # 信息提取列表
 INFO_PATTERN = {"user": "user", "password": "password",
                 "address": "address", "port": "port","phonenumber":"phonenumber"}
+
+# 单项依赖信息组---前者需要后者存在
+ONE_WAY_CONNECTED_INFO = {"port": "address",}
+
+# 双向依赖信息组---等价关系，前后都需要存在才成立
+TWO_WAY_CONNECTED_INFO = {"AK": "SK",}
+
 # 信息提取替换词列表
 REPLACED_KEYWORDS_LIST = ["{user}", "{password}", "{address}", "{port}", "{phonenumber}"]
+
 # 代码提取词列表
 SPECIAL_KEYWORDS_LIST = [
     "user",
@@ -35,6 +43,16 @@ SPECIAL_KEYWORDS_LIST = [
     "username",
     "url",
     "driver",
+]
+
+CODE_FILE_EXTENSION = [
+    '.java', '.py', '.go', '.js', '.php', '.c', '.cpp', '.cs', '.scala', '.html', '.css', '.xml', '.sh', '.bat', '.ps1', 'Dockerfile', '.h'
+]
+CONFIG_FILE_EXTENSION = [
+    '.yml', '.yaml', '.json', '.toml', '.properties', '.ini'
+]
+IMAGE_FILE_EXTENSION = [
+    '.jpg', '.png', '.bmp', '.jpeg', '.gif', '.svg'
 ]
 # 读取YAML文件
 with open('config/rules-stable.yml', 'r') as yaml_file:
