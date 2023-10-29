@@ -22,7 +22,9 @@ from config.info_core_config import (
     INFO_PATTERN,
     REPLACED_KEYWORDS_LIST,
     SPECIAL_KEYWORDS_LIST,
-    sensitive_info_pattern
+    sensitive_info_pattern,
+    ONE_WAY_CONNECTED_INFO,
+    TWO_WAY_CONNECTED_INFO
 )
 
 ##########################工具函数和类###############################
@@ -126,6 +128,48 @@ class paired_info_pattern():
         self.data["port"] = None
         self.data["phonenumber"] = None
 
+        self.check_header = {"user": False, "password": False}
+
+    def reset_data(self):
+        #后续可以仿照下面改成递推式
+        self.data = {}
+        self.data["user"] = None
+        self.data["password"] = None
+        self.data["address"] = None
+        self.data["port"] = None
+        self.data["phonenumber"] = None
+
+    def reset_headers(self):
+        self.check_header.update({k:False for k, v in self.data.items()})
+
+    # 判断是否一个对象存在关键对象
+    def check_header_complete(self):
+        return not all(value is False for value in self.check_header.values())
+
+    def check_data_headers(self,data):
+        for k,v in self.check_header.items():
+            if data == "{"+k+"}" and v:
+                return True
+        return False
+    
+    def set_data_headers(self,data):
+        for k in self.check_header.keys():
+            if data == "{"+k+"}" :
+                self.check_header[k] = True
+
+    def remake_data(self):
+        # 依赖整合
+        for k,v in ONE_WAY_CONNECTED_INFO.items():
+            if self.data.get(v) == None and self.data.get(k) != None:
+                self.data[k] = None
+        
+        # 对称整合
+        for k,v in TWO_WAY_CONNECTED_INFO.items():
+            if self.data.get(v) == None or self.data.get(k) != None:
+                self.data[k] = None
+            if self.data.get(v) != None or self.data.get(k) == None:
+                self.data[v] = None
+
     def setter(self, name: str, value: Any) -> None:
         # if name in self.data:
         #     self.data[name] = value
@@ -147,6 +191,7 @@ class paired_info_pattern():
             if self.data[key] != None:
                 result[key] = self.data[key]
         # check if result have all needed attributes
+        # TODO() 可能要修改
         for key in ["user", "password", "address", "port", "phonenumber"]:
             if key not in result:
                 result[key] = None
@@ -307,6 +352,7 @@ def eng_text_preprocessing(text: str) -> str:
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
+
     # 替换中文关键词
     for keyword in ENG_KEYWORDS_LIST:
         if keyword in ENG_REPLACEMENT_DICT:
@@ -332,6 +378,7 @@ def chn_text_preprocessing(text: str) -> str:
 
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
+
     # 替换中文关键词
     for keyword in CHN_KEYWORDS_LIST:
         if keyword in CHN_REPLACEMENT_DICT:
@@ -472,40 +519,35 @@ def extract_paired_info(text):
     result_pair = []
     a_paired_info = paired_info_pattern()
     text = text.split()
-    has_user = False
-    has_address = False
+
     for i in range(len(text)-1):
         # 密码不会最先出现
         if text[i].strip() == "{password}" and a_paired_info.is_None():
             continue
+
         if text[i].strip() in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
-            if (text[i] == "{user}" and has_user) or (text[i] == "{address}" and has_address):
+            if a_paired_info.check_data_headers(text[i]):
                 if a_paired_info.getter("password") != None:
+                    a_paired_info.remake_data()
                     result_pair.append(a_paired_info.output())
                 else:
                     a_paired_info.setter(INFO_PATTERN[text[i].replace(
                         '{', '').replace('}', '')], text[i+1])
-                has_user = False
-                has_address = False
+
             logger.debug(TAG + 'Adding attr to paired info: '+text[i]+" "+text[i+1])
             a_paired_info.setter(INFO_PATTERN[text[i].replace(
                 '{', '').replace('}', '')], text[i+1])
-            if text[i] == "{user}":
-                has_user = True
-            if text[i] == "{address}":
-                has_address = True
-    last_output = a_paired_info.output()
+            
 
-    if last_output["user"] != None or last_output["address"] != None:
-        result_pair.append(last_output)
+    if a_paired_info.check_header_complete():
+        a_paired_info.remake_data()
+        result_pair.append(a_paired_info.output())
 
-   # 移除没有地址的端口号
-    for item in result_pair:
-        if item["address"] is None and item["port"] is not None:
-            item["port"] = None
     # 移除空项
     logger.debug(TAG + 'Paired info before filtering: '+str(result_pair))
     filtered_result_pair = []
+
+    # 不太清楚为啥要有这个判断，不敢动，和上文的output中补充联动
     for item in result_pair:
         if ("user" in item and "address" in item and "password" in item) and \
             (item["user"] is not None or item["address"] is not None) and \
