@@ -29,6 +29,23 @@ from config.info_core_config import (
 )
 
 ##########################工具函数和类###############################
+# 从结果类中还原占位符
+def restore_placeholders(result_dict: dict) -> dict:
+    logger.debug(TAG + "restore_placeholders(): result_dict: "+str(result_dict))
+    # if result_dict is a list
+    if isinstance(result_dict, list):
+        result = []
+        for item in result_dict:
+            result.append(restore_placeholders(item))
+        return result_dict
+    elif isinstance(result_dict, dict):
+        for key, value in result_dict.items():
+            for placeholder, replacement in ITEM_PROTECTION_DICT.items():
+                # 使用正则匹配，防止替换到错误的位置
+                value = re.sub(re.escape(placeholder), replacement, value)
+            result_dict[key] = value
+    return result_dict
+
 
 def determine_file_type(file_name,info):
     if file_name.endswith(tuple(CODE_FILE_EXTENSION)):
@@ -241,6 +258,9 @@ placeholders = {}  # This dictionary will store placeholders and their correspon
 def information_protection(text: str) -> Tuple[str, dict]:
     global placeholders
     placeholders = {}  
+    # 每次调用函数时，清空字典，防止重复
+    global ITEM_PROTECTION_DICT 
+    ITEM_PROTECTION_DICT= {}
     placeholders_counter = 1  # Counter for generating placeholders
     global PLACEHOLDERS_CORRESPONDING_TYPE
     PLACEHOLDERS_CORRESPONDING_TYPE = {}
@@ -333,14 +353,12 @@ def prevent_eng_words_interference(text: str) -> str:
 # 预处理英文自然语言文本
 def eng_text_preprocessing(text: str) -> str:
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
-    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}\\b|[a-zA-Z0-9,.;@?!\\-\"'()])+"
-    
-
+    pattern =  f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text)
-
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
+    # cleaned_text = text
     # 替换中文关键词
     for keyword in ENG_KEYWORDS_LIST:
         if keyword in ENG_REPLACEMENT_DICT:
@@ -359,11 +377,11 @@ def chn_text_preprocessing(text: str) -> str:
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
-    pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
-
+    pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
+                                                 
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text, re.IGNORECASE)
-
+    
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
     # 替换中文关键词
@@ -565,11 +583,11 @@ def extract_paired_info(text):
             filtered_result_pair.append(filtered_item)
     result_pair = filtered_result_pair
 
+
+    logger.debug(TAG + 'paired_info_extract(): beginning to restore replaced content')
+    logger.debug(TAG + 'paired_info_extract(): ITEM_PROTECTION_DICT: '+str(ITEM_PROTECTION_DICT))
     # 还原被替换的内容
-    for item in result_pair:
-        for key, value in item.items():
-            if value in ITEM_PROTECTION_DICT:
-                item[key] = ITEM_PROTECTION_DICT[value]
+    result_pair = restore_placeholders(result_pair)
     return result_pair
 
 #代码等文件的提取
@@ -617,7 +635,7 @@ def code_info_extract(text: str) -> dict:
         words_list += line.split(" ")
     for i in range(len(words_list) - 1):
         # print(words_list[i])
-        logger.debug(TAG + 'Special processing for text: '+words_list[i]+" "+words_list[i+1])
+        logger.debug(TAG + 'Code processing for text: '+words_list[i]+" "+words_list[i+1])
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
             key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
         ):
@@ -627,10 +645,8 @@ def code_info_extract(text: str) -> dict:
                             ] = ITEM_PROTECTION_DICT[words_list[i+1]]
             else:
                 result_dict[words_list[i]] = words_list[i + 1]
-    for key, value in result_dict.items():
-        if value in ITEM_PROTECTION_DICT:
-            result_dict[key] = ITEM_PROTECTION_DICT[value]
-    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    result_dict = restore_placeholders(result_dict)
+    logger.info(TAG + 'Code processing result: '+str(result_dict))
     return result_dict
 
 # 配置文件的提取
@@ -678,17 +694,15 @@ def config_info_extract(text: str) -> dict:
             if key and value:
                 matches_result[key] = value
     result_dict = {}
-    logger.debug(TAG + 'Special processing for text: '+str(lines))
+    logger.debug(TAG + 'Config processing for text: '+str(lines))
     # remove empty eng_keywords_list
     for key in matches_result:
         if any(key1 in key for key1 in SPECIAL_KEYWORDS_LIST):
             result_dict[key] = matches_result[key]
 
     # 还原被替换的内容
-    for key, value in result_dict.items():
-        if value in ITEM_PROTECTION_DICT:
-            result_dict[key] = ITEM_PROTECTION_DICT[value]
-    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    result_dict = restore_placeholders(result_dict)
+    logger.info(TAG + 'Config processing result: '+str(result_dict))
     return result_dict
 
 # 使用模糊识别的方法提取信息，打关键词,抽取在之后做
@@ -698,7 +712,13 @@ def fuzz_extract(text: str,RETURN_TYPE_DICT=False) -> dict:
     # 移除代码注释 // # 等
     # 已移除，影响地址的提取
     # text = re.sub(r'//.*', '', text)
-    logger.debug(TAG + 'Text before sensitive info protection: '+text)
+    global ITEM_PROTECTION_DICT
+    logger.debug(TAG + 'fuzz_extract():ITEM_PROTECTION_DICT before fuzz extract: '+str(ITEM_PROTECTION_DICT))
+    logger.debug(TAG + 'fuzz_extract(): Text before sensitive info protection: '+text)
+    text, item_protection_dict1 = information_protection(text)
+    logger.debug(TAG + 'fuzz_extract(): Text after sensitive info protection: '+text)
+    logger.debug(TAG + 'fuzz_extract():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
+
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
@@ -707,9 +727,12 @@ def fuzz_extract(text: str,RETURN_TYPE_DICT=False) -> dict:
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after IoC protection: '+text)
         text = eng_text_preprocessing(text)
-    text, item_protection_dict1 = information_protection(text)
-    global ITEM_PROTECTION_DICT
-    ITEM_PROTECTION_DICT = item_protection_dict1
+
+
+    # logger.debug(TAG + 'ITEM_PROTECTION_DICT: '+str(ITEM_PROTECTION_DICT))
+    # logger.debug(TAG + 'ITEM_PROTECTION_DICT1: '+str(item_protection_dict1))
+    if ITEM_PROTECTION_DICT == {}:
+        ITEM_PROTECTION_DICT = item_protection_dict1
     text = fuzz_mark(text)
     text = marked_text_refinement(text)
     # TODO:传回对应类别的字典
@@ -854,8 +877,8 @@ def result_manager(result,info,file_path) -> dict:
             result = switch[file_type](info)
         else:
             logger.info(TAG + "result_manager(): unknown input")
-            # result = fuzz_extract(info)
-            # logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
+            result = fuzz_extract(info)
+            logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
     return result
 
 if __name__ == '__main__':

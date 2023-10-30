@@ -17,7 +17,7 @@ CHN_REPLACEMENT_DICT = {"账号": "user", "端口": "port", "名称": "user", "�
                         "密钥为": "password", "密码": "password", "IP":"address","地址": "address", "姓名": "name"}
 # 信息提取列表
 INFO_PATTERN = {"user": "user", "password": "password",
-                "address": "address", "port": "port","phonenumber":"phonenumber","email":"email","ip":"address"}
+                "address": "address", "port": "port","phonenumber":"phonenumber","email":"email","ip":"address","url":"address"}
 
 # 单项依赖信息组---前者需要后者存在
 ONE_WAY_CONNECTED_INFO = {"port": "address",}
