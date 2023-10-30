@@ -46,6 +46,12 @@ def restore_placeholders(result_dict: dict) -> dict:
             result_dict[key] = value
     return result_dict
 
+# 是否是有效信息
+def is_valid_info(info: str) -> bool:
+    VALID_INFO_THRESHOLD = 3
+    alphanumeric_count = len(re.findall(r'\w', info))
+    return alphanumeric_count >= VALID_INFO_THRESHOLD
+
 
 def determine_file_type(file_name,info):
     logger.info(TAG + "determine_file_type(): file_name: "+str(file_name))
@@ -611,6 +617,8 @@ def rule_based_info_extract(text: str) -> dict:
         item_type = PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0]
         item_content = ITEM_PROTECTION_DICT[key]
         result_dict[item_type] = item_content
+    for value in result_dict.values():
+        value = "Rule based: "+value
     return result_dict
 
 #代码(目前仅有carbon.jpg)等文件的提取
@@ -627,6 +635,7 @@ def code_info_extract(text: str) -> dict:
     # 仅保留含有字符串的行
     string_lines = re.findall(r'.*["\'].*["\'].*',text, re.MULTILINE)
     text = string_lines
+    logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
     lines = []
     # remove outer "
     for line in text:
@@ -679,6 +688,13 @@ def code_info_extract(text: str) -> dict:
     # TODO this section is just for test, remove it later
     rule_based_info_extract_result = rule_based_info_extract(original_text)
     result_dict.update(rule_based_info_extract_result)
+    
+    result_dict_temp = {}
+    logger.info(TAG + 'code_info_extract(): remove invalid info')
+    for key, value in result_dict.items():
+        if is_valid_info(value):
+            result_dict_temp[key] = value
+    result_dict = result_dict_temp
     return result_dict
 
 # 配置文件的提取
