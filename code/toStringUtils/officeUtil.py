@@ -234,16 +234,22 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
     try:
 
         presentation = Presentation(pptx_path)
-        slide_text = ""
+        slide_text = []
         for slide_number, slide in enumerate(presentation.slides, start=1):
-            # 提取文本内容
-            for shape in slide.shapes:
-                if hasattr(shape, "text"):
-                    slide_text += shape.text + "\n"
 
             image_count = 0
             for shape in slide.shapes:
+
+                # 提取文本内容
+                if hasattr(shape, "text"):
+                    # 去除水印文字
+                    if ("Evaluation only.\nCreated with Aspose.Slides for .NET Standard" not in shape.text):
+                        slide_text.append(shape.text)
+
+                # 提取图片
                 if shape.shape_type == 13:  # 13 表示图片
+
+                    slide_text.append("$PictureIsHere$")
                     # 提取图片
                     image_dir = f"{result_image_path}/{ppt_pptx_name}/"
                     os.makedirs(image_dir, exist_ok=True)
@@ -257,18 +263,13 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                     with open(image_filename, "wb") as img_file:
                         img_file.write(image_bytes)
 
-        # 去除水印文字
-        slide_text = slide_text.replace("Evaluation only.", "")
-        # 去除版权信息 去除含有aspose的行
-        slide_text = slide_text.split("\n")
-        for i in range(len(slide_text)):
-            if "Aspose" in slide_text[i]:
-                slide_text[i] = ""
-        slide_text = "\n".join(slide_text)
-        logger.info(TAG+"pptx_file_info_extract()-文本信息-"+slide_text)
+        logger.info(TAG+"pptx_file_info_extract()-文本信息:")
+        logger.info(slide_text)
+
+        text_all = " "
 
         # 解析图片信息
-        image_all_text_res = ""
+        image_all_text_res = []
         if globalVar.flag_list[0] == True:
             image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
             image_all_text = ocr_table_batch(image_folder_path)
@@ -279,19 +280,43 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                 try:
                     single_result = " ".join(
                         [element for sublist in row[1:] for element in sublist])
-                    image_all_text_res += single_result
+                    image_all_text_res.append(single_result)
                 except IndexError as e:
                     # 处理 IndexError 异常
                     logger.error(e)
-            logger.info(TAG+"pptx_file_info_extract(): 图片文本信息-" +
-                        image_all_text_res)
+            logger.info(TAG+"pptx_file_info_extract(): 图片文本信息:")
+            logger.info(image_all_text_res)
         else:
             logger.info(TAG+"pptx_file_info_extract(): 不处理文件内部的图片!!")
 
-        return slide_text+"\n"+image_all_text_res
+        # 将图片文本信息按顺序插入到文本内部: 文本-文本-图片(如果存在)-文本
+        res = replace_picture_texts(slide_text, image_all_text_res)
+        res = "\n".join(res)
+
+        return res
     except Exception as e:
         logger.error(e)
         return ""
+
+
+# 将图片文本信息按顺序插入到文本内部: 文本-文本-图片(如果存在)-文本
+def replace_picture_texts(text_list, image_text_list):
+    i = 0  # 用于追踪image_all_text_res的索引
+
+    while i < len(text_list):
+        if text_list[i] == "$PictureIsHere$":
+            if i < len(image_text_list):
+                text_list[i] = image_text_list[i]
+                i += 1
+            else:
+                del text_list[i]
+        else:
+            i += 1
+
+    if i < len(image_text_list):
+        text_list.extend(image_text_list[i:])
+
+    return text_list
 
 
 # 提取.xlsx中的文本
