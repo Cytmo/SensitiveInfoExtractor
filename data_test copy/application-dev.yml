@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/mydb
+    driver-class-name: com.mysql.jdbc.Driver
+    username: xxlab
+    password: lab@998877
