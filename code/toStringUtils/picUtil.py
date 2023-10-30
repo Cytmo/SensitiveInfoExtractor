@@ -177,7 +177,7 @@ def find_image_by_hash(hash_to_find):
 
 # 定义自定义排序函数，提取文件名中的数字部分并进行比较
 def custom_sort_key(filename):
-    match = re.search(r'image(\d+)\.png', filename)
+    match = re.search(r'image(\d+)\.(png|jpg)', filename)
     if match:
         return int(match.group(1))
     return float('inf')  # 如果没有匹配到数字部分，默认使用正无穷大

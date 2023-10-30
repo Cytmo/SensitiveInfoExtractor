@@ -39,30 +39,35 @@ def pdf_file(file_path):
 
     try:
         pdf = fitz.open(file_path)
-        text = ""
+        text = []
+
+        count = 1
 
         for itm, page in enumerate(pdf):
             try:
                 tupleImage = page.get_images()
-                text += page.get_text("text")
+                text.append(page.get_text("text"))
                 for xref0 in tupleImage:
                     xref = xref0[0]
                     img = pdf.extract_image(xref)
                     ext = img['ext']
-                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+
                     imageFilename = os.path.join(
-                        result_image_path, f"{timestamp}_pdf_image_{itm}_{xref}.{ext}")
+                        result_image_path, f"{os.path.basename(file_path)}_image{count}.png")
                     imgout = open(imageFilename, 'wb')
                     imgout.write(img["image"])
                     imgout.close()
+                    text.append("$PictureIsHere$")
+                    count += 1
             except:
                 continue
         pdf.close()
 
-        logger.info(TAG+"pdf_file()-文本信息-"+text)
+        logger.info(TAG+"pdf_file()-文本信息:")
+        logger.info(text)
 
         # 解析图片信息
-        image_all_text_res = ""
+        image_all_text_res = []
         if globalVar.flag_list[0] == True:
             image_all_text = ocr_table_batch(result_image_path)
             # image_all_text = ocr_batch_textract(image_dir)
@@ -72,15 +77,20 @@ def pdf_file(file_path):
                 try:
                     single_result = " ".join(
                         [element for sublist in row[1:] for element in sublist])
-                    image_all_text_res += single_result
+                    image_all_text_res.append(single_result)
                 except IndexError as e:
                     # 处理 IndexError 异常
                     logger.error(e)
-            logger.info(TAG+"pdf_file()-图片文本信息-"+image_all_text_res)
+            logger.info(TAG+"pdf_file()-图片文本信息:")
+            logger.info(image_all_text_res)
+
+            res = replace_picture_texts(text, image_all_text_res)
+            return "\n".join(res)
         else:
             logger.info(TAG+"pdf_file()-不处理文件内部的图片!!")
+            text = "\n".join(text).replace("$PictureIsHere$", "")
+            return text
 
-        return text+"\n"+image_all_text_res
     except Exception as e:
         logger.error(e)
         return ""
