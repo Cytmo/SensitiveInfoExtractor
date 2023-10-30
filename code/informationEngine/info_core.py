@@ -769,7 +769,7 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
                 result = plain_text_info_extraction(info)
                 logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
                 return result
-            return             result = plain_text_info_extraction(info,FUZZ_MARK=True)
+            return plain_text_info_extraction(info,FUZZ_MARK=True)
         logger.info(TAG + "info_extraction(): input is string")
         result = plain_text_info_extraction(info)
 
