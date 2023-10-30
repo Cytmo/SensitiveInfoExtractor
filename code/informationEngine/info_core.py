@@ -46,9 +46,17 @@ def restore_placeholders(result_dict: dict) -> dict:
             result_dict[key] = value
     return result_dict
 
+# 是否是有效信息
+def is_valid_info(info: str) -> bool:
+    VALID_INFO_THRESHOLD = 3
+    alphanumeric_count = len(re.findall(r'\w', info))
+    return alphanumeric_count >= VALID_INFO_THRESHOLD
+
 
 def determine_file_type(file_name,info):
-    if file_name.endswith(tuple(CODE_FILE_EXTENSION)):
+    logger.info(TAG + "determine_file_type(): file_name: "+str(file_name))
+    # TODO 完善的文件类型判断
+    if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name:
         return "code"
     elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
         return "config"
@@ -597,8 +605,25 @@ def extract_paired_info(text):
     result_pair = restore_placeholders(result_pair)
     return result_pair
 
-#代码等文件的提取
+
+
+def rule_based_info_extract(text: str) -> dict:
+    logger.info(TAG + 'rule_based_info_extract(): Rule based processing for text')
+    text, item_protection_dict1 = information_protection(text)
+    global ITEM_PROTECTION_DICT
+    ITEM_PROTECTION_DICT = item_protection_dict1
+    result_dict = {}
+    for key in ITEM_PROTECTION_DICT:
+        item_type = PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0]
+        item_content = ITEM_PROTECTION_DICT[key]
+        result_dict[item_type] = item_content
+    for value in result_dict.values():
+        value = "Rule based: "+value
+    return result_dict
+
+#代码(目前仅有carbon.jpg)等文件的提取
 def code_info_extract(text: str) -> dict:
+    original_text = text
     logger.info(TAG + 'Code processing for text')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
@@ -607,7 +632,10 @@ def code_info_extract(text: str) -> dict:
     text = text.lower()
     text = convert_chinese_punctuation(text)
     text = text.replace("'", '"')
-    text = text.split("\n")
+    # 仅保留含有字符串的行
+    string_lines = re.findall(r'.*["\'].*["\'].*',text, re.MULTILINE)
+    text = string_lines
+    logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
     lines = []
     # remove outer "
     for line in text:
@@ -654,6 +682,19 @@ def code_info_extract(text: str) -> dict:
                 result_dict[words_list[i]] = words_list[i + 1]
     result_dict = restore_placeholders(result_dict)
     logger.info(TAG + 'Code processing result: '+str(result_dict))
+
+
+
+    # TODO this section is just for test, remove it later
+    rule_based_info_extract_result = rule_based_info_extract(original_text)
+    result_dict.update(rule_based_info_extract_result)
+    
+    result_dict_temp = {}
+    logger.info(TAG + 'code_info_extract(): remove invalid info')
+    for key, value in result_dict.items():
+        if is_valid_info(value):
+            result_dict_temp[key] = value
+    result_dict = result_dict_temp
     return result_dict
 
 # 配置文件的提取
