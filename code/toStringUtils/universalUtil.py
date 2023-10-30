@@ -15,12 +15,8 @@ universalUtil: 通用文件读取
 # doc文件需要 apt-get install antiword
 def universal_textract(file):
     text = textract.process(filename=file, encoding='utf-8')
-    decoded_text = text.decode('utf-8')
 
-    if ".doc" in file:
-        decoded_text = decoded_text.replace("[pic]", "")
-    if ".docx" in file:
-        decoded_text = decoded_text.replace("[pic]", "")
+    decoded_text = text.decode('utf-8')
 
     return decoded_text
 
@@ -36,4 +32,3 @@ def universal_file(file):
         return "File not found"
     except Exception as e:
         return str(e)
-

@@ -5,6 +5,7 @@ from toStringUtils.emlUtil import *
 from toStringUtils.officeUtil import *
 from toStringUtils.picUtil import *
 from informationEngine.info_core import begin_info_extraction
+from toStringUtils.officeUtil import *
 
 """
 extractInfo: 文件信息读取与敏感信息提取
@@ -27,9 +28,10 @@ logger = LoggerSingleton().get_logger()
 # 此处更换敏感信息提取api
 def sensitive_info_detect(file_path, text, flag=0):
     if flag == 1:
-        sensitive_info = begin_info_extraction(text, flag=1,file_path=file_path)
+        sensitive_info = begin_info_extraction(
+            text, flag=1, file_path=file_path)
     else:
-        sensitive_info = begin_info_extraction(text,file_path=file_path)
+        sensitive_info = begin_info_extraction(text, file_path=file_path)
     res_out.add_new_json(file_path, sensitive_info)
 
 

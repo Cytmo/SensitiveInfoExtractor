@@ -1,3 +1,5 @@
+from docx import Document
+from docx.oxml import OxmlElement
 import aspose.words as aw
 import re
 import xlrd
@@ -10,6 +12,8 @@ from datetime import datetime
 import textract
 from util import globalVar
 from toStringUtils.picUtil import *
+from util.extractInfo import *
+from toStringUtils.universalUtil import *
 
 
 """
@@ -101,8 +105,8 @@ def docs_file(file_path, type):
             file_path.replace(".doc", ".docx").split("/")[-1]
     elif type == ".docx":
         logger.info(TAG+"docs_file(): .docx")
-        result_image_path = "../workspace/image/wps/wps"
-        image_dir = f"{result_image_path}/{doc_docx_name}/"
+        result_image_path = "../workspace/image/office/docx"
+        image_dir = f"{result_image_path}/{os.path.basename(file_path)}/"
         return docx_file_info_extract(file_path, image_dir)
     else:
         return ""
@@ -129,15 +133,46 @@ def docs_file(file_path, type):
 
 # 1-2.提取.docx中的文本和图片文本信息
 def docx_file_info_extract(docx_path, image_dir):
-    logger.info(TAG+"docx_file_info_extract(): "+docx_path+"  "+image_dir)
+    logger.info(TAG+"docx_file_info_extract():")
+
+    docx_text = " "
+
+    target_docx = docx.Document(docx_path)
+
+    # 是否成功设置图片占位符
+    flag = False
+
     try:
-        target_docx = docx.Document(docx_path)
+        # 设置占位符$PictureIsHere$
+        text_doc = aw.Document(docx_path)
+        doc_path = os.path.dirname(
+            docx_path)+"/"+os.path.basename(docx_path).replace(".docx", ".doc")
+        text_doc.save(doc_path, aw.SaveFormat.DOC)
 
-        # 提取文本
-        target_docx_text = ""
+        docx_text = universal_textract(
+            doc_path)
+        docx_text = docx_text.replace("[pic]", "$PictureIsHere$")
+        docx_text = docx_text.replace(
+            "Evaluation Only. Created with Aspose.Words. Copyright 2003-2023  Aspose  Pty", "")
+        docx_text = docx_text.replace(
+            "Ltd.", "")
+
+        flag = True
+        logger.info(TAG+"docx_file_info_extract(): 成功设置图片占位符")
+        logger.info(TAG+"docx_file_info_extract()-文本信息:")
+        logger.info(docx_text)
+
+    except Exception as e:
+        logger.info(TAG+"docx_file_info_extract(): 图片占位符设置失败")
+        logger.error(e)
+        docx_text = " "
         for paragraph in target_docx.paragraphs:
-            target_docx_text += paragraph.text + "\n"
+            if "Evaluation Only. Created with Aspose.Words. Copyright 2003-2023  Aspose" not in paragraph.text and "Ltd." not in paragraph.text:
+                docx_text += (paragraph.text + "\n")
+        logger.info(TAG+"docx_file_info_extract()-文本信息:")
+        logger.info(docx_text)
 
+    try:
         # 保存照片
         os.makedirs(image_dir, exist_ok=True)
         dict_rel = target_docx.part.rels
@@ -151,19 +186,9 @@ def docx_file_info_extract(docx_path, image_dir):
                 img_name = f'{word_name}-{img_name}'
                 with open(os.path.join(image_dir, img_name), "wb") as f:
                     f.write(rel.target_part.blob)
-         # 去除水印文字
-        target_docx_text = target_docx_text.replace("Evaluation only.", "")
-        # 去除版权信息 去除含有aspose的行
-        target_docx_text = target_docx_text.split("\n")
-        for i in range(len(target_docx_text)):
-            if "Aspose" in target_docx_text[i]:
-                target_docx_text[i] = ""
-        target_docx_text = "\n".join(target_docx_text)
-
-        logger.info(TAG+"docx_file_info_extract()-文本信息-"+target_docx_text)
 
         # 解析图片信息
-        image_all_text_res = ""
+        image_all_text_res = []
         if globalVar.flag_list[0] == True:
             image_all_text = ocr_table_batch(image_dir)
             # image_all_text = ocr_batch_textract(image_dir)
@@ -173,19 +198,28 @@ def docx_file_info_extract(docx_path, image_dir):
                 try:
                     single_result = " ".join(
                         [element for sublist in row[1:] for element in sublist])
-                    image_all_text_res += single_result
+                    image_all_text_res.append(single_result)
                 except IndexError as e:
                     # 处理 IndexError 异常
                     logger.error(e)
-            logger.info(TAG+"docx_file_info_extract()-图片文本信息-" +
-                        image_all_text_res)
+            logger.info(TAG+"docx_file_info_extract()-图片文本信息: ")
+            logger.info(image_all_text_res)
         else:
             logger.info(TAG+"docx_file_info_extract()-不处理文件内部的图片!!")
 
-        return target_docx_text+"\n"+image_all_text_res
+        if flag:
+            docx_text_list = re.split(r'(\$PictureIsHere\$)', docx_text)
+            res = replace_picture_texts(docx_text_list, image_all_text_res)
+            res = "\n".join(res)
+            return res
+        else:
+            res = docx_text+"\n".join(image_all_text_res)
+            return res
+
     except Exception as e:
         logger.error(e)
-        return ""
+        logger.error(TAG+"docx_file_info_extract(): 图片信息提取失败, 只返回文本信息")
+        return docx_text
 
 
 # 2-1.解析.ppt/.dps/.pptx
@@ -258,7 +292,7 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                     image_bytes = image.blob
                     image_ext = image.ext
                     image_filename = image_dir + \
-                        f"{ppt_pptx_name}_slide_{slide_number}_image_{image_count}.{image_ext}"
+                        f"{ppt_pptx_name}_slide_{slide_number}_image{image_count}.{image_ext}"
 
                     with open(image_filename, "wb") as img_file:
                         img_file.write(image_bytes)
@@ -301,20 +335,24 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
 
 # 将图片文本信息按顺序插入到文本内部: 文本-文本-图片(如果存在)-文本
 def replace_picture_texts(text_list, image_text_list):
-    i = 0  # 用于追踪image_all_text_res的索引
+    logger.info(TAG+"replace_picture_texts():")
+
+    i = 0  # 用于追踪textlist的索引
+    j = 0  # 用于追踪image_all_text_res的索引
 
     while i < len(text_list):
         if text_list[i] == "$PictureIsHere$":
-            if i < len(image_text_list):
-                text_list[i] = image_text_list[i]
+            if j < len(image_text_list):
+                text_list[i] = image_text_list[j]
                 i += 1
+                j += 1
             else:
                 del text_list[i]
         else:
             i += 1
 
-    if i < len(image_text_list):
-        text_list.extend(image_text_list[i:])
+    if j < len(image_text_list):
+        text_list.extend(image_text_list[j:])
 
     return text_list
 

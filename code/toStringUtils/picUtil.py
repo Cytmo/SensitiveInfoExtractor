@@ -1,3 +1,4 @@
+import re
 from util import globalVar
 from functools import lru_cache
 import hashlib
@@ -174,6 +175,14 @@ def find_image_by_hash(hash_to_find):
         return False
 
 
+# 定义自定义排序函数，提取文件名中的数字部分并进行比较
+def custom_sort_key(filename):
+    match = re.search(r'image(\d+)\.png', filename)
+    if match:
+        return int(match.group(1))
+    return float('inf')  # 如果没有匹配到数字部分，默认使用正无穷大
+
+
 # 使用百度PaddleOCR表格形式识别, 输入为包含图片路径的list
 def ocr_table_batch(folder_path):
     ocr_result = []
@@ -182,7 +191,7 @@ def ocr_table_batch(folder_path):
                                lang="ch", use_gpu=True
                                )
 
-    image_paths = read_all_pic(folder_path)
+    image_paths = sorted(read_all_pic(folder_path), key=custom_sort_key)
 
     for image_path in image_paths:
 
