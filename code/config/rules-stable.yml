@@ -6144,7 +6144,7 @@ patterns:
       regex: travis[_-]?com[_-]?token(=| =|:| :)
       confidence: low
   - pattern:
-      name: travis_e2e_token
+      name: travis_e2e_token 
       regex: travis[_-]?e2e[_-]?token(=| =|:| :)
       confidence: low
   - pattern:

@@ -34,6 +34,7 @@ class LoggerSingleton:
         self.setup_logger()
 
     def setup_logger(self):
+
         # 设置logger
         logging.getLogger().handlers = []
         self.logger = logging.getLogger(name=self.name)

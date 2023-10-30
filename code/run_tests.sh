@@ -24,8 +24,8 @@ while getopts "a12ch" option; do
         a)  # Test - Exclude images
             python3 main.py -f ../data -p false
             ;;
-        1)  # Test - data_test folder
-            python3 main.py -f ../data_test
+        1)  # Test - data_test folder 
+            python3 main.py -f ../data_test -p false
             ;;
         2)  # Test - all files
             python3 main.py -f ../data
