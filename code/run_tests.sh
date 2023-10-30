@@ -4,9 +4,9 @@
 function show_usage {
     echo "Usage: $0 <options>"
     echo "Options:"
-    echo "  -a: Test - Exclude images"
-    echo "  -1: Test - data_test folder"
-    echo "  -2: Test - all files"
+    echo "  -n: Test - Exclude images"
+    echo "  -t: Test - data_test folder"
+    echo "  -a: Test - all files"
     echo "  -c: Clear logs"
     echo "  -h: Show help"
     # 添加更多选项和描述
@@ -19,15 +19,15 @@ if [ $# -eq 0 ]; then
 fi
 
 # 获取用户提供的选项
-while getopts "a12ch" option; do
+while getopts "ntach" option; do
     case "$option" in
-        a)  # Test - Exclude images
+        n)  # Test - Exclude images
             python3 main.py -f ../data -p false
             ;;
-        1)  # Test - data_test folder 
+        t)  # Test - data_test folder 
             python3 main.py -f ../data_test -p false
             ;;
-        2)  # Test - all files
+        a)  # Test - all files
             python3 main.py -f ../data
             ;;
         c)  # Clear logs
