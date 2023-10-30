@@ -86,7 +86,7 @@ class XlsxDevider:
             process_bind_prase(data_part)   
 
         for prases in index_prase:
-            data_part = xlsxDevider.xlsx_data.iloc[prases[0]:prases[1]].copy().reset_index(drop = True).reindex()
+            data_part = xlsxDevider.xlsx_data.iloc[prases[0]:prases[1]].copy().reset_index(drop = True)
             queue_tmp.put(XlsxDevider(data_part))
 
         return queue_tmp
@@ -108,7 +108,8 @@ class XlsxDevider:
             process_bind_prase(data_part)
 
         for prases in index_prase:
-            data_part = xlsxDevider.xlsx_data.iloc[:,prases[0]:prases[1]].copy().reset_index(drop = True).reindex()
+            data_part = xlsxDevider.xlsx_data.iloc[:,prases[0]:prases[1]].copy().reset_index(drop = True)
+            data_part.columns = list(range(0,prases[1]-prases[0]))
             queue_tmp.put(XlsxDevider(data_part))
 
         #TODO 处理行分割
@@ -136,7 +137,7 @@ class XlsxDevider:
                 process_bind_prase(data_part)   
 
             for prases in index_prase:
-                data_part = xlsxDevider.xlsx_data.iloc[prases[0]:prases[1]].copy().reset_index(drop = True).reindex()
+                data_part = xlsxDevider.xlsx_data.iloc[prases[0]:prases[1]].copy().reset_index(drop = True)
                 queue_tmp.put(XlsxDevider(data_part))
 
             return queue_tmp
@@ -160,10 +161,12 @@ class XlsxDevider:
                 process_bind_prase(data_part)
 
             for prases in index_prase:
-                data_part = xlsxDevider.xlsx_data.iloc[:,prases[0]:prases[1]].copy().reset_index(drop = True).reindex()
+                data_part = xlsxDevider.xlsx_data.iloc[:,prases[0]:prases[1]].copy().reset_index(drop = True)
+                data_part.columns = list(range(0,prases[1]-prases[0]))
                 queue_tmp.put(XlsxDevider(data_part))
 
                 
+        #TODO 处理行分割
         return queue_tmp
 
     @classmethod
@@ -206,7 +209,17 @@ class XlsxDevider:
         else:
             print("处理敏感数据中，敏感数据大小为",self.xlsx_data.shape)
             print("推荐优先处理分块以提高处理结果")
-
+        # 单行单列的提取
+        if self.xlsx_data.shape[0] < 1:
+            return
+        elif self.xlsx_data.shape[0]==1:
+            process_bind_prase(self.xlsx_data.loc[0].tolist())
+            return
+        if self.xlsx_data.shape[1] <1:
+            return
+        elif self.xlsx_data.shape[1] == 1:
+            process_bind_prase(self.xlsx_data.loc[:,0].tolist())
+            return
         #TODO 处理提取分好块中的敏感数据
         # 首行，首行校验->逐行提取
         word_condition = [_sensitive_word.get(element) for element in self.xlsx_data.loc[0]]
@@ -246,13 +259,22 @@ class XlsxDevider:
 
 # for sheet_name in sheet_names:
 #     data = xlsx.parse(sheet_name)
-data = xlsx.parse(sheet_names[5],header=None)
-xlsxDevider = XlsxDevider(data)
-print(xlsxDevider.check_Pass())
-que_add = XlsxDevider.process_xlsx(xlsxDevider)
+xlsx_queue = queue.Queue()
+for name in sheet_names:
+    xlsx_queue.put(XlsxDevider(xlsx.parse(name,header=None)))
+# xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[0],header=None)))
 
-if xlsxDevider.check_Pass():
-    xlsxDevider.extract_sensitive_xlsx()
+while not xlsx_queue.empty():
+    xlsxDevider = xlsx_queue.get()
+    que_add = XlsxDevider.process_xlsx(xlsxDevider)
+    if xlsxDevider.check_Pass():
+        xlsxDevider.extract_sensitive_xlsx()
+    else:
+        while not que_add.empty():
+            xlsx_queue.put(que_add.get())
+
+
+
 
 # while not que_add.empty():
 #     tmp_use = que_add.get()
