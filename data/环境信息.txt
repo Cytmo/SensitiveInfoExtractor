@@ -20,7 +20,3 @@ root
 
 
 
-{address} ?2? {address} ?3? {address} ?4? 
-{user} root {password} Pass@word!!! {user} 163 {user} ?1? 
-{phonenumber} ?6? {password} Huawei@123456
-{address} ?5? {user} root {password} 2!Um37hvjk
