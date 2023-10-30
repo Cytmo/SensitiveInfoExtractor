@@ -186,6 +186,7 @@ def docx_file_info_extract(docx_path, image_dir):
         # 保存照片
         os.makedirs(image_dir, exist_ok=True)
         dict_rel = target_docx.part.rels
+        count = 1
         for rel in dict_rel:
             rel = dict_rel[rel]
             if "image" in rel.target_ref:
@@ -193,9 +194,11 @@ def docx_file_info_extract(docx_path, image_dir):
                     os.makedirs(image_dir)
                 img_name = re.findall("/(.*)", rel.target_ref)[0]
                 word_name = os.path.splitext(os.path.basename(docx_path))[0]
-                img_name = f'{word_name}-{img_name}'
-                with open(os.path.join(image_dir, img_name), "wb") as f:
+                img_name = image_dir+"/" + \
+                    f'{os.path.basename(doc_path)}-image{count}.png'
+                with open(img_name, "wb") as f:
                     f.write(rel.target_part.blob)
+                count += 1
 
         # 解析图片信息
         image_all_text_res = []
@@ -279,9 +282,8 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
 
         presentation = Presentation(pptx_path)
         slide_text = []
+        image_count = 1
         for slide_number, slide in enumerate(presentation.slides, start=1):
-
-            image_count = 0
             for shape in slide.shapes:
 
                 # 提取文本内容
@@ -297,15 +299,17 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                     # 提取图片
                     image_dir = f"{result_image_path}/{ppt_pptx_name}/"
                     os.makedirs(image_dir, exist_ok=True)
-                    image_count += 1
+
                     image = shape.image
                     image_bytes = image.blob
                     image_ext = image.ext
                     image_filename = image_dir + \
-                        f"{ppt_pptx_name}_slide_{slide_number}_image{image_count}.{image_ext}"
+                        f"{ppt_pptx_name}_image{image_count}.png"
 
                     with open(image_filename, "wb") as img_file:
                         img_file.write(image_bytes)
+
+                    image_count += 1
 
         logger.info(TAG+"pptx_file_info_extract()-文本信息:")
         logger.info(slide_text)

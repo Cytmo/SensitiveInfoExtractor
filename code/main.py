@@ -40,7 +40,7 @@ argparse.add_argument("-f", "--folder", default="../data",
 argparse.add_argument("-mp", "--multiprocess", default="false",
                       help="if use multiprocess")
 # 时间输出到哪
-argparse.add_argument("-t", "--time", default="time_info.txt",
+argparse.add_argument("-t", "--time", default="output/time_info.txt",
                       help="time info output file")
 
 # 是否处理非图片文件内部中的图片, 默认为true
