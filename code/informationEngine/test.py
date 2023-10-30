@@ -122,6 +122,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
 
     return text, placeholders
 
+<<<<<<< Updated upstream
 
 
 input_string = ["ACCESSKEY='AKIAIOSFODMM7EXAMPLE'",
@@ -129,3 +130,39 @@ input_string = ["ACCESSKEY='AKIAIOSFODMM7EXAMPLE'",
                 'cytmo@qq.com']
 for i in input_string:
     text, placeholders = information_protection(i)
+=======
+# item = '''
+
+# 13666628123
+# '''
+# item_protection, placeholders = information_protection(item)
+# print(item_protection)
+# print(placeholders)
+# print(placeholders_corresponding_type)
+
+ENG_KEYWORDS_LIST = ["-u", "-p", "IP", "port", "-h",
+                 "user", "password", "passw0rd", "address", "name", '\n']
+# 预处理英文自然语言文本
+def eng_text_preprocessing(text: str) -> str:
+    # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
+    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}\\b|[a-zA-Z0-9,.;@?!\\-\"'()])+"
+
+
+    # 使用正则表达式进行匹配和替换
+    cleaned_text = re.findall(pattern, text)
+
+    # 将匹配到的内容重新组合成字符串
+    cleaned_text = ' '.join(cleaned_text)
+    # 替换中文关键词
+    for keyword in ENG_KEYWORDS_LIST:
+        if keyword in ENG_REPLACEMENT_DICT:
+            cleaned_text = cleaned_text.replace(
+                keyword, ' {'+ENG_REPLACEMENT_DICT[keyword]+'} ')
+    # 移除空行
+    cleaned_text = '\n'.join(
+        [line for line in cleaned_text.splitlines() if line.strip()])
+    cleaned_text = cleaned_text.replace("{ {", "{").replace("} }", "}")
+    logger.debug("Cleaned text: "+cleaned_text)
+    return cleaned_text
+eng_text_preprocessing("AID0006812	计算机	192.168.0.25 user	user25	Zq8yO5u9KDxowGe3cygppfj2pkyT9YMn	张三	销售部	在用	xx公司")
+>>>>>>> Stashed changes

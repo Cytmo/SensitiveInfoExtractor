@@ -333,7 +333,8 @@ def prevent_eng_words_interference(text: str) -> str:
 # 预处理英文自然语言文本
 def eng_text_preprocessing(text: str) -> str:
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
-    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!=\-\"'()/])+"
+    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}\\b|[a-zA-Z0-9,.;@?!\\-\"'()])+"
+    
 
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text)
@@ -358,7 +359,7 @@ def chn_text_preprocessing(text: str) -> str:
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
-    pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\"'()])+"
+    pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\-\"'()])+"
 
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text, re.IGNORECASE)
@@ -691,7 +692,7 @@ def config_info_extract(text: str) -> dict:
     return result_dict
 
 # 使用模糊识别的方法提取信息，打关键词,抽取在之后做
-def fuzz_extract(text: str) -> dict:
+def fuzz_extract(text: str,RETURN_TYPE_DICT=False) -> dict:
     original_text = text
     # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除代码注释 // # 等
@@ -711,6 +712,15 @@ def fuzz_extract(text: str) -> dict:
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = fuzz_mark(text)
     text = marked_text_refinement(text)
+    # TODO:传回对应类别的字典
+    if RETURN_TYPE_DICT:
+        text = text.split()
+        result_dict = {}
+        for i in range(len(text)-1):
+            if text[i] in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
+                result_dict[text[i]] = text[i+1]
+                i = i+1
+        return result_dict
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
     return paired_info    
@@ -826,6 +836,7 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
             return result_table
 
 # 在常规提取失败后，使用特殊方法提取信息
+# TODO 部分文件并判定为未知并进行了fuzz_extract 解决此问题
 def result_manager(result,info,file_path) -> dict:
     # file_extension = file_path.split(".")[-1]
     logger.info(TAG + "result_manager(): plain text info extract result: {}".format(str(result)))
@@ -843,8 +854,8 @@ def result_manager(result,info,file_path) -> dict:
             result = switch[file_type](info)
         else:
             logger.info(TAG + "result_manager(): unknown input")
-            result = fuzz_extract(info)
-            logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
+            # result = fuzz_extract(info)
+            # logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
     return result
 
 if __name__ == '__main__':
