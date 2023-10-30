@@ -352,6 +352,9 @@ def prevent_eng_words_interference(text: str) -> str:
 
 # 预处理英文自然语言文本
 def eng_text_preprocessing(text: str) -> str:
+    # text, item_protection_dict1 = information_protection(text)
+    # global ITEM_PROTECTION_DICT
+    # ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern =  f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
     # 使用正则表达式进行匹配和替换
@@ -368,14 +371,14 @@ def eng_text_preprocessing(text: str) -> str:
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
     cleaned_text = cleaned_text.replace("{ {", "{").replace("} }", "}")
-    logger.debug("Cleaned text: "+cleaned_text)
+    logger.debug(TAG + "eng_text_preprocessing(): Cleaned text: "+cleaned_text)
     return cleaned_text
 
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
 def chn_text_preprocessing(text: str) -> str:
-    text, item_protection_dict1 = information_protection(text)
-    global ITEM_PROTECTION_DICT
-    ITEM_PROTECTION_DICT = item_protection_dict1
+    # text, item_protection_dict1 = information_protection(text)
+    # global ITEM_PROTECTION_DICT
+    # ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
                                                  
@@ -392,7 +395,7 @@ def chn_text_preprocessing(text: str) -> str:
     # 移除空行
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
-    logger.debug("Cleaned text: "+cleaned_text)
+    logger.debug(TAG + "chn_text_preprocessing(): Cleaned text: "+cleaned_text)
     return cleaned_text
 
 # 模糊标记文本中的关键词
@@ -510,15 +513,19 @@ def marked_text_refinement(text: str) -> str:
     for i in range(len(text)-1):
         if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
             if text[i] == "{address}" and not is_valid_address(text[i+1]):
+                logger.debug(TAG + 'marked_text_refinement(): Removing invalid address: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
             if text[i] == "{port}" and not is_valid_port(text[i+1]):
+                logger.debug(TAG + 'marked_text_refinement(): Removing invalid port: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
             if text[i] == "{user}" and not is_valid_user(text[i+1]):
+                logger.debug(TAG + 'marked_text_refinement(): Removing invalid user: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
             if text[i] == "{password}" and not is_valid_password(text[i+1]):
+                logger.debug(TAG + 'marked_text_refinement(): Removing invalid password: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
 
@@ -804,6 +811,13 @@ def plain_text_info_extraction(text: str):
     original_text = text
     # logger.critical(TAG + 'Text class: {}'.format(guess_lexer(text).name))
     # 移除代码注释 // # 等
+    global ITEM_PROTECTION_DICT
+    logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT before fuzz extract: '+str(ITEM_PROTECTION_DICT))
+    logger.debug(TAG + 'plain_text_info_extraction(): Text before sensitive info protection: '+text)
+    text, item_protection_dict1 = information_protection(text)
+    logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
+    logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
+
     logger.debug(TAG + 'Text before IoC protection: '+text)
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
@@ -813,6 +827,8 @@ def plain_text_info_extraction(text: str):
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
         text = eng_text_preprocessing(text)
+    if ITEM_PROTECTION_DICT == {}:
+        ITEM_PROTECTION_DICT = item_protection_dict1
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
