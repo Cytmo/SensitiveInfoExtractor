@@ -49,6 +49,6 @@ def simplify_rules(input_filename, output_filename):
 
 # 目前只删除了带?的
 # 调用函数并传递输入和输出文件名
-input_file = '../rules-stable.yml'
-output_file = '../rules/rules_simple.yml'
+input_file = '../rules/rules_stable.yml'
+output_file = '../rules/rules_stable_simple.yml'
 simplify_rules(input_file, output_file)
