@@ -914,10 +914,23 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
                 result = plain_text_info_extraction(info)
                 logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
                 return result
-            return plain_text_info_extraction(info,FUZZ_MARK=True)
+            file_type = determine_file_type(file_path,info)
+            switch = {
+                'code': code_info_extract,
+                'config': config_info_extract
+            }  
+            logger.info(TAG + "begin_info_extraction(): input type is {}".format(file_type))
+            if file_type in switch:
+                logger.info(TAG + "begin_info_extraction(): input is code/config")
+                # result = code_info_extract(info)
+                result = switch[file_type](info)
+            else:
+                logger.info(TAG + "begin_info_extraction(): unknown input")
+                result = plain_text_info_extraction(info,FUZZ_MARK=True)
+                logger.info(TAG + "begin_info_extraction(): fuzz_extract result: {}".format(str(result)))
+            return result
         logger.info(TAG + "info_extraction(): input is string")
         result = plain_text_info_extraction(info)
-
         return result_manager(result,info,file_path)
     # 表格
     elif isinstance(info, list):
