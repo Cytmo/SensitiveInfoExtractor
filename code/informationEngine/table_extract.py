@@ -78,7 +78,7 @@ def count_most_frequent_strings(data):
     
     return counts
 
-init_sensitive_word('/home/sakucy/networkCopitation/2023/code/config/sensitive_word.yml')
+init_sensitive_word('config/sensitive_word.yml')
 global _sensitive_word_tmp
 
 class XlsxDevider:
