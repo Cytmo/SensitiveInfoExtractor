@@ -46,6 +46,12 @@ def restore_placeholders(result_dict: dict) -> dict:
                 # 使用正则匹配，防止替换到错误的位置
                 value = re.sub(re.escape(placeholder), replacement, value)
             result_dict[key] = value
+    # 文本标记API专用，不应当在其他地方使用
+    elif isinstance(result_dict, str):
+        logger.warning(TAG + "restore_placeholders(): result_dict is str, only for text mark api")
+        for placeholder, replacement in ITEM_PROTECTION_DICT.items():
+            # 使用正则匹配，防止替换到错误的位置
+            result_dict = re.sub(re.escape(placeholder), replacement, result_dict)
     return result_dict
 
 # 是否是有效信息
@@ -795,7 +801,10 @@ def config_info_extract(text: str) -> dict:
 # 从处理过后的纯文本字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
-def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False) -> list:
+# RETURN_TYPE_DICT 为True时返回字典
+# FUZZ_MARK 为True时进行模糊标记
+# RETURN_MARKED_TEXT 为True时返回标记后的文本
+def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False,RETURN_MARKED_TEXT=True) -> list:
     original_text = text
     global ITEM_PROTECTION_DICT
     logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT before fuzz extract: '+str(ITEM_PROTECTION_DICT))
@@ -816,6 +825,10 @@ def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False)
         ITEM_PROTECTION_DICT = item_protection_dict1
     if FUZZ_MARK:
         text = fuzz_mark(text)
+    if RETURN_MARKED_TEXT:
+        # 还原保护时被替换的内容
+        text = restore_placeholders(text)
+        return text
     text = marked_text_refinement(text)
     # TODO:传回对应类别的字典
     if RETURN_TYPE_DICT:
