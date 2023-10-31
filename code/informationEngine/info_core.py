@@ -378,7 +378,7 @@ def prevent_eng_words_interference(text: str) -> str:
     return result
 
 # 预处理英文自然语言文本
-def eng_text_preprocessing(text: str) -> str:
+def eng_text_preprocessing(text: str,FUZZ_MARK=False) -> str:
     # text, item_protection_dict1 = information_protection(text)
     # global ITEM_PROTECTION_DICT
     # ITEM_PROTECTION_DICT = item_protection_dict1
@@ -390,10 +390,11 @@ def eng_text_preprocessing(text: str) -> str:
     cleaned_text = ' '.join(cleaned_text)
     # cleaned_text = text
     # 替换中文关键词
-    for keyword in ENG_KEYWORDS_LIST:
-        if keyword in ENG_REPLACEMENT_DICT:
-            cleaned_text = cleaned_text.replace(
-                keyword, ' {'+ENG_REPLACEMENT_DICT[keyword]+'} ')
+    if not FUZZ_MARK:
+        for keyword in ENG_KEYWORDS_LIST:
+            if keyword in ENG_REPLACEMENT_DICT:
+                cleaned_text = cleaned_text.replace(
+                    keyword, ' {'+ENG_REPLACEMENT_DICT[keyword]+'} ')
     # 移除空行
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
@@ -402,23 +403,24 @@ def eng_text_preprocessing(text: str) -> str:
     return cleaned_text
 
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
-def chn_text_preprocessing(text: str) -> str:
+def chn_text_preprocessing(text: str,FUZZ_MARK=False) -> str:
     # text, item_protection_dict1 = information_protection(text)
     # global ITEM_PROTECTION_DICT
     # ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
-                                                 
+                                             
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text, re.IGNORECASE)
     
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
     # 替换中文关键词
-    for keyword in CHN_KEYWORDS_LIST:
-        if keyword in CHN_REPLACEMENT_DICT:
-            cleaned_text = cleaned_text.replace(
-                keyword, ' {'+CHN_REPLACEMENT_DICT[keyword]+'} ')
+    if not FUZZ_MARK:
+        for keyword in CHN_KEYWORDS_LIST:
+            if keyword in CHN_REPLACEMENT_DICT:
+                cleaned_text = cleaned_text.replace(
+                    keyword, ' {'+CHN_REPLACEMENT_DICT[keyword]+'} ')
     # 移除空行
     cleaned_text = '\n'.join(
         [line for line in cleaned_text.splitlines() if line.strip()])
@@ -812,7 +814,7 @@ def config_info_extract(text: str) -> dict:
     for key in matches_result:
         if any(key1 in key for key1 in SPECIAL_KEYWORDS_LIST):
             result_dict[key] = matches_result[key]
-
+    
     # 还原被替换的内容
     result_dict = restore_placeholders(result_dict)
     logger.info(TAG + 'Config processing result: '+str(result_dict))
@@ -836,12 +838,12 @@ def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False,
 
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
-        text = chn_text_preprocessing(text)
+        text = chn_text_preprocessing(text,FUZZ_MARK)
     else:
         logger.info(TAG + 'This is an English text.')
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
-        text = eng_text_preprocessing(text)
+        text = eng_text_preprocessing(text,FUZZ_MARK)
     if ITEM_PROTECTION_DICT == {}:
         ITEM_PROTECTION_DICT = item_protection_dict1
     if FUZZ_MARK:
