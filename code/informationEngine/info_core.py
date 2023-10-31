@@ -726,19 +726,17 @@ def code_info_extract(text: str) -> dict:
     text = lines
     lines = []
     for line in text:
-        # if "=" in line:
-        #     line_sliced = line.strip().split("=")
-        # else:
-        #     pattern = r"(['\"]).*?\1\s+(['\"]).*?\2"
-        #     matches = re.findall(pattern, line)
+        if "=" in line:
+            line_sliced = line.strip().split("=")
+        else:
+            pattern = r"(['\"]).*?\1\s+(['\"]).*?\2"
+            matches = re.findall(pattern, line)
 
-        #     # 打印匹配的字符串的两部分
-        #     for match in matches:
-        #         part1, part2 = match
-        #     line_sliced = [part1, part2]
-        line_sliced = line.strip().split(" ")
-        for line_sliced_item in line_sliced:
-            lines.append("{{{}}} {}".format(line_sliced_item, line_sliced_item))
+            # 打印匹配的字符串的两部分
+            for match in matches:
+                part1, part2 = match
+            line_sliced = [part1, part2]
+        lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
     logger.info(TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
     # text = lines
 
