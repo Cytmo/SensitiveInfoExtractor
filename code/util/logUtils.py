@@ -34,19 +34,26 @@ class LoggerSingleton:
         self.setup_logger()
 
     def setup_logger(self):
+        # 创建一个自定义的根记录器
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.NOTSET)  # 设置根记录器的级别为最低级别
 
+        # 移除根记录器的所有处理程序
+        for handler in root_logger.handlers[:]:
+            root_logger.removeHandler(handler)
         # 设置logger
+        # 清空logger.handlers
         logging.getLogger().handlers = []
         self.logger = logging.getLogger(name=self.name)
         self.logger.setLevel(level=self.level)
 
         self.logger.handlers = []
         # 初始化handler
-        stream_handler = logging.StreamHandler()
+        console_handler = logging.StreamHandler()
         file_handler = logging.FileHandler(filename=self.filename)
 
         # 设置handler等级
-        stream_handler.setLevel(level=logging.INFO)
+        console_handler.setLevel(level=logging.INFO)
         file_handler.setLevel(level=self.level)
 
         # 设置日志格式
@@ -60,15 +67,28 @@ class LoggerSingleton:
                 'ERROR': 'red',
                 'CRITICAL': 'red,bg_white',
             })
+        console_handler.setFormatter(None)
 
-        stream_handler.setFormatter(sf_format)
+        console_handler.setFormatter(sf_format)
+        
         sf_format = logging.Formatter(
             "[line:%(lineno)d]-%(levelname)s-%(message)s")
         file_handler.setFormatter(sf_format)
 
         # 将handler添加到logger
-        self.logger.addHandler(stream_handler)
+
+
+        self.logger.addHandler(console_handler)
         self.logger.addHandler(file_handler)
 
     def get_logger(self):
+
+        # 移除根记录器的所有处理程序
+        for handler in logging.root.handlers[:]:
+                logging.root.removeHandler(handler)
+
+                # 创建一个新的根记录器并设置自定义配置
+                root_logger = logging.getLogger()
+                root_logger.setLevel(logging.NOTSET)  # 设置根记录器的级别为最低级别
+
         return self.logger
