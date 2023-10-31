@@ -61,7 +61,7 @@ class LoggerSingleton:
             "%(log_color)s%(asctime)s-[line:%(lineno)d]-%(levelname)s-%(message)s",
             datefmt="%H:%M:%S",
             log_colors={
-                'DEBUG': 'cyan',
+                'DEBUG': 'blue',
                 'INFO': 'green',
                 'WARNING': 'yellow',
                 'ERROR': 'red',

@@ -55,8 +55,7 @@ def restore_placeholders(result_dict: dict) -> dict:
     return result_dict
 
 # 是否是有效信息
-def is_valid_info(info: str) -> bool:
-    VALID_INFO_THRESHOLD = 3
+def is_valid_info(info: str,VALID_INFO_THRESHOLD = 3) -> bool:
     alphanumeric_count = len(re.findall(r'\w', info))
     return alphanumeric_count >= VALID_INFO_THRESHOLD
 
@@ -252,6 +251,8 @@ class paired_info_pattern():
         for key in self.data:
             if self.data[key] != None:
                 result[key] = self.data[key]
+        if len(result)<2:
+            return {}
         # check if result have all needed attributes
         # TODO() 可能要修改
         # for key in ["user", "password", "address", "port", "phonenumber"]:
@@ -599,10 +600,9 @@ def extract_paired_info(text):
     if a_paired_info.check_header_complete():
         a_paired_info.remake_data()
         result_pair.append(a_paired_info.output())
-
     # 移除空项
     logger.debug(TAG + 'Paired info before filtering: '+str(result_pair))
-    filtered_result_pair = []
+    # filtered_result_pair = []
 
     # 不太清楚为啥要有这个判断，不敢动，和上文的output中补充联动
     # for item in result_pair:
@@ -613,12 +613,15 @@ def extract_paired_info(text):
     #         filtered_item = {key: value for key,
     #                          value in item.items() if value is not None}
     #         filtered_result_pair.append(filtered_item)
-    result_pair = filtered_result_pair
+    # result_pair = filtered_result_pair
 
     logger.debug(TAG + 'paired_info_extract(): beginning to restore replaced content')
     logger.debug(TAG + 'paired_info_extract(): ITEM_PROTECTION_DICT: '+str(ITEM_PROTECTION_DICT))
     # 还原被替换的内容
     result_pair = restore_placeholders(result_pair)
+    for item in result_pair:
+        if item == {}:
+            result_pair.remove(item)
     return result_pair
 
 
@@ -650,41 +653,76 @@ def rule_based_info_extract(text: str) -> dict:
 def code_info_extract(text: str) -> dict:
     original_text = text
     logger.info(TAG + 'code_info_extract(): Code processing for text '+str(text))
-
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
     text = text.lower()
     text = text.replace("'", '"')
-    # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
-    string_lines = re.findall(r'.*=\s*["\'].*["\']',text, re.MULTILINE)
-    string_lines += re.findall(r"['\"].*['\"]\s+['\"].*['\"]",text, re.MULTILINE)
+    # remove outer "
+    lines = text.split("\n")
+    new_lines = []
 
-    text = string_lines
+    for line in lines:
+        # 去除行首和行尾的双引号
+        if line.startswith('"') and line.endswith('"'):
+            line = line[1:-1]
+        new_lines.append(line)
+
+    text = '\n'.join(new_lines)
+    logger.debug(TAG + 'code_info_extract(): text after removing outer " start:@@@ '+str(text)+' end:@@@')
+    # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
+    matches1 = re.finditer(r'.*=\s*["\'][^"\']*["\']', text, re.MULTILINE)
+    matches2 = re.finditer(r"['\"].*['\"]\s+['\"].*['\"]",text, re.MULTILINE)
+    # 创建一个字典，用于存储替换规则
+    replacement_dict = {}
+
+    for match in matches1:
+        matched_string = match.group(0)
+        replacement = f"REPLACE{len(replacement_dict)}"
+        replacement_dict[replacement] = matched_string
+        text = text.replace(matched_string, replacement)
+
+    for match in matches2:
+        matched_string = match.group(0)
+        replacement = f"REPLACE{len(replacement_dict)}"
+        replacement_dict[replacement] = matched_string
+        text = text.replace(matched_string, replacement)
+
+    # 输出还原后的文本
+    for key, value in replacement_dict.items():
+        text = text.replace(key, value)
+
     logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
+    text = text.split("\n")
     lines = []
     for line in text:
         line=line.strip()
-        line.replace("\"", " ")
-        line.replace("'", " ")
-        line.replace("=", " ")
+        line=line.replace("\"", " ")
+        # line=line.replace("=", " ")
         lines.append(line)
     logger.info(TAG + 'code_info_extract(): text after removing outer " and only keeping string: '+str(lines))
     text = lines
     lines = []
     for line in text:
-        if "=" in line:
+        line_sliced = []
+        if  "name" in line and "value" in line:
+            logger.debug(TAG + 'Dividing by name and value: '+line)
+            # 使用正则表达式匹配属性名和属性值
+            pattern = r'\s*name\s*=\s*([^\s]+)\s*value\s*=\s*([^\s]+)'
+            matches = re.findall(pattern, line)
+            # 打印匹配结果
+            for match in matches:
+                line_sliced = [match[0], match[1]]
+        elif "=" in line:
             line_sliced = line.strip().split("=")
         else:
-            pattern = r"(['\"]).*?\1\s+(['\"]).*?\2"
-            matches = re.findall(pattern, line)
+            line_sliced = line.split(" ")
+            # remove empty item in line_sliced
+            line_sliced = [item for item in line_sliced if item != ""]
+        if len(line_sliced) == 2:
+            lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
 
-            # 打印匹配的字符串的两部分
-            for match in matches:
-                part1, part2 = match
-            line_sliced = [part1, part2]
-        lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
     logger.info(TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
     # text = lines
     result_dict = {}
@@ -723,62 +761,24 @@ def code_info_extract(text: str) -> dict:
         if is_valid_info(value):
             result_dict_temp[key] = value
     result_dict = result_dict_temp
+    cleaned_dict = {}  # Create a new dictionary to store the cleaned key-value pairs
+
+    for key, value in result_dict.items():
+        # Remove /, space, :, {, and } from key and value
+        cleaned_key = key.replace('/', '').replace(' ', '').\
+            replace(':', '').replace('{', '').replace('}', '').replace('\"', '').replace('\'', '')
+        # cleaned_value = value.replace('/', '').replace(' ', '').\
+        #     replace(':', '').replace('{', '').replace('}', '').replace('\"', '').replace('\'', '')
+
+        # Add the cleaned key-value pair to the new dictionary
+        cleaned_dict[cleaned_key] = value
+    result_dict = cleaned_dict
     return result_dict
 
 # 配置文件的提取
 def config_info_extract(text: str) -> dict:
-    logger.info(TAG + 'Special processing for config')
-    text, item_protection_dict1 = information_protection(text)
-    global ITEM_PROTECTION_DICT
-    ITEM_PROTECTION_DICT = item_protection_dict1
-    text = prevent_eng_words_interference(text)
-    text = text.lower()
-    text = text.replace("'", '"')
-    text = text.split("\n")
-    lines = []
-    # remove outer "
-    for line in text:
-        if line.startswith('"') and line.endswith('"'):
-            line = line[1:-1]
-        lines.append(line)
-    text = lines
-    matches_result = {}
-    # only  keep each eng_keywords_list between ""
-    for line in text:
-        line= line.lower()
-        if "=\"" in line:
-            # 使用正则表达式匹配属性名和属性值
-            pattern = r'\s*name\s*=\s*"([^"]+)"\s*value\s*=\s*"([^"]+)"'
-            matches = re.findall(pattern, line)
-            # 打印匹配结果
-            for match in matches:
-                matches_result[match[0]] = match[1]
-        elif "=" in line:
-            # logger.debug(TAG + 'Dividing by =: '+line)
-            parts = line.strip().split('=')
-            if len(parts) == 2:
-                key, value = parts
-                key = key.strip()
-                value = value.strip()
-                if key and value:
-                    matches_result[key] = value
-        elif ':' in line:
-            key, _, value = line.partition(':')
-            key = key.strip()
-            value = value.strip()
-            if key and value:
-                matches_result[key] = value
-    result_dict = {}
-    logger.debug(TAG + 'Config processing for text: '+str(lines))
-    # remove empty eng_keywords_list
-    for key in matches_result:
-        if any(key1 in key for key1 in SPECIAL_KEYWORDS_LIST):
-            result_dict[key] = matches_result[key]
-    
-    # 还原被替换的内容
-    result_dict = restore_placeholders(result_dict)
-    logger.info(TAG + 'Config processing result: '+str(result_dict))
-    return result_dict 
+    return code_info_extract(text)
+
 
 ##########################入口函数###############################
 # 从处理过后的纯文本字符串中提取成对信息
