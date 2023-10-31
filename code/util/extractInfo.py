@@ -154,24 +154,25 @@ def extract_et(file_path, nameclean):
 # # .eml文件读取和提取操作
 def extract_eml(file_path, nameclean):
     logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
-    # eml_header, eml_text, eml_attachment = eml_file(file_path)
+    eml_header, eml_text, eml_attachment = eml_file(file_path)
 
-    # sensitive_info = []
-    # sensitive_info_text = begin_info_extraction(eml_text["text"])
-    # if not len(sensitive_info_text) == 0:
-    #     logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
-    #     sensitive_info.append(sensitive_info_text)
+    sensitive_info = []
+    sensitive_info_text = begin_info_extraction(eml_text["text"])
+    if not len(sensitive_info_text) == 0:
+        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
+        sensitive_info.append(sensitive_info_text)
 
-    # if "table" in eml_text:
-    #     logger.info(TAG+"extract_eml(): eml body has table")
-    #     sensitive_info = sensitive_info+eml_text["table"]
+    print(eml_text)
+    if "table" in eml_text:
+        logger.info(TAG+"extract_eml(): eml body has table")
+        sensitive_info = sensitive_info+eml_text["table"]
 
-    # result = {
-    #     "eml_header": eml_header,
-    #     "sensitive_info": sensitive_info,
-    #     "eml_attachment": eml_attachment
-    # }
-    # res_out.add_new_json(file_path, result)
+    result = {
+        "eml_header": eml_header,
+        "sensitive_info": sensitive_info,
+        "eml_attachment": eml_attachment
+    }
+    res_out.add_new_json(file_path, result)
 
 
 ######################### code config file ################################

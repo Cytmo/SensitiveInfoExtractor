@@ -3,6 +3,9 @@ import queue
 import yaml
 import re
 from informationEngine.info_core import *
+from util.logUtils import LoggerSingleton
+TAG = "informationEngine.table_extract-"
+logger = LoggerSingleton().get_logger()
 
 
 def contains_chinese(data):
@@ -311,7 +314,8 @@ class XlsxDevider:
         if len(json_data) > 0:
             return json_data
         self.xlsx_data = self.xlsx_data.transpose()
-
+        logger.info(TAG-"xlsx_data:{}".format(
+            self.xlsx_data.to_string(index=False, header=False)))
         return begin_info_extraction(self.xlsx_data.to_string(index=False, header=False))
 
     def xlsx_fuzz_extract(self):
