@@ -8,6 +8,7 @@ function show_usage {
     echo "  -t: Test - data_test folder"
     echo "  -a: Test - all files"
     echo "  -c: Clear logs"
+    echo "  -d: Compare the two newest files in the output folder"
     echo "  -h: Show help"
     # 添加更多选项和描述
 }
@@ -19,7 +20,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # 获取用户提供的选项
-while getopts "ntach" option; do
+while getopts "ntacdh" option; do
     case "$option" in
         n)  # Test - Exclude images
             python3 main.py -f ../data -p false
@@ -34,11 +35,28 @@ while getopts "ntach" option; do
             rm log/*
             rm output/*
             ;;
+        d) # Compare the two newest files in the output folder
+            # 获取output文件夹中最新的两个文件
+            files=($(ls -t output/* | head -n 2))
+            if [ ${#files[@]} -lt 2 ]; then
+                echo "There are less than 2 files in the output folder."
+            else
+                # 执行比较操作，这里用diff作为示例，你可以根据实际需求修改
+                echo "Comparing ${files[0]} and ${files[1]}..."
+                diff "${files[0]}" "${files[1]}"
+                result=$?
+                echo "result : $result"
+                if [ "$result" -eq 0 ]; then
+                    echo "The two files are the same."
+                else
+                    echo "The two files are different."
+                fi
+            fi
+            ;;
         h)  # Show help
             show_usage
             exit 0
             ;;
-        # 添加更多选项的处理
         \?) # 无效选项
             echo "Invalid option: -$OPTARG"
             exit 1

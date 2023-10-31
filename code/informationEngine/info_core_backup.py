@@ -22,7 +22,7 @@ from config.info_core_config import (
     INFO_PATTERN,
     REPLACED_KEYWORDS_LIST,
     SPECIAL_KEYWORDS_LIST,
-    sensitive_info_pattern
+    SENSITIVE_INFO_PATTERN
 )
 
 ##########################工具函数和类###############################
@@ -276,7 +276,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
 
 
     sensitive_info_pattern_match_result = {}
-    for pattern in sensitive_info_pattern['patterns']:
+    for pattern in SENSITIVE_INFO_PATTERN['patterns']:
 
         name = pattern['pattern']['name']
         regex = pattern['pattern']['regex']

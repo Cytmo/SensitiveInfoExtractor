@@ -122,15 +122,6 @@ def information_protection(text: str) -> Tuple[str, dict]:
 
     return text, placeholders
 
-<<<<<<< Updated upstream
-
-
-input_string = ["ACCESSKEY='AKIAIOSFODMM7EXAMPLE'",
-                'SECRETKEY="wJalrXUtnFEMI/K7MDENG/bQxRfiCYEXAMPLEKEY"',
-                'cytmo@qq.com']
-for i in input_string:
-    text, placeholders = information_protection(i)
-=======
 # item = '''
 
 # 13666628123
@@ -165,4 +156,3 @@ def eng_text_preprocessing(text: str) -> str:
     logger.debug("Cleaned text: "+cleaned_text)
     return cleaned_text
 eng_text_preprocessing("AID0006812	计算机	192.168.0.25 user	user25	Zq8yO5u9KDxowGe3cygppfj2pkyT9YMn	张三	销售部	在用	xx公司")
->>>>>>> Stashed changes
