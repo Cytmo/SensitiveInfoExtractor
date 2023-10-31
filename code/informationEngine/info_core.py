@@ -254,9 +254,9 @@ class paired_info_pattern():
                 result[key] = self.data[key]
         # check if result have all needed attributes
         # TODO() 可能要修改
-        for key in ["user", "password", "address", "port", "phonenumber"]:
-            if key not in result:
-                result[key] = None
+        # for key in ["user", "password", "address", "port", "phonenumber"]:
+        #     if key not in result:
+        #         result[key] = None
         self.__init__()
         return result
 
@@ -605,14 +605,14 @@ def extract_paired_info(text):
     filtered_result_pair = []
 
     # 不太清楚为啥要有这个判断，不敢动，和上文的output中补充联动
-    for item in result_pair:
-        if ("user" in item and "address" in item and "password" in item) and \
-            (item["user"] is not None or item["address"] is not None) and \
-                item["password"] is not None:
-            # Remove None attributes
-            filtered_item = {key: value for key,
-                             value in item.items() if value is not None}
-            filtered_result_pair.append(filtered_item)
+    # for item in result_pair:
+    #     if ("user" in item and "address" in item and "password" in item) and \
+    #         (item["user"] is not None or item["address"] is not None) and \
+    #             item["password"] is not None:
+    #         # Remove None attributes
+    #         filtered_item = {key: value for key,
+    #                          value in item.items() if value is not None}
+    #         filtered_result_pair.append(filtered_item)
     result_pair = filtered_result_pair
 
     logger.debug(TAG + 'paired_info_extract(): beginning to restore replaced content')
@@ -650,13 +650,12 @@ def rule_based_info_extract(text: str) -> dict:
 def code_info_extract(text: str) -> dict:
     original_text = text
     logger.info(TAG + 'code_info_extract(): Code processing for text '+str(text))
-    text = fix_ocr(text)
+
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
     text = text.lower()
-    text = fix_ocr(text)
     text = text.replace("'", '"')
     # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
     string_lines = re.findall(r'.*=\s*["\'].*["\']',text, re.MULTILINE)
@@ -664,27 +663,6 @@ def code_info_extract(text: str) -> dict:
 
     text = string_lines
     logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
-    # lines = []
-    # # remove outer "
-    # for line in text:
-    #     if line.startswith('"') and line.endswith('"'):
-    #         line = line[1:-1]
-    #     lines.append(line)
-    # text = lines
-    # lines = []
-    # # only  keep each eng_keywords_list between ""
-    # for line in text:
-    #     new_line = ""
-    #     if ":" in line:
-    #         line = line.split(":")
-    #     elif "=" in line:
-    #         line = line.split("=")
-    #     elif '"' in line:
-    #         line = line.split('"')
-    #     for i in range(len(line)):
-    #         if i % 2 == 1:
-    #             new_line += "{} ".format(line[i])
-    #     lines.append(new_line)
     lines = []
     for line in text:
         line=line.strip()
@@ -709,8 +687,6 @@ def code_info_extract(text: str) -> dict:
         lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
     logger.info(TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
     # text = lines
-
-
     result_dict = {}
     logger.debug(TAG + 'Special processing for text: '+str(lines))
     # remove empty eng_keywords_list
@@ -734,24 +710,9 @@ def code_info_extract(text: str) -> dict:
                             ] = ITEM_PROTECTION_DICT[words_list[i+1]]
             else:
                 result_dict[words_list[i]] = words_list[i + 1]
-    # # check if the result is valid
-    # logger.info(TAG + 'code_info_extract(): using paired_info_class to check valid info')
-    # logger.info(TAG + 'code_info_extract(): paired_info_class input: '+str(result_dict))
-    # a_paired_info = paired_info_pattern()
-    # for key, value in result_dict.items():
-    #     if key in a_paired_info.data:
-    #         a_paired_info.setter(key, value)
-    # a_paired_info.remake_data()
-    # result_dict = a_paired_info.output()
-
-    # logger.info(TAG + 'code_info_extract(): Code processing result after paired_info_class: '+str(result_dict))
-
 
     result_dict = restore_placeholders(result_dict)
     logger.info(TAG + 'Code processing result: '+str(result_dict))
-
-    
-
     # TODO this section is just for test, remove it later
     rule_based_info_extract_result = rule_based_info_extract(original_text)
     result_dict.update(rule_based_info_extract_result)
@@ -772,7 +733,6 @@ def config_info_extract(text: str) -> dict:
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
     text = text.lower()
-    text = fix_ocr(text)
     text = text.replace("'", '"')
     text = text.split("\n")
     lines = []
@@ -909,6 +869,7 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
             for item in info[1:]:
                 item_to_string = "\n".join(item)
                 text = text+"\n"+item_to_string
+            text = fix_ocr(text)
             result =  plain_text_info_extraction(text)
             return result_manager(result,text,file_path)
         else:
