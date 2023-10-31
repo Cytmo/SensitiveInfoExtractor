@@ -24,6 +24,8 @@ pip install pyyaml
 pip install aspose-words
 pip install imbalanced-learn
 pip install python-magic
+pip install Pandas
+pip install xlrd
 
 
 # linux软件安装
