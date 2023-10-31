@@ -340,6 +340,22 @@ class XlsxDevider:
         return json_data
 
 
+# 传入pandas中dataframe类型的 2维列表
+def single_table_sensitive_extraction(data):
+    xlsx_queue = queue.Queue()
+
+    xlsx_queue.put(XlsxDevider(data))
+    # xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[5],header=None)))
+    res = []
+    while not xlsx_queue.empty():
+        xlsxDevider = xlsx_queue.get()
+        que_add = XlsxDevider.process_xlsx(xlsxDevider)
+        if xlsxDevider.check_Pass():
+            res.append(xlsxDevider.extract_sensitive_xlsx())
+        else:
+            while not que_add.empty():
+                xlsx_queue.put(que_add.get())
+    return res
 # xlsx = pd.ExcelFile('/home/sakucy/networkCopitation/2023/data/tmp/资产梳理.xlsx')
 # sheet_names = xlsx.sheet_names
 # # for sheet_name in sheet_names:
