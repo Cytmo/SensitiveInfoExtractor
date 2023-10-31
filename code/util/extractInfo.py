@@ -150,8 +150,8 @@ def extract_et(file_path, nameclean):
 
 ######################### e-mail file ########################################
 
-
-# .eml文件读取和提取操作
+# TODO
+# # .eml文件读取和提取操作
 def extract_eml(file_path, nameclean):
     logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
     # eml_header, eml_text, eml_attachment = eml_file(file_path)

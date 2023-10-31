@@ -281,38 +281,6 @@ class paired_info_pattern():
 
 ##########################预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
-def information_protection(text: str) -> Tuple[str, dict]:
-    placeholders = {}  # This dictionary will store placeholders and their corresponding content
-    placeholders_counter = 1  # Counter for generating placeholders
-    global PLACEHOLDERS_CORRESPONDING_TYPE
-    PLACEHOLDERS_CORRESPONDING_TYPE = {}
-    # Define a list of dictionaries with patterns and their corresponding types
-    patterns = [
-        {'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', 'type': 'email'},
-        {'pattern': r'jdbc:mysql://[a-zA-Z0-9:/._-]+', 'type': 'jdbc_url'},
-        {'pattern': r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 'type': 'url'},
-        {'pattern': r'(?:\d{1,3}\.){3}\d{1,3}|localhost', 'type': 'ip'},
-        {'pattern': r'1[3-9]\d{9}', 'type': 'phonenumber'},
-        # {'pattern': r'\b(0|6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|[0-5]?[0-9]{1,4})\b', 'type': 'port'}
-    ]
-
-
-
-    for pattern_info in patterns:
-        pattern = pattern_info['pattern']
-        matches = re.finditer(pattern, text, flags=re.IGNORECASE)
-        for match in matches:
-            item = match.group()
-            placeholder = f'?{placeholders_counter}?'
-            placeholders[placeholder] = item
-            PLACEHOLDERS_CORRESPONDING_TYPE[placeholder] = pattern_info['type']  # Store the corresponding type
-            # Replace only the first occurrence
-            text = text.replace(item, placeholder, 1)
-            placeholders_counter += 1
-
-
-    return text, placeholders
-
 placeholders = {}  # This dictionary will store placeholders and their corresponding content
 def information_protection(text: str) -> Tuple[str, dict]:
     global placeholders
@@ -357,19 +325,19 @@ def information_protection(text: str) -> Tuple[str, dict]:
         confidence = pattern['pattern']['confidence']
 
         # 进行正则表达式匹配
-        match = re.search(regex, text)
+        matches = re.finditer(regex, text)
 
-        if match:
+
+        for match in matches:
             logger.info(TAG + "information_protection(): Matched pattern: {}".format(name))
             logger.info(TAG + "information_protection(): Confidence: {}".format(confidence))
             logger.info(TAG + "information_protection(): Matched text: {}\n".format(match.group(0)))
-            logger.info(TAG + "information_protection(): Matched text: {}\n".format(match))
             # print(f"Matched pattern: {name}")
             # print(f"Confidence: {confidence}")
             # print(f"Matched text: {match.group(0)}\n")
-            if match.group(0) not in match_result:
-                sensitive_info_pattern_match_result[match.group(0)] = []
-                sensitive_info_pattern_match_result[match.group(0)].append(name)
+            # if match.group(0) not in match_result:
+            sensitive_info_pattern_match_result[match.group(0)] = []
+            sensitive_info_pattern_match_result[match.group(0)].append(name)
     # 记录计数器位置，防止种类从0开始，取到不存在的键值
     for key in sensitive_info_pattern_match_result:
         placeholder = f'?{placeholders_counter}?'
