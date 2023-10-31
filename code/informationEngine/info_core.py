@@ -663,6 +663,16 @@ def rule_based_info_extract(text: str) -> dict:
         result_dict[item_type] = item_content
     for value in result_dict.values():
         value = "Rule based: "+value
+
+    logger.info(TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_dict))
+    # logger.info(TAG + 'rule_based_info_extract(): using paired_info_class to check valid info')
+    # a_paired_info = paired_info_pattern()
+    # for key, value in result_dict.items():
+    #     if key in a_paired_info.data:
+    #         a_paired_info.setter(key, value)
+    # a_paired_info.remake_data()
+    # result_dict = a_paired_info.output()
+    # logger.info(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
     return result_dict
 
 #代码(目前仅有carbon.jpg)等文件的提取
@@ -724,10 +734,23 @@ def code_info_extract(text: str) -> dict:
                             ] = ITEM_PROTECTION_DICT[words_list[i+1]]
             else:
                 result_dict[words_list[i]] = words_list[i + 1]
+    # # check if the result is valid
+    # logger.info(TAG + 'code_info_extract(): using paired_info_class to check valid info')
+    # logger.info(TAG + 'code_info_extract(): paired_info_class input: '+str(result_dict))
+    # a_paired_info = paired_info_pattern()
+    # for key, value in result_dict.items():
+    #     if key in a_paired_info.data:
+    #         a_paired_info.setter(key, value)
+    # a_paired_info.remake_data()
+    # result_dict = a_paired_info.output()
+
+    # logger.info(TAG + 'code_info_extract(): Code processing result after paired_info_class: '+str(result_dict))
+
+
     result_dict = restore_placeholders(result_dict)
     logger.info(TAG + 'Code processing result: '+str(result_dict))
 
-
+    
 
     # TODO this section is just for test, remove it later
     rule_based_info_extract_result = rule_based_info_extract(original_text)
@@ -804,7 +827,7 @@ def config_info_extract(text: str) -> dict:
 # RETURN_TYPE_DICT 为True时返回字典
 # FUZZ_MARK 为True时进行模糊标记
 # RETURN_MARKED_TEXT 为True时返回标记后的文本
-def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False,RETURN_MARKED_TEXT=True) -> list:
+def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False,RETURN_MARKED_TEXT=False) -> list:
     original_text = text
     global ITEM_PROTECTION_DICT
     logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT before fuzz extract: '+str(ITEM_PROTECTION_DICT))

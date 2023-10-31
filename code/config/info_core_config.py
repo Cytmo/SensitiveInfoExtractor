@@ -23,7 +23,7 @@ INFO_PATTERN = {"user": "user", "password": "password",
 ONE_WAY_CONNECTED_INFO = {"port": "address",}
 
 # 双向依赖信息组---等价关系，前后都需要存在才成立
-TWO_WAY_CONNECTED_INFO = {"AK": "SK",}
+TWO_WAY_CONNECTED_INFO = {"AWSsecretkey":"AWSaccesskey"}
 
 # 信息提取替换词列表
 REPLACED_KEYWORDS_LIST = ["{user}", "{password}", "{address}", "{port}", "{phonenumber}", "{email}"]

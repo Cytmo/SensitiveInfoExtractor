@@ -1217,10 +1217,6 @@ patterns:
       regex: API[\\-|_|A-Z0-9]*(\'|\")?(:|=)(\'|\")?[\\-|_|A-Z0-9]{10}
       confidence: low
   - pattern:
-      name: Generic - 1691
-      regex: SECRET[\\-|_|A-Z0-9]*(\'|\")?(:|=)(\'|\")?[\\-|_|A-Z0-9]{10}
-      confidence: low
-  - pattern:
       name: Generic - 1692
       regex: AUTHORIZATION[\\-|_|A-Z0-9]*(\'|\")?(:|=)(\'|\")?[\\-|_|A-Z0-9]{10}
       confidence: low
