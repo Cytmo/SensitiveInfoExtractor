@@ -16,7 +16,6 @@ logger = LoggerSingleton().get_logger()
 
 """
 picUtil: 图片OCR
-* 主流OCR: https://www.jianshu.com/p/d19dba26f275
 """
 
 

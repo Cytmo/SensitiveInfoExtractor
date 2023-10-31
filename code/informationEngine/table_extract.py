@@ -90,6 +90,23 @@ def count_most_frequent_strings(data):
     return counts
 
 
+def find_tag_sensitive(word):
+    word = str(word)
+    global _sensitive_word_tmp
+    print(_sensitive_word_tmp)
+    result = _sensitive_word_tmp.get(word)
+    if result is not None:
+        return result
+    for key, value in _sensitive_word_tmp.items():
+        pattern = re.escape(key)
+        matches = re.findall(pattern, word)
+
+        # 如果找到匹配结果，添加到结果列表中
+        if matches:
+            return value
+    return None
+
+
 init_sensitive_word('config/sensitive_word.yml')
 global _sensitive_word_tmp
 
@@ -274,8 +291,9 @@ class XlsxDevider:
             return process_bind_prase(self.xlsx_data.iloc[:, 0].tolist())
         # TODO 处理提取分好块中的敏感数据
         # 首行，首行校验->逐行提取
-        word_condition = [_sensitive_word_tmp.get(
+        word_condition = [find_tag_sensitive(
             element) for element in self.xlsx_data.iloc[0]]
+
         word_index = [index for index, value in enumerate(
             word_condition) if value is not None]
         if len(word_index) > 1:
@@ -289,7 +307,7 @@ class XlsxDevider:
             return json_data
 
         # 首列，首列校验->逐列提取
-        word_condition = [_sensitive_word_tmp.get(
+        word_condition = [find_tag_sensitive(
             element) for element in self.xlsx_data.iloc[:, 0]]
         word_index = [index for index, value in enumerate(
             word_condition) if value is not None]
@@ -314,9 +332,14 @@ class XlsxDevider:
         if len(json_data) > 0:
             return json_data
         self.xlsx_data = self.xlsx_data.transpose()
-        logger.info(TAG-"xlsx_data:{}".format(
-            self.xlsx_data.to_string(index=False, header=False)))
-        return begin_info_extraction(self.xlsx_data.to_string(index=False, header=False))
+
+        str_last_in = self.xlsx_data.to_string(index=False, header=False)
+        str_last_in = fix_ocr(str_last_in)
+        str_last_in = str_last_in.replace("\"", " ")
+        str_last_in = str_last_in.replace("'", " ")
+        str_last_in = str_last_in.replace("=", " ")
+        logger.info(TAG+"testest"+str_last_in)
+        return begin_info_extraction(str_last_in)
 
     def xlsx_fuzz_extract(self):
         json_data = []
