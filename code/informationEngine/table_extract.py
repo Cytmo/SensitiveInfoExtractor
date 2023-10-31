@@ -286,7 +286,7 @@ class XlsxDevider:
             return json_data
         self.xlsx_data = self.xlsx_data.transpose()
 
-        return []
+        return begin_info_extraction(self.xlsx_data.to_string(index = False,header = False))
 
 
     def xlsx_fuzz_extract(self):
