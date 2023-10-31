@@ -2,7 +2,7 @@ from util.logUtils import LoggerSingleton
 from util import globalVar
 import argparse
 from typing import Any, Tuple
-from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
+# from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
 from informationEngine import password_guesser
 # 添加日志模块
 TAG = "informationEngine.info_core.py: "
@@ -899,8 +899,9 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
             result =  plain_text_info_extraction(text)
             return result_manager(result,text,file_path)
         else:
-            result_table = one_table_remove_irrelevant_columns(
-                globalVar.get_sensitive_word(), info[1:])
+            # result_table = one_table_remove_irrelevant_columns(
+            #     globalVar.get_sensitive_word(), info[1:])
+            result_table = []
             return result_table
 
 # 在常规提取失败后，使用特殊方法提取信息

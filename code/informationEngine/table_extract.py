@@ -2,9 +2,7 @@ import pandas as pd
 import queue
 import yaml
 import re
-
-xlsx = pd.ExcelFile('资产梳理.xlsx')
-sheet_names = xlsx.sheet_names
+from informationEngine.info_core import *
 
 
 def contains_chinese(data):
@@ -13,7 +11,7 @@ def contains_chinese(data):
 
 # print(data.shape[0])
 def init_sensitive_word(yml_file_path):
-    global _sensitive_word
+    global _sensitive_word_tmp
     # 读取YAML文件
     with open(yml_file_path, 'r') as yaml_file:
         data = yaml.safe_load(yaml_file)
@@ -23,11 +21,15 @@ def init_sensitive_word(yml_file_path):
 
     sensitive_word_origin = chinese_patterns+english_patterns
 
-    _sensitive_word = {item.get('name'):item.get('name') for item in sensitive_word_origin}
+    _sensitive_word_tmp = {item.get('name'):item.get('name') for item in sensitive_word_origin}
     
 def process_bind_prase(data):
     # TODO 提取未知单条数据
-    print("处理单条数据",data)
+    # print("处理单条数据",data)
+
+    str_list = [str(item) for item in data]
+
+    return begin_info_extraction(" ".join(str_list))
 
 def line_spilit_index(empty_index):
     index_single = []
@@ -55,10 +57,29 @@ def line_spilit_index_key(empty_index):
         index_last = index
     return index_single,index_prase
 
+def count_most_frequent_strings(data):
+    counts = {}
 
+    # 遍历每一列
+    for j in range(len(data[0])):
+        unique_strings = set()
+        column_counts = {}
 
-init_sensitive_word('./sensitive_word.yml')
-global _sensitive_word
+        # 遍历每一行
+        for i in range(len(data)):
+            element = data[i][j]
+            if element != '':
+                unique_strings.add(element)
+                column_counts[element] = column_counts.get(element, 0) + 1
+
+        # 找到当前列中出现最多的字符串
+        most_frequent = max(column_counts, key=column_counts.get)
+        counts[j] = (most_frequent, column_counts[most_frequent], len(unique_strings))
+    
+    return counts
+
+init_sensitive_word('/home/sakucy/networkCopitation/2023/code/config/sensitive_word.yml')
+global _sensitive_word_tmp
 
 class XlsxDevider:
     def __init__(self,data):
@@ -75,15 +96,20 @@ class XlsxDevider:
 
         empty_rows = xlsxDevider.xlsx_data.isnull().all(axis=1)
         empty_rows_index = empty_rows[empty_rows].index.to_list()
-        if len(empty_rows_index) < 1:
+
+        # 所有空行数1+才有效
+        if len(empty_rows_index)<2:
             return queue_tmp
+        
+        # 空行分割计算
         empty_rows_index.insert(0,-1)
         empty_rows_index.append(len(empty_rows))
         [index_single,index_prase] = line_spilit_index(empty_rows_index)
         
+        # 分割单行和多行
         for index in index_single:
-            data_part = xlsxDevider.xlsx_data.iloc[index].copy().to_list()
-            process_bind_prase(data_part)   
+            data_part = pd.DataFrame(xlsxDevider.xlsx_data.iloc[index].copy()).reset_index(drop = True)
+            queue_tmp.put(XlsxDevider(data_part)) 
 
         for prases in index_prase:
             data_part = xlsxDevider.xlsx_data.iloc[prases[0]:prases[1]].copy().reset_index(drop = True)
@@ -94,18 +120,20 @@ class XlsxDevider:
     @classmethod
     def process_col(cls,xlsxDevider):
         queue_tmp = queue.Queue()
-
+        
         empty_cols = xlsxDevider.xlsx_data.isnull().all()
         empty_cols_index = empty_cols[empty_cols].index.to_list()
-        if len(empty_cols_index) < 1:
+
+        if len(empty_cols_index)<2:
             return queue_tmp
+        
         empty_cols_index.insert(0,-1)
         empty_cols_index.append(len(empty_cols))
         [index_single,index_prase] = line_spilit_index(empty_cols_index)
 
         for index in index_single:
-            data_part = xlsxDevider.xlsx_data.iloc[:,index].copy().to_list()
-            process_bind_prase(data_part)
+            data_part = pd.DataFrame(xlsxDevider.xlsx_data.iloc[:,index].copy()).reset_index(drop = True)
+            queue_tmp.put(XlsxDevider(data_part))
 
         for prases in index_prase:
             data_part = xlsxDevider.xlsx_data.iloc[:,prases[0]:prases[1]].copy().reset_index(drop = True)
@@ -121,7 +149,7 @@ class XlsxDevider:
         empty_rows_index = []
         # 行关键词检测
         for index,row in xlsxDevider.xlsx_data.iterrows():
-            word_condition = [_sensitive_word.get(element) for element in row]
+            word_condition = [_sensitive_word_tmp.get(element) for element in row]
             if len(list(set([x for x in word_condition if x is not None]))) > 1:
                 empty_rows_index.append(index)
                 
@@ -133,8 +161,8 @@ class XlsxDevider:
             [index_single,index_prase] = line_spilit_index_key(empty_rows_index)
             
             for index in index_single:
-                data_part = xlsxDevider.xlsx_data.iloc[index].copy().to_list()
-                process_bind_prase(data_part)   
+                data_part = pd.DataFrame(xlsxDevider.xlsx_data.iloc[index].copy()).reset_index(drop = True)
+                queue_tmp.put(XlsxDevider(data_part))   
 
             for prases in index_prase:
                 data_part = xlsxDevider.xlsx_data.iloc[prases[0]:prases[1]].copy().reset_index(drop = True)
@@ -145,7 +173,7 @@ class XlsxDevider:
         # 列关键词检测
         empty_cols_index = []
         for index,(col_name,col) in enumerate(xlsxDevider.xlsx_data.items()):
-            word_condition = [_sensitive_word.get(element) for element in col]
+            word_condition = [_sensitive_word_tmp.get(element) for element in col]
             if len(list(set([x for x in word_condition if x is not None]))) > 1:
                 empty_cols_index.append(index)
 
@@ -154,11 +182,11 @@ class XlsxDevider:
             empty_cols_index.append(xlsxDevider.xlsx_data.shape[1])
             [index_single,index_prase] = line_spilit_index_key(empty_cols_index)
 
-            print(empty_cols_index)
+            # print(empty_cols_index)
 
             for index in index_single:
-                data_part = xlsxDevider.xlsx_data.iloc[:,index].copy().to_list()
-                process_bind_prase(data_part)
+                data_part = pd.DataFrame(xlsxDevider.xlsx_data.iloc[:,index].copy()).reset_index(drop = True)
+                queue_tmp.put(XlsxDevider(data_part))
 
             for prases in index_prase:
                 data_part = xlsxDevider.xlsx_data.iloc[:,prases[0]:prases[1]].copy().reset_index(drop = True)
@@ -171,7 +199,13 @@ class XlsxDevider:
 
     @classmethod
     def process_xlsx(cls,xlsxDevider):
-        queue_tmp = None
+        queue_tmp = queue.Queue()
+        if xlsxDevider.xlsx_data.shape[0] == 1 or xlsxDevider.xlsx_data.shape[1] == 1:
+            xlsxDevider.raw_pass = True
+            xlsxDevider.col_pass = True
+            xlsxDevider.key_pass = True
+            return queue_tmp
+        
         if not xlsxDevider.raw_pass:
             queue_tmp = XlsxDevider.process_raw(xlsxDevider)
             if queue_tmp.empty():
@@ -179,7 +213,6 @@ class XlsxDevider:
             else:
                 return queue_tmp
         
-        print("raw_pass")
         if not xlsxDevider.col_pass:
             queue_tmp = XlsxDevider.process_col(xlsxDevider)
             if queue_tmp.empty():
@@ -187,7 +220,6 @@ class XlsxDevider:
             else:
                 return queue_tmp
             
-        print("col_pass")
         if not xlsxDevider.key_pass:
             queue_tmp = XlsxDevider.process_key(xlsxDevider)
             if queue_tmp.empty():
@@ -195,7 +227,6 @@ class XlsxDevider:
             else:
                 return queue_tmp
         
-        print("key_pass")
         return queue_tmp
 
     def check_Pass(self):
@@ -211,18 +242,16 @@ class XlsxDevider:
             print("推荐优先处理分块以提高处理结果")
         # 单行单列的提取
         if self.xlsx_data.shape[0] < 1:
-            return
+            return json_data
         elif self.xlsx_data.shape[0]==1:
-            process_bind_prase(self.xlsx_data.loc[0].tolist())
-            return
+            return process_bind_prase(self.xlsx_data.iloc[0].tolist())
         if self.xlsx_data.shape[1] <1:
-            return
+            return json_data
         elif self.xlsx_data.shape[1] == 1:
-            process_bind_prase(self.xlsx_data.loc[:,0].tolist())
-            return
+            return process_bind_prase(self.xlsx_data.iloc[:,0].tolist())
         #TODO 处理提取分好块中的敏感数据
         # 首行，首行校验->逐行提取
-        word_condition = [_sensitive_word.get(element) for element in self.xlsx_data.loc[0]]
+        word_condition = [_sensitive_word_tmp.get(element) for element in self.xlsx_data.iloc[0]]
         word_index = [index for index,value in enumerate(word_condition) if value is not None]
         if len(word_index) > 1:
             use_data = self.xlsx_data.iloc[1:]
@@ -231,12 +260,10 @@ class XlsxDevider:
                 sub_result = {word_condition[index]:row.values[index] for index in word_index if not nan_flag[index]}
                 if len(sub_result)>1:
                     json_data.append(sub_result)
-            # TODO 添加输出函数
-            print(json_data)
-            return
+            return json_data
         
         # 首列，首列校验->逐列提取
-        word_condition = [_sensitive_word.get(element) for element in self.xlsx_data.loc[:,0]]
+        word_condition = [_sensitive_word_tmp.get(element) for element in self.xlsx_data.iloc[:,0]]
         word_index = [index for index,value in enumerate(word_condition) if value is not None]
         if len(word_index) > 1:
             use_data = self.xlsx_data.iloc[:,1:]
@@ -245,33 +272,91 @@ class XlsxDevider:
                 sub_result = {word_condition[index]:col.values[index] for index in word_index if not nan_flag[index]}
                 if len(sub_result)>1:
                     json_data.append(sub_result)
-            # TODO 添加输出函数
-            print(json_data)
-            return           
-        
+            return json_data   
+
+        # 行模糊提取
+        json_data = self.xlsx_fuzz_extract()
+        if len(json_data)>0:
+            return json_data
+        self.xlsx_data = self.xlsx_data.transpose()
+
+        # 列模糊提取
+        json_data = self.xlsx_fuzz_extract()
+        if len(json_data)>0:
+            return json_data
+        self.xlsx_data = self.xlsx_data.transpose()
+
+        return []
+
+
+    def xlsx_fuzz_extract(self):
+        json_data = []
         # 行模糊提取
         chinese_cols = self.xlsx_data.apply(lambda col: col.apply(contains_chinese)).any()
         chinese_columns = chinese_cols[chinese_cols].index
-        use_data = self.xlsx_data.drop(chinese_columns,axis=1)
+        # 不剩两列以上数据直接返回
+        if not self.xlsx_data.shape[1]-len(chinese_columns)>1:
+            return json_data
+        use_data = self.xlsx_data.drop(chinese_columns,axis=1).reset_index(drop = True)
+        use_data.columns = list(range(0,use_data.shape[1]))
+        guss_tag_list = []
+        # print(use_data)
+        for ind,row in use_data.iterrows():
+            # print(row)
+            str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
+            # print(str_use)
+            text = plain_text_info_extraction(str_use,False,True,True)
+            text = text.split(' ')
+            guss_tag = []
+            for i in range(len(text)-1):
+                if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
+                    if text[i+1] == 'nan':
+                        guss_tag.append('')
+                    else:
+                        guss_tag.append(text[i])
+            guss_tag_list.append(guss_tag)
+        guss_most_tag = count_most_frequent_strings(guss_tag_list)
+        guss_most = [item[0] for k,item in guss_most_tag.items()]
+        guss_most_unique = list(set(guss_most))
+        tag_use = []
+        user_label_in = False
+        for index in range(len(guss_most)):
+            if guss_most[index] == "{user}" and  not user_label_in:
+                tag_use.append(index)
+                user_label_in = True
+            elif guss_most[index] != "{user}":
+                if guss_most[index] == "{password}" and  not user_label_in:
+                    continue
+                tag_use.append(index)
+        if len(guss_most_unique)>1:
+            # 模糊提取的输出
+            for ind,row in use_data.iterrows():
+                nan_flag = pd.isna(row)
+                # print(row)
+                sub_result = {guss_most[index].replace('{', '').replace('}', ''):row.values[index] for index in tag_use if not nan_flag[index]}
+                if len(sub_result)>1:
+                    json_data.append(sub_result)
+        # print(json_data)
+        return json_data
 
-        print(json_data)
-        return 
 
-# for sheet_name in sheet_names:
-#     data = xlsx.parse(sheet_name)
-xlsx_queue = queue.Queue()
-for name in sheet_names:
-    xlsx_queue.put(XlsxDevider(xlsx.parse(name,header=None)))
-# xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[0],header=None)))
+# xlsx = pd.ExcelFile('/home/sakucy/networkCopitation/2023/data/tmp/资产梳理.xlsx')
+# sheet_names = xlsx.sheet_names
+# # for sheet_name in sheet_names:
+# #     data = xlsx.parse(sheet_name)
+# xlsx_queue = queue.Queue()
+# # for name in sheet_names:
+# #     xlsx_queue.put(XlsxDevider(xlsx.parse(name,header=None)))
+# xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[5],header=None)))
 
-while not xlsx_queue.empty():
-    xlsxDevider = xlsx_queue.get()
-    que_add = XlsxDevider.process_xlsx(xlsxDevider)
-    if xlsxDevider.check_Pass():
-        xlsxDevider.extract_sensitive_xlsx()
-    else:
-        while not que_add.empty():
-            xlsx_queue.put(que_add.get())
+# while not xlsx_queue.empty():
+#     xlsxDevider = xlsx_queue.get()
+#     que_add = XlsxDevider.process_xlsx(xlsxDevider)
+#     if xlsxDevider.check_Pass():
+#         xlsxDevider.extract_sensitive_xlsx()
+#     else:
+#         while not que_add.empty():
+#             xlsx_queue.put(que_add.get())
 
 
 

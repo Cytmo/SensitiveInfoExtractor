@@ -1,3 +1,4 @@
+import queue
 from docx import Document
 from docx.oxml import OxmlElement
 import aspose.words as aw
@@ -10,10 +11,13 @@ import docx
 import fitz
 from datetime import datetime
 import textract
+from informationEngine.table_extract import XlsxDevider
 from util import globalVar
 from toStringUtils.picUtil import *
 from util.extractInfo import *
 from toStringUtils.universalUtil import *
+import pandas as pd
+
 
 
 """
@@ -372,121 +376,26 @@ def replace_picture_texts(text_list, image_text_list):
 
 
 # 提取.xlsx中的文本
-# TODO:需要更新
 def xlsx_file(file_path):
-    # 打开 Excel 文件
-    workbook = xlrd.open_workbook(file_path)
-
-    # 获取所有工作簿的名称
-    sheet_names = workbook.sheet_names()
-
-    # 遍历工作簿并读取内容
-    workbook_contents = []
-
-    for sheet_name in sheet_names:
-        worksheet = workbook.sheet_by_name(sheet_name)
-
-        # 读取工作簿的内容行
-        rows = [worksheet.row_values(row_num)
-                for row_num in range(worksheet.nrows)]
-
-        workbook_contents.append((sheet_name, rows))
-
-    # 关闭工作簿
-    workbook.release_resources()
-    del workbook
-
-    res = xlsx_format(workbook_contents)
-
-    if len(res) == 1:
-        return res[0]
-    return res
-
-
-# 对提取.xlsx中的文本进行格式化成表格数据结构
-def xlsx_format(workbook_contents):
-    xlsx_file_info = []
-
-    for sheet_name, rows in workbook_contents:
-        sheet_data = []
-
-        for row in rows:
-            row_data = []
-
-            for value in row:
-                if value is None:
-                    row_data.append("none")
-                elif isinstance(value, datetime):
-                    row_data.append(handle_datetime(value))
-                else:
-                    row_data.append(value)
-
-            if len(row_data) > 0:
-                sheet_data.append(row_data)
-
-        xlsx_file_info.append(sheet_data)
-
-    xlsx_file_info = xlsx_remove_irrelevant_columns(xlsx_file_info)
-
-    return xlsx_file_info
-
-
-# 对提取.xlsx中的多张表格信息进行敏感信息匹配和提取
-def xlsx_remove_irrelevant_columns(xlsx_file_info):
-
-    sensitive_word = globalVar.get_sensitive_word()
-
+    xlsx = pd.ExcelFile(file_path)
+    sheet_names = xlsx.sheet_names
+    # for sheet_name in sheet_names:
+    #     data = xlsx.parse(sheet_name)
+    xlsx_queue = queue.Queue()
+    for name in sheet_names:
+        xlsx_queue.put(XlsxDevider(xlsx.parse(name,header=None)))
+    # xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[5],header=None)))
     res = []
-
-    for item in xlsx_file_info:
-
-        res_one_item = one_table_remove_irrelevant_columns(
-            sensitive_word, item)
-
-        if not len(res_one_item) == 0:
-            res.append(res_one_item)
-
+    while not xlsx_queue.empty():
+        xlsxDevider = xlsx_queue.get()
+        que_add = XlsxDevider.process_xlsx(xlsxDevider)
+        if xlsxDevider.check_Pass():
+            res.append(xlsxDevider.extract_sensitive_xlsx())
+        else:
+            while not que_add.empty():
+                xlsx_queue.put(que_add.get())
     return res
 
-
-# 对提取.xlsx中的单张表格信息进行敏感信息匹配和提取
-def one_table_remove_irrelevant_columns(sensitive_word, item):
-    column_names = item[0]
-    # 用于存储要保留的列索引
-    valid_columns = []
-    # 遍历每一列
-    for idx, column_name in enumerate(column_names):
-        # 遍历敏感词列表
-        for word in sensitive_word:
-            # 如果列名是敏感词的子字符串，则保留该列
-            if word['name'] in column_name:
-                valid_columns.append(idx)
-                break
-
-    filtered_info = []
-
-    # 重新构建info，只包括要保留的列
-    if len(valid_columns) != 0:
-        filtered_info = [[row[i] for i in valid_columns] for row in item]
-        # filtered_info = [[item for item in row if item != ""]
-        #                  for row in filtered_info]
-
-        # 提取列名
-        column_names = filtered_info[0]
-        # 初始化一个空的 JSON 列表
-        json_data = []
-
-        # 遍历行数据，将每一行转换为字典
-        for row in filtered_info[1:]:
-            row_dict = {}
-            for i, value in enumerate(row):
-                # 使用列名作为键，行中的值作为值
-                if value != "":
-                    row_dict[column_names[i]] = value
-            json_data.append(row_dict)
-        filtered_info = json_data
-
-    return filtered_info
 
 
 # 对xlsx中的时间进行格式化
