@@ -193,7 +193,8 @@ def is_token_file(file_path):
 # 源代码文件读取和提取操作
 # TODO:需要重新整理CODE的识别
 def extract_code_file(file_path, nameclean):
-    # TODO: 添加处理
+    logger.info(TAG+"extract_code_file(): " + os.path.basename(file_path))
+    extract_direct_read(file_path, os.path.basename(file_path))
     return
 
 
