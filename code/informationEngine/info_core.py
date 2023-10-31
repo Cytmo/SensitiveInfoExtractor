@@ -128,7 +128,8 @@ def password_classifier(text: str) -> bool:
         return False
 
 # 转换OCR识别中的错误符号
-def convert_chinese_punctuation(text):
+def fix_ocr(text):
+    logger.info(TAG + "fix_ocr(): fix_ocr input: "+str(text))
     # 定义一个字典来映射中文标点符号到英文标点符号
     punctuation_mapping = {
         "，": ",",
@@ -155,7 +156,7 @@ def convert_chinese_punctuation(text):
     # 使用字典进行替换
     for chinese_punctuation, english_punctuation in punctuation_mapping.items():
         text = text.replace(chinese_punctuation, english_punctuation)
-
+    logger.info(TAG + "fix_ocr(): fix_ocr result: "+str(text))
     return text
 
 # 判断是否是被保护的信息项
@@ -678,39 +679,68 @@ def rule_based_info_extract(text: str) -> dict:
 #代码(目前仅有carbon.jpg)等文件的提取
 def code_info_extract(text: str) -> dict:
     original_text = text
-    logger.info(TAG + 'Code processing for text')
+    logger.info(TAG + 'code_info_extract(): Code processing for text '+str(text))
+    text = fix_ocr(text)
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
     text = text.lower()
-    text = convert_chinese_punctuation(text)
+    text = fix_ocr(text)
     text = text.replace("'", '"')
-    # 仅保留含有字符串的行
-    string_lines = re.findall(r'.*["\'].*["\'].*',text, re.MULTILINE)
+    # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
+    string_lines = re.findall(r'.*=\s*["\'].*["\']',text, re.MULTILINE)
+    string_lines += re.findall(r"['\"].*['\"]\s+['\"].*['\"]",text, re.MULTILINE)
+
     text = string_lines
     logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
+    # lines = []
+    # # remove outer "
+    # for line in text:
+    #     if line.startswith('"') and line.endswith('"'):
+    #         line = line[1:-1]
+    #     lines.append(line)
+    # text = lines
+    # lines = []
+    # # only  keep each eng_keywords_list between ""
+    # for line in text:
+    #     new_line = ""
+    #     if ":" in line:
+    #         line = line.split(":")
+    #     elif "=" in line:
+    #         line = line.split("=")
+    #     elif '"' in line:
+    #         line = line.split('"')
+    #     for i in range(len(line)):
+    #         if i % 2 == 1:
+    #             new_line += "{} ".format(line[i])
+    #     lines.append(new_line)
     lines = []
-    # remove outer "
     for line in text:
-        if line.startswith('"') and line.endswith('"'):
-            line = line[1:-1]
+        line=line.strip()
+        line.replace("\"", " ")
+        line.replace("'", " ")
+        line.replace("=", " ")
         lines.append(line)
+    logger.info(TAG + 'code_info_extract(): text after removing outer " and only keeping string: '+str(lines))
     text = lines
     lines = []
-    # only  keep each eng_keywords_list between ""
     for line in text:
-        new_line = ""
-        if ":" in line:
-            line = line.split(":")
-        elif "=" in line:
-            line = line.split("=")
-        elif '"' in line:
-            line = line.split('"')
-        for i in range(len(line)):
-            if i % 2 == 1:
-                new_line += "{} ".format(line[i])
-        lines.append(new_line)
+        if "=" in line:
+            line_sliced = line.strip().split("=")
+        else:
+            pattern = r"(['\"]).*?\1\s+(['\"]).*?\2"
+            matches = re.findall(pattern, line)
+
+            # 打印匹配的字符串的两部分
+            for match in matches:
+                part1, part2 = match
+            line_sliced = [part1, part2]
+        lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
+    logger.info(TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
+    # text = lines
+
+
     result_dict = {}
     logger.debug(TAG + 'Special processing for text: '+str(lines))
     # remove empty eng_keywords_list
@@ -772,7 +802,7 @@ def config_info_extract(text: str) -> dict:
     ITEM_PROTECTION_DICT = item_protection_dict1
     text = prevent_eng_words_interference(text)
     text = text.lower()
-    text = convert_chinese_punctuation(text)
+    text = fix_ocr(text)
     text = text.replace("'", '"')
     text = text.split("\n")
     lines = []
@@ -884,10 +914,23 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
                 result = plain_text_info_extraction(info)
                 logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
                 return result
-            return plain_text_info_extraction(info,FUZZ_MARK=True)
+            file_type = determine_file_type(file_path,info)
+            switch = {
+                'code': code_info_extract,
+                'config': config_info_extract
+            }  
+            logger.info(TAG + "begin_info_extraction(): input type is {}".format(file_type))
+            if file_type in switch:
+                logger.info(TAG + "begin_info_extraction(): input is code/config")
+                # result = code_info_extract(info)
+                result = switch[file_type](info)
+            else:
+                logger.info(TAG + "begin_info_extraction(): unknown input")
+                result = plain_text_info_extraction(info,FUZZ_MARK=True)
+                logger.info(TAG + "begin_info_extraction(): fuzz_extract result: {}".format(str(result)))
+            return result
         logger.info(TAG + "info_extraction(): input is string")
         result = plain_text_info_extraction(info)
-
         return result_manager(result,info,file_path)
     # 表格
     elif isinstance(info, list):
