@@ -1,3 +1,4 @@
+import shutil
 from util.resultUtil import ResOut
 from toStringUtils.universalUtil import *
 from toStringUtils.configUtil import *
@@ -93,10 +94,18 @@ def extract_doc(file_path, nameclean):
 # (1-2).wps文件读取和提取操作
 def extract_wps(file_path, nameclean):
     logger.info(TAG+"extract_wps(): " + file_path.split("/")[-1])
-    wps_file_name = file_path.replace(".wps", ".doc")
-    os.rename(file_path, wps_file_name)
+
+    if not file_path.endswith(".wps"):
+        return
+    time = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    os.makedirs("../workspace/wps/trans/wps/", exist_ok=True)
+    copy_file_path = "../workspace/wps/trans/wps/copy_"+time+"_" + \
+        os.path.basename(file_path)
+    shutil.copy(file_path, copy_file_path)
+    wps_file_name = copy_file_path.replace(".wps", ".doc")
+    os.rename(copy_file_path, wps_file_name)
     text = docs_file(wps_file_name, type=".wps")
-    os.rename(wps_file_name, file_path)
+    os.rename(wps_file_name, copy_file_path)
     sensitive_info_detect(file_path, text)
 
 
@@ -117,10 +126,18 @@ def extract_ppt(file_path, nameclean):
 # (2-2).dps文件读取和提取操作
 def extract_dps(file_path, nameclean):
     logger.info(TAG+"extract_dps(): " + file_path.split("/")[-1])
-    wps_file_name = file_path.replace(".dps", ".ppt")
-    os.rename(file_path, wps_file_name)
+
+    if not file_path.endswith(".dps"):
+        return
+    time = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    os.makedirs("../workspace/wps/trans/dps/", exist_ok=True)
+    copy_file_path = "../workspace/wps/trans/dps/copy_"+time+"_" + \
+        os.path.basename(file_path)
+    shutil.copy(file_path, copy_file_path)
+    wps_file_name = copy_file_path.replace(".dps", ".ppt")
+    os.rename(copy_file_path, wps_file_name)
     text = ppts_file(wps_file_name, type=".dps")
-    os.rename(wps_file_name, file_path)
+    os.rename(wps_file_name, copy_file_path)
     sensitive_info_detect(file_path, text)
 
 
@@ -141,10 +158,17 @@ def extract_xlsx(file_path, nameclean):
 # (3-2).et文件读取和提取操作
 def extract_et(file_path, nameclean):
     logger.info(TAG+"extract_et(): " + file_path.split("/")[-1])
-    et_doc_name = file_path.replace(".et", ".xlsx")
-    os.rename(file_path, et_doc_name)
+    if not file_path.endswith(".et"):
+        return
+    time = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    os.makedirs("../workspace/wps/trans/et/", exist_ok=True)
+    copy_file_path = "../workspace/wps/trans/et/copy_"+time+"_" + \
+        os.path.basename(file_path)
+    shutil.copy(file_path, copy_file_path)
+    et_doc_name = copy_file_path.replace(".et", ".xlsx")
+    os.rename(copy_file_path, et_doc_name)
     text = xlsx_file(et_doc_name)
-    os.rename(et_doc_name, file_path)
+    os.rename(et_doc_name, copy_file_path)
     res_out.add_new_json(file_path, text)
 
 

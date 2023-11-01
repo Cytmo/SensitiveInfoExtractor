@@ -19,7 +19,6 @@ from toStringUtils.universalUtil import *
 import pandas as pd
 
 
-
 """
 officeUtil: 解析 docx/pdf/wps/et
 """
@@ -105,22 +104,23 @@ def pdf_file(file_path):
 
 # 1-1.解析.doc/.wps/.docx
 def docs_file(file_path, type):
+    time = datetime.now().strftime("%Y%m%d%H%M%S%f")
     if type == ".doc":
         logger.info(TAG+"docs_file(): .doc")
         doc_file_dir = "../workspace/office/doc/"
         result_image_path = "../workspace/image/office/doc"
         docx_path = doc_file_dir + \
-            file_path.replace(".doc", ".docx").split("/")[-1]
+            time+"_"+file_path.replace(".doc", ".docx").split("/")[-1]
     elif type == ".wps":
         logger.info(TAG+"docs_file(): .wps")
         doc_file_dir = "../workspace/wps/wps/"
         result_image_path = "../workspace/image/wps/wps"
         docx_path = doc_file_dir + \
-            file_path.replace(".doc", ".docx").split("/")[-1]
+            time+"_"+file_path.replace(".doc", ".docx").split("/")[-1]
     elif type == ".docx":
         logger.info(TAG+"docs_file(): .docx")
         result_image_path = "../workspace/image/office/docx"
-        image_dir = f"{result_image_path}/{os.path.basename(file_path)}/"
+        image_dir = f"{result_image_path}/{time}_{os.path.basename(file_path)}/"
         return docx_file_info_extract(file_path, image_dir)
     else:
         return ""
@@ -129,7 +129,7 @@ def docs_file(file_path, type):
     logger.info(TAG+"docs_file(): "+docx_path)
 
     os.makedirs(result_image_path, exist_ok=True)
-    doc_docx_name = file_path.split("/")[-1]
+    doc_docx_name = time+"_"+file_path.split("/")[-1]
 
     # 使用Aspose.Words将.doc转换为.docx
     try:
@@ -241,23 +241,25 @@ def docx_file_info_extract(docx_path, image_dir):
 
 # 2-1.解析.ppt/.dps/.pptx
 def ppts_file(file_path, type):
+    time = datetime.now().strftime("%Y%m%d%H%M%S%f")
     if type == ".ppt":
         logger.info(TAG+"ppts_file(): .ppt")
         ppt_file_dir = "../workspace/office/ppt/"
         result_image_path = "../workspace/image/office/ppt"
         pptx_path = ppt_file_dir + \
-            file_path.replace(".ppt", ".pptx").split("/")[-1]
+            time+"_"+file_path.replace(".ppt", ".pptx").split("/")[-1]
     elif type == ".dps":
         logger.info(TAG+"ppts_file(): .dps")
         ppt_file_dir = "../workspace/wps/dps/"
         result_image_path = "../workspace/image/wps/dps"
         pptx_path = ppt_file_dir + \
-            file_path.replace(".dps", ".pptx").split("/")[-1]
+            time+"_"+file_path.replace(".dps", ".pptx").split("/")[-1]
     elif type == ".pptx":
         logger.info(TAG+"ppts_file(): .pptx")
         ppt_file_dir = "../workspace/wps/pptx/"
         result_image_path = "../workspace/image/office/pptx"
-        ppt_pptx_name = file_path.replace(".dps", ".pptx").split("/")[-1]
+        ppt_pptx_name = time+"_" + \
+            file_path.replace(".dps", ".pptx").split("/")[-1]
         return pptx_file_info_extract(file_path, result_image_path, ppt_pptx_name)
     else:
         return ""
@@ -265,7 +267,7 @@ def ppts_file(file_path, type):
     os.makedirs(ppt_file_dir, exist_ok=True)
     logger.info(TAG+"ppt_file(): "+pptx_path)
     os.makedirs(result_image_path, exist_ok=True)
-    ppt_pptx_name = file_path.split("/")[-1]
+    ppt_pptx_name = time+"_"+file_path.split("/")[-1]
 
     try:
         with slides.Presentation(file_path) as presentation:
@@ -383,7 +385,7 @@ def xlsx_file(file_path):
     #     data = xlsx.parse(sheet_name)
     xlsx_queue = queue.Queue()
     for name in sheet_names:
-        xlsx_queue.put(XlsxDevider(xlsx.parse(name,header=None)))
+        xlsx_queue.put(XlsxDevider(xlsx.parse(name, header=None)))
     # xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[5],header=None)))
     res = []
     while not xlsx_queue.empty():
