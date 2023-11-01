@@ -295,7 +295,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
     # Define a list of dictionaries with patterns and their corresponding types
     patterns = [
         {'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', 'type': 'email'},
-        {'pattern': r'jdbc:mysql://[a-zA-Z0-9:/._-]+', 'type': 'jdbc_url'},
+        # {'pattern': r'jdbc:mysql://[a-zA-Z0-9:/._-]+', 'type': 'jdbc_url'},
         {'pattern': r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 'type': 'url'},
         {'pattern': r'(?:\d{1,3}\.){3}\d{1,3}|localhost', 'type': 'ip'},
         {'pattern': r'1[3-9]\d{9}', 'type': 'phonenumber'},
@@ -634,7 +634,8 @@ def rule_based_info_extract(text: str) -> dict:
     for key in ITEM_PROTECTION_DICT:
         item_type = PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0]
         item_content = ITEM_PROTECTION_DICT[key]
-        result_dict[item_type] = item_content
+        if item_type not in INFO_PATTERN:
+            result_dict[item_type] = item_content
     for value in result_dict.values():
         value = "Rule based: "+value
 
@@ -668,30 +669,32 @@ def code_info_extract(text: str) -> dict:
         if line.startswith('"') and line.endswith('"'):
             line = line[1:-1]
         new_lines.append(line)
-
+    XML_FILE = False
+    for line in new_lines:
+        if  "name" in line and "value" in line:
+                XML_FILE = True
     text = '\n'.join(new_lines)
     logger.debug(TAG + 'code_info_extract(): text after removing outer " start:@@@ '+str(text)+' end:@@@')
     # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
-    matches1 = re.finditer(r'.*=\s*["\'][^"\']*["\']', text, re.MULTILINE)
-    matches2 = re.finditer(r"['\"].*['\"]\s+['\"].*['\"]",text, re.MULTILINE)
-    # 创建一个字典，用于存储替换规则
-    replacement_dict = {}
+    if XML_FILE:
+        pass
+    else:
 
-    for match in matches1:
-        matched_string = match.group(0)
-        replacement = f"REPLACE{len(replacement_dict)}"
-        replacement_dict[replacement] = matched_string
-        text = text.replace(matched_string, replacement)
+        combined_regex = r'(?:.*?=\s*["\'][^"\']*["\']|["\'].*["\']\s+["\'].*["\'])'
 
-    for match in matches2:
-        matched_string = match.group(0)
-        replacement = f"REPLACE{len(replacement_dict)}"
-        replacement_dict[replacement] = matched_string
-        text = text.replace(matched_string, replacement)
+        matches = re.finditer(combined_regex, text, re.MULTILINE)
 
-    # 输出还原后的文本
-    for key, value in replacement_dict.items():
-        text = text.replace(key, value)
+        replacement_dict = {}
+
+        for match in matches:
+            matched_string = match.group(0)
+            replacement = f"REPLACE{len(replacement_dict)}"
+            replacement_dict[replacement] = matched_string
+            text = text.replace(matched_string, replacement)
+
+        # Output the restored text
+        for key, value in replacement_dict.items():
+            text = text.replace(key, value)
 
     logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
     text = text.split("\n")
