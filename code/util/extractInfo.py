@@ -64,10 +64,32 @@ def extract_config(file_path, nameclean):
 # 图片文件ocr读取和提取操作, 如.jpg/.png...
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
-    text = ocr_table_batch(file_path)
-    # text = ocr_paddleocr(file_path)
-    sensitive_info_detect(file_path, text[0])
 
+    pic_list = ocr_table_batch(file_path)
+
+    [print(data) for data in pic_list[0][0:]]
+
+    text_or_table_flag = is_png_text(pic_list[0])
+
+    if text_or_table_flag:
+        # is table
+        pd_table_data = pd.DataFrame(pic_list[0][1:])
+        print(pd_table_data)
+        res = single_table_sensitive_extraction(pd_table_data)
+    else:
+        # is pic
+        res = begin_info_extraction(pic_list[0])
+
+    res_out.add_new_json(file_path, res)
+
+
+# 判断图片识别结果（表格形式）还是文本
+def is_png_text(info):
+    if len(info[1]) >= 2:
+        logger.info(TAG + "is_png_text(): input is [table] png ")
+        return False
+    logger.info(TAG + "is_png_text(): input is [text] png ")
+    return True
 
 ######################### pdf file ###########################################
 
@@ -187,7 +209,6 @@ def extract_eml(file_path, nameclean):
         logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
         sensitive_info.append(sensitive_info_text)
 
-    print(eml_text)
     if "table" in eml_text:
         logger.info(TAG+"extract_eml(): eml body has table")
         sensitive_info = sensitive_info+eml_text["table"]
@@ -224,75 +245,4 @@ def extract_code_file(file_path, nameclean):
     return
 
 
-def is_code_file(code_dir_or_file):
-    # 代码后缀文件
-    extension_code = [
-        '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
-        '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
-        '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
-        '.ps1', 'Dockerfile', '.toml', '.h'
-    ]
-
-    code_config = ['Dockerfile', '.dockerignore', '.gitignore']
-
-    flag_code_file = False
-
-    if '.' in code_dir_or_file:
-        file_extension = os.path.splitext(code_dir_or_file)[1]
-        for item in extension_code:
-            if file_extension == item:
-                flag_code_file = True
-                break
-
-    for item in code_config:
-        if str(code_dir_or_file).split("/")[-1] == item:
-            flag_code_file = True
-            break
-
-    if not flag_code_file:
-        return False
-
-    result_stdout, result_stderr = source_code_file(code_dir_or_file)
-
-    if len(result_stderr) == 0:
-        logger.info(TAG+"is_code_file(): " + code_dir_or_file +
-                    " , but none")
-        return True
-
-    logger.info(TAG+"is_code_file(): " + code_dir_or_file +
-                " , has sensitive information.")
-
-    result_stdout_json = json.loads(result_stdout)
-
-    # 只保留 key和value
-    result_stdout = [{"key": item["key"], "value": item["value"]}
-                     for item in result_stdout_json]
-    # 去重
-    result_stdout_set = {tuple(item.items()) for item in result_stdout}
-    result_stdout = [dict(item) for item in result_stdout_set]
-
-    result_stdout_copy = result_stdout
-    extract_out = []
-    ak_sk = {}
-
-    for item in result_stdout:
-        if item["key"] == "ACCESSKEY":
-            ak_sk["ACCESSKEY"] = item["value"]
-            result_stdout_copy = [_item for _item in result_stdout_copy if not (
-                _item["key"] == "ACCESSKEY" and _item["value"] == item["value"])]
-            if not len(ak_sk) == 2:
-                continue
-        if item["key"] == "SECRETKEY":
-            ak_sk["SECRETKEY"] = item["value"]
-            result_stdout_copy = [_item for _item in result_stdout_copy if not (
-                _item["key"] == "SECRETKEY" and _item["value"] == item["value"])]
-            if not len(ak_sk) == 2:
-                continue
-        if len(ak_sk) == 2:
-            extract_out.append(ak_sk)
-            ak_sk = {}
-
-    # 特殊处理的项结果(ak与sk)+未特殊处理的原有项
-    res = extract_out+result_stdout_copy
-    res_out.add_new_json(code_dir_or_file, res)
-    return True
+######################### Tools ########################################
