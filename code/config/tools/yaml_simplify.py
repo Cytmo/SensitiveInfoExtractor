@@ -51,4 +51,16 @@ def simplify_rules(input_filename, output_filename):
 # 调用函数并传递输入和输出文件名
 input_file = '../rules/rules_stable.yml'
 output_file = '../rules/rules_stable_simple.yml'
-simplify_rules(input_file, output_file)
+# simplify_rules(input_file, output_file)
+
+
+# 读取YAML文件
+with open(output_file, 'r') as file:
+    data = yaml.safe_load(file)
+
+# 提取并保存名称到name.txt
+with open('name.txt', 'w') as output_file:
+    for pattern in data['patterns']:
+        name = pattern['pattern']['name']
+        output_file.write(name + '\n')
+        print(name)
