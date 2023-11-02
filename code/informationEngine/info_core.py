@@ -92,11 +92,11 @@ def determine_file_type(file_name,info):
     
 # 分割字符串并移除空项
 def text_split(text: str) -> list:
-    logger.info(TAG + "text_split(): text split input: "+str(text))
+    logger.info(TAG + "text_split(): text split input: "+' '.join(text.split()))
     # 使用 \n \t 空格 分割字符串
     text = re.split(r'\n|\t| ', text)
     text = [item for item in text if item != '' and item != ' ']
-    logger.info (TAG + "text_split(): text split result: "+str(text))
+    logger.info (TAG + "text_split(): text split result: "+' '.join(text))
     return text
 
 def is_chinese_text(text: str) -> bool:
@@ -132,7 +132,7 @@ def password_classifier(text: str) -> bool:
 
 # 转换OCR识别中的错误符号
 def fix_ocr(text):
-    logger.info(TAG + "fix_ocr(): fix_ocr input: "+str(text))
+    logger.info(TAG + "fix_ocr(): fix_ocr input: "+' '.join(text.split()))
     # 定义一个字典来映射中文标点符号到英文标点符号
     punctuation_mapping = {
         "，": ",",
@@ -159,7 +159,7 @@ def fix_ocr(text):
     # 使用字典进行替换
     for chinese_punctuation, english_punctuation in punctuation_mapping.items():
         text = text.replace(chinese_punctuation, english_punctuation)
-    logger.info(TAG + "fix_ocr(): fix_ocr result: "+str(text))
+    logger.info(TAG + "fix_ocr(): fix_ocr result: "+' '.join(text.split()))
     return text
 
 # 判断是否是被保护的信息项
@@ -509,9 +509,9 @@ def marked_text_refinement(text: str) -> str:
         if PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0] not in INFO_PATTERN:
             replaced_content = " {" + PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0] + "} "+ key + " "
             logger.debug(TAG + 'marked_text_refinement(): Replacing {} with {}'.format(key, replaced_content))
-            logger.debug(TAG + 'marked_text_refinement(): Text before replacement: '+str(text))
+            logger.debug(TAG + 'marked_text_refinement(): Text before replacement: '+' '.join(text.split()))
             text = text.replace(key, replaced_content)
-            logger.debug(TAG + 'marked_text_refinement(): Text after replacement: '+str(text))
+            logger.debug(TAG + 'marked_text_refinement(): Text after replacement: '+' '.join(text.split()))
 
     # 调整关键词和指示词的相对位置，保持关键词在指示词的后部
     text = text.split()
@@ -526,7 +526,7 @@ def marked_text_refinement(text: str) -> str:
                     logger.debug(TAG + 'Swapping {} with {}'.format(text[i], text[j]))
                     text[i+1], text[j] = text[j], text[i+1]
                     break
-    logger.debug(TAG + 'Text after position adjustment: '+str(text))
+    logger.debug(TAG + 'Text after position adjustment: '+' '.join(text))
 
 
     # 移除连续出现的，其后无有效关键词的指示词
@@ -542,7 +542,7 @@ def marked_text_refinement(text: str) -> str:
             new_text.append(text[i+1])
     text = new_text
 
-    logger.debug(TAG + 'Text after removing invalid keywords: '+str(text))
+    logger.debug(TAG + 'Text after removing invalid keywords: '+' '.join(text))
     # 移除关键词无效的指示词，如 地址后不是有效地址
     for i in range(len(text)-1):
         if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
@@ -571,7 +571,7 @@ def marked_text_refinement(text: str) -> str:
 
 
 
-    logger.debug(TAG + 'Text after repeated keywords adjustment: '+str(text))
+    logger.debug(TAG + 'Text after repeated keywords adjustment: '+' '.join(text.split()))
     return text
 
 ##########################信息提取函数###############################
@@ -659,7 +659,7 @@ def rule_based_info_extract(text: str) -> dict:
 #代码等文件的提取
 def code_info_extract(text: str) -> dict:
     original_text = text
-    logger.info(TAG + 'code_info_extract(): Code processing for text '+str(text))
+    logger.info(TAG + 'code_info_extract(): Code processing for text '+' '.join(text.split()))
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -680,7 +680,7 @@ def code_info_extract(text: str) -> dict:
         if  "name" in line and "value" in line:
                 XML_FILE = True
     text = '\n'.join(new_lines)
-    logger.debug(TAG + 'code_info_extract(): text after removing outer " start:@@@ '+str(text)+' end:@@@')
+    logger.debug(TAG + 'code_info_extract(): text after removing outer " start:@@@ '+' '.join(text.split())+' end:@@@')
     # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
     if XML_FILE:
         pass
@@ -702,7 +702,7 @@ def code_info_extract(text: str) -> dict:
         for key, value in replacement_dict.items():
             text = text.replace(key, value)
 
-    logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+str(text))
+    logger.debug(TAG + 'code_info_extract(): text after removing lines without string: '+' '.join(text.split()))
     text = text.split("\n")
     lines = []
     for line in text:
@@ -789,7 +789,7 @@ def config_info_extract(text: str) -> dict:
     return code_info_extract(text)
 
 def ocr_code_processing(text: str) -> dict:
-    logger.info(TAG + 'ocr_code_processing(): processing for text: '+str(text))
+    logger.info(TAG + 'ocr_code_processing(): processing for text: '+' '.join(text.split()))
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -923,7 +923,7 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
             logger.info(TAG + "begin_info_extraction(): input is code/config")
             # result = code_info_extract(info)
             result = switch[file_type](info)
-            return result
+            return result_manager(result,info,file_path,IS_CODE_OR_CONFIG=True)
         else:
             if not any(key in new_info for key in ENG_KEYWORDS_LIST) and not any(key in new_info for key in CHN_KEYWORDS_LIST):
                 logger.info(TAG + "info_extraction(): fuzz extract")
@@ -932,8 +932,8 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
                     logger.info(TAG + 'This is a Chinese text.')
                     result = plain_text_info_extraction(info)
                     logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
-                    return result
-                plain_text_info_extraction(info,FUZZ_MARK=True)
+                    
+                result = plain_text_info_extraction(info,FUZZ_MARK=True)
             else:
                 logger.info(TAG + "begin_info_extraction(): unknown input")
                 result = plain_text_info_extraction(info)
@@ -956,10 +956,26 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
             return result_table
 
 # 在常规提取失败后，使用特殊方法提取信息
-# TODO 部分文件并判定为未知并进行了fuzz_extract 解决此问题
-def result_manager(result,info,file_path) -> dict:
+def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
+    logger.info(TAG + "result_manager(): extract result: {}".format(str(result)))
+    if IS_CODE_OR_CONFIG or isinstance(result, dict):
+        # TODO 代码文件的结果过滤
+        filtered_item = {}
+        for key, value in result.items():
+            if is_valid_info(value) and is_valid_info(key):
+                filtered_item[key] = value
+        result = filtered_item
+        return result
+    else:
+        filtered_result = []
+        for item in result:
+            filtered_item = {}
+            for key, value in item.items():
+                if is_valid_info(value) and is_valid_info(key):
+                    filtered_item[key] = value
+            filtered_result.append(filtered_item)
+        result = filtered_result
     # file_extension = file_path.split(".")[-1]
-    logger.info(TAG + "result_manager(): plain text info extract result: {}".format(str(result)))
     file_type = determine_file_type(file_path,info)
     switch = {
         'code': code_info_extract,
