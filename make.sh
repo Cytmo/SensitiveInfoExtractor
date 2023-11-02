@@ -26,6 +26,7 @@ pip install imbalanced-learn
 pip install python-magic
 pip install Pandas
 pip install xlrd
+pip install scikit-learn==1.3.1
 
 
 # linux软件安装

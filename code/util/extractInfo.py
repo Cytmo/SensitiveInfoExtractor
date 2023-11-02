@@ -65,6 +65,7 @@ def extract_config(file_path, nameclean):
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
     text = ocr_table_batch(file_path)
+    # text = ocr_paddleocr(file_path)
     sensitive_info_detect(file_path, text[0])
 
 

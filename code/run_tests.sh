@@ -34,6 +34,7 @@ while getopts "ntacdh" option; do
         c)  # Clear logs
             rm log/*
             rm output/*
+            rm -r workspace/*
             ;;
         d) # Compare the two newest files in the output folder
             # 获取output文件夹中最新的两个文件
