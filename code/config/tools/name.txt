@@ -1,0 +1,187 @@
+AWS API Gateway
+AWS API Key
+AWS ARN
+AWS Access Key ID Value
+AWS AppSync GraphQL Key
+AWS ELB
+AWS ElasticCache
+AWS MWS ID
+AWS MWS key
+AWS RDS
+AWS S3 Bucket
+AWS client ID
+AWS cred file info
+Adafruitio
+Alibaba - 2
+Amazon SNS Topic
+Apideck - 1
+Apify
+Bearer token
+Bitly Secret Key
+Braintree API Key
+Clickhelp - 1
+Closecrm
+Cloudinary Credentials
+Databricks
+Deputy - 1
+Dfuse
+Discord Webhook
+Discordwebhook
+Documo
+Doppler
+Dropbox
+Dynatrace token
+EC
+FCM Server Key
+FCM_server_key
+Facebook Access Token
+Facebook OAuth
+Finage
+Firebase Database Detect - 1
+Firebase Database Detect - 2
+Fleetbase
+Flutterwave
+Frameio
+Freshdesk - 2
+Gcp
+Generic Secret
+Generic webhook secret
+GitHub
+Github App Token
+Github OAuth Access Token
+Github Personal Access Token
+Github Refresh Token
+Gitlabv2
+Gocardless
+Google (GCP) Service Account
+Google API Key
+Google OAuth Access Token
+Graphcms - 2
+Invoiceocean - 2
+Kanban - 2
+Linearapi
+Locationiq
+MailChimp API Key
+Mailgun API Key - 1
+Mailgun API key - 2
+Mapbox - 2
+Microsoft Teams Webhook
+Microsoftteamswebhook
+Midise
+Mite - 2
+Newrelic Admin API Key
+Newrelic REST API Key
+Newrelic Synthetics Location Key
+Notion
+Onelogin - 2
+PGP private key block
+Password in URL
+PayPal Braintree access token
+Paypaloauth - 1
+Paypaloauth - 2
+Paystack
+Picatic API key
+Posthog
+Postman
+Pubnubpublishkey - 1
+Pubnubpublishkey - 2
+PyPI upload token
+REDIS_URL
+RKCS8
+RSA private key
+Razorpay - 1
+Reallysimplesystems
+Rubygems
+SSH
+SSH (DSA) private key
+Saucelabs - 1
+SendGrid API Key
+Sendinbluev2
+Shopify access token
+Shopify custom app access token
+Shopify private app access token
+Shopify shared secret
+Shoppable Service Auth
+Signalwire - 1
+Slack
+Slack Token
+Slack User token
+Slack Webhook
+Slack access token
+Slackwebhook
+Square API Key
+Square OAuth Secret
+Square access token
+Squareapp - 1
+Squareapp - 2
+Squareup
+Stripe
+Stripe API Key - 1
+Stripe API key - 2
+Stripe API key - 3
+Stripe Public Live Key
+Stripe Public Test Key
+Stripe Restricted API Key
+Stripe Secret Live Key
+Stripe Secret Test Key
+Telegram Bot API Key
+Telegram Secret
+Terraformcloudpersonaltoken
+Trello URL
+Twilio - 1
+Twilio API Key
+Twitter Access Token
+Twitter Client ID
+Twitter OAuth
+Twitter Secret Key
+Ubidots
+Zapierwebhook
+appclientsecret
+awsaccesskeyid
+awssecretkey
+bintraykey
+consumerkey
+dockerhubpassword
+facebook_access_token
+facebook_oauth
+github_access_token - 2
+google_oauth
+google_url
+heroku_api_key_api_key
+jdbc
+kubeconfig
+kxoltsn3vogdop92m
+mailgun
+managementapiaccesstoken
+mapboxaccesstoken
+master_password
+mysqlmasteruser
+mysqlsecret
+nativeevents
+nexuspassword
+nuget_api_key - 1
+outlook_team
+passwordtravis
+paypal_braintree_access_token
+randrmusicapiaccesstoken
+repotoken
+secretaccesskey
+secretkey
+sendgrid - 2
+setdstaccesskey
+setdstsecretkey
+setsecretkey
+slack_webhook_url
+sonatypepassword
+sqsaccesskey
+sqssecretkey
+square_app_secret
+ssh_password
+sshpass
+stripe_restricted_api
+stripe_standard_api
+twitteroauthaccesssecret
+twitteroauthaccesstoken
+usertravis
+vscetoken
+zensonatypepassword
