@@ -57,3 +57,10 @@ IMAGE_FILE_EXTENSION = [
 # 读取YAML文件
 with open('config/rules-stable.yml', 'r') as yaml_file:
     SENSITIVE_INFO_PATTERN = yaml.safe_load(yaml_file)
+    for pattern in SENSITIVE_INFO_PATTERN['patterns']:
+        name = pattern['pattern']['name'].strip()
+        REPLACED_KEYWORDS_LIST.append("{"+name+"}")
+
+
+
+

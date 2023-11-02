@@ -1,10 +1,11 @@
 import email
 import os
 import re
+import pandas as pd
 from bs4 import BeautifulSoup
 from util import globalVar
-from toStringUtils.officeUtil import one_table_remove_irrelevant_columns, xlsx_file
-
+from toStringUtils.officeUtil import xlsx_file
+from informationEngine.table_extract import single_table_sensitive_extraction
 
 """
 emlUtil: 解析邮件
@@ -81,12 +82,15 @@ def eml_file(eml_file_path):
                     attachment_file.write(attachment_data)
                 logger.info(TAG+f"Saved attachment: {attachment_path}")
                 attachment_file_info = xlsx_file(attachment_path)
+                logger.info(TAG+"eml_file()-eml_file_res:")
+                logger.info(attachment_file_info)
 
     return [email_info, body, attachment_file_info]
 
 
 # 解析eml中的文本中的html
 def html_extract(body):
+    logger.info(TAG+"html_extract():")
     # 创建BeautifulSoup对象
     soup = BeautifulSoup(body, 'html.parser')
     # 找到所有的<p>标签
@@ -114,13 +118,17 @@ def html_extract(body):
             for cell in row.find_all(['th', 'td']):
                 row_data.append(cell.get_text().strip())
             table_data.append(row_data)
-
-        sensitive_word = globalVar.get_sensitive_word()
-        res_table = one_table_remove_irrelevant_columns(
-            sensitive_word, table_data)
+        pd_table_data = pd.DataFrame(table_data)
+        logger.info(TAG+"html_extract():")
+        logger.info(table_data)
+        logger.info(TAG+"html_extract():")
+        logger.info(pd_table_data)
+        res = single_table_sensitive_extraction(pd_table_data)
+        logger.info(TAG+"html_extract()-html-res:")
+        logger.info(res)
         result = {
             'text': p_text_string,
-            'table': res_table
+            'table': res
         }
     else:
         result = {

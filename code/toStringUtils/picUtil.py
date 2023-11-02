@@ -16,7 +16,6 @@ logger = LoggerSingleton().get_logger()
 
 """
 picUtil: 图片OCR
-* 主流OCR: https://www.jianshu.com/p/d19dba26f275
 """
 
 
@@ -114,6 +113,8 @@ def ocr_paddleocr(file):
     for line in result:
         for x in line:
             res.append(x[1][0])
+
+    [print(item) for item in res]
     return res
 
 
@@ -220,8 +221,11 @@ def ocr_table_batch(folder_path):
             image_path = [image_path]
             filtered_list.append(image_path)
             for row in table_data:
-                if row != ['']:
-                    filtered_list.append(row)
+                # if row != ['']:
+                #     filtered_list.append(row)
+                filtered_list.append(row)
+
+            [print(data) for data in filtered_list]
 
             globalVar._pic_hash[single_pic_hash] = filtered_list
             ocr_result.append(filtered_list)
@@ -229,4 +233,5 @@ def ocr_table_batch(folder_path):
             logger.info(TAG+"ocr_table_batch() with old hash: "+image_path)
             ocr_result.append(result)
 
+    return " "
     return ocr_result
