@@ -4,8 +4,11 @@ import re
 import pandas as pd
 from bs4 import BeautifulSoup
 from util import globalVar
-from toStringUtils.officeUtil import xlsx_file
 from informationEngine.table_extract import single_table_sensitive_extraction
+from email.header import decode_header
+from email.utils import parseaddr
+import base64
+from datetime import datetime
 
 """
 emlUtil: 解析邮件
@@ -22,8 +25,11 @@ logger = LoggerSingleton().get_logger()
 
 # 读取eml中的文本和附件
 def eml_file(eml_file_path):
-    result_image_path = "../workspace/eml"
-    os.makedirs(result_image_path, exist_ok=True)
+    time = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    result_attach_file_path = "../workspace/eml/" + \
+        time+"_"+os.path.basename(eml_file_path)+"/"
+    os.makedirs(result_attach_file_path, exist_ok=True)
+
     # 读取eml文件内容
     with open(eml_file_path, 'r', encoding='utf-8') as eml_file:
         eml_content = eml_file.read()
@@ -32,60 +38,46 @@ def eml_file(eml_file_path):
     msg = email.message_from_string(eml_content)
 
     # 提取关键信息到一个字典
-    email_info = {
-        # "X-Pm-Content-Encryption": decode_header(msg["X-Pm-Content-Encryption"]),
-        # "X-Pm-Origin": decode_header(msg["X-Pm-Origin"]),
-        "Subject": decode_header(msg["Subject"]),
-        "From": decode_header(msg["From"]),
-        "Date": decode_header(msg["Date"]),
-        # "Mime-Version": decode_header(msg["Mime-Version"]),
-        "To": decode_header(msg["To"]),
-        "X-Pm-Scheduled-Sent-Original-Time": decode_header(msg["X-Pm-Scheduled-Sent-Original-Time"]),
-        "X-Pm-Recipient-Authentication": decode_header(msg["X-Pm-Recipient-Authentication"]),
-        "X-Pm-Recipient-Encryption": decode_header(msg["X-Pm-Recipient-Encryption"])
-    }
+    email_info = {}
+    try:
+        email_info = {
+            # "X-Pm-Content-Encryption": decode_header(msg["X-Pm-Content-Encryption"]),
+            # "X-Pm-Origin": decode_header(msg["X-Pm-Origin"]),
+            "Subject": decode_headers(msg["Subject"]),
+            "From": decode_headers(msg["From"]),
+            "Date": decode_headers(msg["Date"]),
+            # "Mime-Version": decode_header(msg["Mime-Version"]),
+            "To": decode_headers(msg["To"]),
+            "X-Pm-Scheduled-Sent-Original-Time": decode_headers(msg["X-Pm-Scheduled-Sent-Original-Time"]),
+            "X-Pm-Recipient-Authentication": decode_headers(msg["X-Pm-Recipient-Authentication"]),
+            "X-Pm-Recipient-Encryption": decode_headers(msg["X-Pm-Recipient-Encryption"])
+        }
+    except Exception as e:
+        logger.error(e)
 
-    # 提取正文和保存附件
-    attachment_file_info = []
-    for part in msg.walk():
-        content_type = part.get_content_type()
+    body = ""
+    # 提取正文
+    try:
+        for part in msg.walk():
+            content_type = part.get_content_type()
 
-        if content_type == "text/plain":
-            body = part.get_payload(decode=True).decode('utf-8')
+            if content_type == "text/html":
+                body = part.get_payload(decode=True).decode('utf-8')
+                body = html_extract(body)
+    except Exception as e:
+        logger.error(e)
 
-        elif content_type == "text/html":
-            body = part.get_payload(decode=True).decode('utf-8')
-            body = html_extract(body)
+    # 和保存附件
+    attach_files_list = []
+    try:
+        for part in msg.walk():
+            if part.get("Content-Disposition"):
+                attach_files_list.append(
+                    save_attachment(part, result_attach_file_path))
+    except Exception as e:
+        logger.error(e)
 
-        elif "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" in content_type:
-            filename = part.get_filename()
-            if filename:
-                # 解码文件名
-                decoded_filename = email.header.decode_header(filename)[0]
-                attachment_filename, charset = decoded_filename
-                if isinstance(attachment_filename, bytes):
-                    attachment_filename = attachment_filename.decode(
-                        charset or 'utf-8')
-
-                # 为了确保文件名只包含合法字符，去除非法字符
-                attachment_filename = re.sub(
-                    r'[\/:*?"<>|]', '', attachment_filename)
-                attachment_filename = attachment_filename.replace(
-                    ".xl", ".xlsx")
-                result_image_path += "/"
-                attachment_path = os.path.join(
-                    result_image_path, attachment_filename)
-
-                # 解码并保存附件
-                attachment_data = part.get_payload(decode=True)
-                with open(attachment_path, 'wb') as attachment_file:
-                    attachment_file.write(attachment_data)
-                logger.info(TAG+f"Saved attachment: {attachment_path}")
-                attachment_file_info = xlsx_file(attachment_path)
-                logger.info(TAG+"eml_file()-eml_file_res:")
-                logger.info(attachment_file_info)
-
-    return [email_info, body, attachment_file_info]
+    return [email_info, body, attach_files_list]
 
 
 # 解析eml中的文本中的html
@@ -139,7 +131,7 @@ def html_extract(body):
 
 
 # 解析eml中的邮件头信息
-def decode_header(header_value):
+def decode_headers(header_value):
     decoded_parts = []
     for part, charset in email.header.decode_header(header_value):
         if isinstance(part, bytes):
@@ -147,3 +139,35 @@ def decode_header(header_value):
         else:
             decoded_parts.append(part)
     return ' '.join(decoded_parts)
+
+
+def save_attachment(part, output_dir):
+
+    file_extension = {"xl": 'xlsx'}
+
+    if part.get_content_maintype() == "multipart":
+        for subpart in part.get_payload():
+            save_attachment(subpart, output_dir)
+    elif part.get("Content-Disposition"):
+        filename = part.get_filename()
+        if filename:
+            decoded_filename, encoding = decode_header(filename)[0]
+            if encoding is not None:
+                if encoding.lower() in ('b', 'q'):
+                    decoded_filename = decoded_filename.encode(
+                        encoding).decode('utf-8')
+                else:
+                    decoded_filename = decoded_filename.decode(encoding)
+
+            # 获取文件名的扩展名  检查是否需要替换扩展名
+            extension = decoded_filename.split(".")[-1]
+            if extension in file_extension:
+                new_extension = file_extension[extension]
+                decoded_filename = decoded_filename.replace(
+                    extension, new_extension)
+
+            file_path = os.path.join(output_dir, decoded_filename)
+
+            with open(file_path, "wb") as f:
+                f.write(part.get_payload(decode=True))
+            return file_path

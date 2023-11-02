@@ -1,3 +1,5 @@
+from informationEngine.keyInfoExtract import *
+from util.decompressionUtil import *
 import shutil
 from util.resultUtil import ResOut
 from toStringUtils.universalUtil import *
@@ -196,32 +198,6 @@ def extract_et(file_path, nameclean):
     res_out.add_new_json(file_path, text)
 
 
-######################### e-mail file ########################################
-
-# TODO
-# # .eml文件读取和提取操作
-def extract_eml(file_path, nameclean):
-    logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
-    eml_header, eml_text, eml_attachment = eml_file(file_path)
-
-    sensitive_info = []
-    sensitive_info_text = begin_info_extraction(eml_text["text"])
-    if not len(sensitive_info_text) == 0:
-        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
-        sensitive_info.append(sensitive_info_text)
-
-    if "table" in eml_text:
-        logger.info(TAG+"extract_eml(): eml body has table")
-        sensitive_info = sensitive_info+eml_text["table"]
-
-    result = {
-        "eml_header": eml_header,
-        "sensitive_info": sensitive_info,
-        "eml_attachment": eml_attachment
-    }
-    res_out.add_new_json(file_path, result)
-
-
 ######################### code config file ################################
 
 # token文件读取和提取操作
@@ -239,8 +215,83 @@ def is_token_file(file_path):
 ######################### code file########################################
 
 # 源代码文件读取和提取操作
-# TODO:需要重新整理CODE的识别
 def extract_code_file(file_path, nameclean):
     logger.info(TAG+"extract_code_file(): " + os.path.basename(file_path))
     extract_direct_read(file_path, os.path.basename(file_path))
     return
+
+
+######################### e-mail file ########################################
+extension_switch_eml = {
+    # 解压
+    process_rar_file: [".rar"],
+    process_zip_file: [".zip"],
+
+    # 各种格式文件提取
+    extract_universal: [".txt", ".epub", ".bash_history"],
+    extract_direct_read: [".md"],
+
+    extract_pdf: [".pdf"],
+    extract_doc: [".doc"],
+    extract_wps: [".wps"],
+    extract_docx: [".docx"],
+    extract_ppt: [".ppt"],
+    extract_dps: [".dps"],
+    extract_pptx: [".pptx"],
+    extract_xlsx: [".xlsx"],
+    extract_et: [".et"],
+
+
+    # 图片处理
+    extract_pic: [".png", ".jpg"],
+
+    # 配置文件处理
+    extract_config: [".yml", ".xml", ".properties"],
+
+    # 代码文件处理
+    extract_code_file: [
+        '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
+        '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
+        '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
+        '.ps1', 'Dockerfile', '.toml', '.h'
+    ],
+
+    # 带后缀的关键文件处理
+    process_pub_file: [".pub"],
+}
+
+
+#  .eml文件读取和提取操作
+def extract_eml(file_path, nameclean):
+    logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
+    eml_header, eml_text, attach_files_list = eml_file(file_path)
+
+    sensitive_info = []
+    sensitive_info_text = []
+    if "text" in eml_text:
+        sensitive_info_text = begin_info_extraction(eml_text["text"])
+
+    if not len(sensitive_info_text) == 0:
+        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
+        sensitive_info.append(sensitive_info_text)
+
+    if "table" in eml_text:
+        logger.info(TAG+"extract_eml(): eml body has table")
+        sensitive_info = sensitive_info+eml_text["table"]
+
+    result = {}
+    if eml_header != "":
+        result["eml_header"] = eml_header
+    if sensitive_info != []:
+        result["sensitive_info"] = sensitive_info
+    if attach_files_list != []:
+        for item_path in attach_files_list:
+            file_spilit = os.path.splitext(os.path.basename(item_path))
+            for process_function, suffix_list in extension_switch_eml.items():
+                if file_spilit[1] in suffix_list:
+                    process_function(item_path, file_spilit[0])
+
+        result["attach_files_list"] = attach_files_list
+
+    if result != {}:
+        res_out.add_new_json(file_path, result)
