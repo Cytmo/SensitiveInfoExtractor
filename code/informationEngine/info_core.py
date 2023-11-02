@@ -1,17 +1,3 @@
-from util.logUtils import LoggerSingleton
-from util import globalVar
-import argparse
-from typing import Any, Tuple
-# from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
-from informationEngine import password_guesser
-# 添加日志模块
-TAG = "informationEngine.info_core.py: "
-logger = LoggerSingleton().get_logger()
-import re
-from typing import Tuple
-import magic
-##########################全局变量###############################
-# 导入全局变量
 from config.info_core_config import (
     PLACEHOLDERS_CORRESPONDING_TYPE,
     ITEM_PROTECTION_DICT,
@@ -29,12 +15,30 @@ from config.info_core_config import (
     ONE_WAY_CONNECTED_INFO,
     TWO_WAY_CONNECTED_INFO,
 )
+import magic
+from typing import Tuple
+import re
+from util.logUtils import LoggerSingleton
+from util import globalVar
+import argparse
+from typing import Any, Tuple
+# from toStringUtils.officeUtil import one_table_remove_irrelevant_columns
+from informationEngine import password_guesser
+# 添加日志模块
+TAG = "informationEngine.info_core.py: "
+logger = LoggerSingleton().get_logger()
+########################## 全局变量###############################
+# 导入全局变量
 
-##########################工具函数和类###############################
+########################## 工具函数和类###############################
 # 从结果类中还原占位符
+
+
 def restore_placeholders(result_dict: dict) -> dict:
-    logger.debug(TAG + "restore_placeholders(): ITEM_PROTECTION_DICT: "+str(ITEM_PROTECTION_DICT))
-    logger.debug(TAG + "restore_placeholders(): result_dict: "+str(result_dict))
+    logger.debug(
+        TAG + "restore_placeholders(): ITEM_PROTECTION_DICT: "+str(ITEM_PROTECTION_DICT))
+    logger.debug(TAG + "restore_placeholders(): result_dict: " +
+                 str(result_dict))
     # if result_dict is a list
     if isinstance(result_dict, list):
         result = []
@@ -49,19 +53,23 @@ def restore_placeholders(result_dict: dict) -> dict:
             result_dict[key] = value
     # 文本标记API专用，不应当在其他地方使用
     elif isinstance(result_dict, str):
-        logger.warning(TAG + "restore_placeholders(): result_dict is str, only for text mark api")
+        logger.warning(
+            TAG + "restore_placeholders(): result_dict is str, only for text mark api")
         for placeholder, replacement in ITEM_PROTECTION_DICT.items():
             # 使用正则匹配，防止替换到错误的位置
-            result_dict = re.sub(re.escape(placeholder), replacement, result_dict)
+            result_dict = re.sub(re.escape(placeholder),
+                                 replacement, result_dict)
     return result_dict
 
 # 是否是有效信息
-def is_valid_info(info: str,VALID_INFO_THRESHOLD = 3) -> bool:
+
+
+def is_valid_info(info: str, VALID_INFO_THRESHOLD=3) -> bool:
     alphanumeric_count = len(re.findall(r'\w', info))
     return alphanumeric_count >= VALID_INFO_THRESHOLD
 
 
-def determine_file_type(file_name,info):
+def determine_file_type(file_name, info):
     logger.info(TAG + "determine_file_type(): file_name: "+str(file_name))
     logger.info(TAG + "determine_file_type(): info: "+str(info))
     # TODO 完善的文件类型判断
@@ -72,8 +80,9 @@ def determine_file_type(file_name,info):
     elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
         return "config"
     elif file_name.endswith(tuple(IMAGE_FILE_EXTENSION)):
-        result = magic.from_buffer(info, mime=True)   
-        logger.info(TAG + "determine_file_type(): image's content's file type: "+str(result)) 
+        result = magic.from_buffer(info, mime=True)
+        logger.info(
+            TAG + "determine_file_type(): image's content's file type: "+str(result))
         switch = {
             "text/plain": "code",
             "application/json": "config",
@@ -89,8 +98,10 @@ def determine_file_type(file_name,info):
         }
         return switch.get(result) if switch.get(result) else "unknown"
     return "unknown"
-    
+
 # 分割字符串并移除空项
+
+
 def text_split(text: str) -> list:
     logger.info(TAG + "text_split(): text split input: "+' '.join(text.split()))
     # 使用 \n \t 空格 分割字符串
@@ -99,12 +110,15 @@ def text_split(text: str) -> list:
     logger.info (TAG + "text_split(): text split result: "+' '.join(text))
     return text
 
+
 def is_chinese_text(text: str) -> bool:
     # pattern = re.compile(r'[\u4e00-\u9fa5]')  # 匹配中文字符的范围
     # return bool(pattern.search(text))
     return chinese_character_percentage(text) > 70.0
 
 # 判断中文字符占比
+
+
 def chinese_character_percentage(text: str) -> float:
     total_characters = 0
     chinese_characters = 0
@@ -122,8 +136,10 @@ def chinese_character_percentage(text: str) -> float:
     return percentage
 
 # 使用svm分类字符串
+
+
 def password_classifier(text: str) -> bool:
-    result =  password_guesser.predict_password([text])
+    result = password_guesser.predict_password([text])
     # [[True, 0.9999999922353121]]
     if result[0][0] == True and result[0][1] > 0.9:
         return True
@@ -131,6 +147,8 @@ def password_classifier(text: str) -> bool:
         return False
 
 # 转换OCR识别中的错误符号
+
+
 def fix_ocr(text):
     logger.info(TAG + "fix_ocr(): fix_ocr input: "+' '.join(text.split()))
     # 定义一个字典来映射中文标点符号到英文标点符号
@@ -163,23 +181,17 @@ def fix_ocr(text):
     return text
 
 # 判断是否是被保护的信息项
+
+
 def is_protected_item(item: str) -> bool:
     pattern = r'\?\d\?'
     return bool(re.search(pattern, item))
+
 
 def is_a_mark(item: str) -> bool:
     pattern = r'\{.*\}'
     return bool(re.search(pattern, item))
 
-# 判断图片识别结果（表格形式）还是文本
-def is_png_text(info):
-    total_length = sum(len(item) for item in info[1:])
-    average_length = total_length / float(len(info[1:]))
-    if average_length >= 2:
-        logger.info(TAG + "is_png_text(): input is [table] png ")
-        return False
-    logger.info(TAG + "is_png_text(): input is [text] png ")
-    return True
 
 # TODO:url和端口号成组且支持一个用户对应多个url
 # 从处理过后的字符串中提取成对信息
@@ -196,7 +208,7 @@ class paired_info_pattern():
         self.check_header = {"user": False, "address": False}
 
     def reset_data(self):
-        #后续可以仿照下面改成递推式
+        # 后续可以仿照下面改成递推式
         self.data = {}
         self.data["user"] = None
         self.data["password"] = None
@@ -205,31 +217,31 @@ class paired_info_pattern():
         self.data["phonenumber"] = None
 
     def reset_headers(self):
-        self.check_header.update({k:False for k, v in self.data.items()})
+        self.check_header.update({k: False for k, v in self.data.items()})
 
     # 判断是否一个对象存在关键对象
     def check_header_complete(self):
         return not all(value is False for value in self.check_header.values())
 
-    def check_data_headers(self,data):
-        for k,v in self.check_header.items():
+    def check_data_headers(self, data):
+        for k, v in self.check_header.items():
             if data == "{"+k+"}" and v:
                 return True
         return False
-    
-    def set_data_headers(self,data):
+
+    def set_data_headers(self, data):
         for k in self.check_header.keys():
-            if data == "{"+k+"}" :
+            if data == "{"+k+"}":
                 self.check_header[k] = True
 
     def remake_data(self):
         # 依赖整合
-        for k,v in ONE_WAY_CONNECTED_INFO.items():
+        for k, v in ONE_WAY_CONNECTED_INFO.items():
             if self.data.get(v) == None and self.data.get(k) != None:
                 self.data[k] = None
-        
+
         # 对称整合
-        for k,v in TWO_WAY_CONNECTED_INFO.items():
+        for k, v in TWO_WAY_CONNECTED_INFO.items():
             if self.data.get(v) == None or self.data.get(k) != None:
                 self.data[k] = None
             if self.data.get(v) != None or self.data.get(k) == None:
@@ -246,7 +258,7 @@ class paired_info_pattern():
         #     return attr_switch[name](value)
         # else:
         #     return False
-        # TODO 
+        # TODO
         self.data[name] = value
         return True
 
@@ -255,7 +267,7 @@ class paired_info_pattern():
         for key in self.data:
             if self.data[key] != None:
                 result[key] = self.data[key]
-        if len(result)<2:
+        if len(result) < 2:
             return {}
         # check if result have all needed attributes
         # TODO() 可能要修改
@@ -278,27 +290,31 @@ class paired_info_pattern():
         return self.data.get(name) == value
 
     def is_None(self):
-        #check if all attributes are None
+        # check if all attributes are None
         for key in self.data:
             if self.data[key] != None:
                 return False
         return True
 
-##########################预处理函数###############################
+
+########################## 预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
 placeholders = {}  # This dictionary will store placeholders and their corresponding content
+
+
 def information_protection(text: str) -> Tuple[str, dict]:
     global placeholders
-    placeholders = {}  
+    placeholders = {}
     # 每次调用函数时，清空字典，防止重复
-    global ITEM_PROTECTION_DICT 
-    ITEM_PROTECTION_DICT= {}
+    global ITEM_PROTECTION_DICT
+    ITEM_PROTECTION_DICT = {}
     placeholders_counter = 1  # Counter for generating placeholders
     global PLACEHOLDERS_CORRESPONDING_TYPE
     PLACEHOLDERS_CORRESPONDING_TYPE = {}
     # Define a list of dictionaries with patterns and their corresponding types
     patterns = [
-        {'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', 'type': 'email'},
+        {'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b',
+            'type': 'email'},
         # {'pattern': r'jdbc:mysql://[a-zA-Z0-9:/._-]+', 'type': 'jdbc_url'},
         {'pattern': r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 'type': 'url'},
         {'pattern': r'(?:\d{1,3}\.){3}\d{1,3}|localhost', 'type': 'ip'},
@@ -321,7 +337,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
                 match_result[item] = []
             match_result[item].append(pattern_info['type'])
             text = text.replace(item, placeholder, 1)
-            placeholders_counter += 1      
+            placeholders_counter += 1
     sensitive_info_pattern_match_result = {}
     for pattern in SENSITIVE_INFO_PATTERN['patterns']:
 
@@ -332,11 +348,13 @@ def information_protection(text: str) -> Tuple[str, dict]:
         # 进行正则表达式匹配
         matches = re.finditer(regex, text)
 
-
         for match in matches:
-            logger.info(TAG + "information_protection(): Matched pattern: {}".format(name))
-            logger.info(TAG + "information_protection(): Confidence: {}".format(confidence))
-            logger.info(TAG + "information_protection(): Matched text: {}\n".format(match.group(0)))
+            logger.info(
+                TAG + "information_protection(): Matched pattern: {}".format(name))
+            logger.info(
+                TAG + "information_protection(): Confidence: {}".format(confidence))
+            logger.info(
+                TAG + "information_protection(): Matched text: {}\n".format(match.group(0)))
             # print(f"Matched pattern: {name}")
             # print(f"Confidence: {confidence}")
             # print(f"Matched text: {match.group(0)}\n")
@@ -357,16 +375,22 @@ def information_protection(text: str) -> Tuple[str, dict]:
         # print("pl    type:"+str(placeholders[key]))
         # print("match type:"+str(match_result[key]))
         # remove space in type to append
-        PLACEHOLDERS_CORRESPONDING_TYPE[key].append(match_result[placeholders[key]])
+        PLACEHOLDERS_CORRESPONDING_TYPE[key].append(
+            match_result[placeholders[key]])
     # 遍历字典，去除值中的空格
     for key, value in PLACEHOLDERS_CORRESPONDING_TYPE.items():
         # 使用列表解析去除值中的空格
-        PLACEHOLDERS_CORRESPONDING_TYPE[key] = [[item[0].replace(' ', '')] for item in value]
-    logger.info(TAG + "information_protection(): placeholder extract{}".format(str(PLACEHOLDERS_CORRESPONDING_TYPE)))
-    logger.info(TAG + "information_protection(): placeholders{}".format(str(placeholders)))
+        PLACEHOLDERS_CORRESPONDING_TYPE[key] = [
+            [item[0].replace(' ', '')] for item in value]
+    logger.info(TAG + "information_protection(): placeholder extract{}".format(
+        str(PLACEHOLDERS_CORRESPONDING_TYPE)))
+    logger.info(
+        TAG + "information_protection(): placeholders{}".format(str(placeholders)))
     return text, placeholders
 
 # 防止文件名等并识别为关键字，如user.txt
+
+
 def prevent_eng_words_interference(text: str) -> str:
     # 文件后缀列表
     file_extensions = ['sys', 'htm', 'html', 'jpg', 'png', 'vb', 'scr', 'pif', 'chm',
@@ -383,12 +407,14 @@ def prevent_eng_words_interference(text: str) -> str:
     return result
 
 # 预处理英文自然语言文本
-def eng_text_preprocessing(text: str,FUZZ_MARK=False) -> str:
+
+
+def eng_text_preprocessing(text: str, FUZZ_MARK=False) -> str:
     # text, item_protection_dict1 = information_protection(text)
     # global ITEM_PROTECTION_DICT
     # ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
-    pattern =  f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
+    pattern = f"(?:{'|'.join(ENG_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text)
     # 将匹配到的内容重新组合成字符串
@@ -408,16 +434,18 @@ def eng_text_preprocessing(text: str,FUZZ_MARK=False) -> str:
     return cleaned_text
 
 # 预处理文本，仅保留英文字符和数字，以及中文关键词（学号，用户名，密码等）
-def chn_text_preprocessing(text: str,FUZZ_MARK=False) -> str:
+
+
+def chn_text_preprocessing(text: str, FUZZ_MARK=False) -> str:
     # text, item_protection_dict1 = information_protection(text)
     # global ITEM_PROTECTION_DICT
     # ITEM_PROTECTION_DICT = item_protection_dict1
     # 构建正则表达式，匹配英文字符、数字以及指定中文关键词
     pattern = f"(?:{'|'.join(CHN_KEYWORDS_LIST)}|[a-zA-Z0-9,.;@?!\\-\"'()])+"
-                                             
+
     # 使用正则表达式进行匹配和替换
     cleaned_text = re.findall(pattern, text, re.IGNORECASE)
-    
+
     # 将匹配到的内容重新组合成字符串
     cleaned_text = ' '.join(cleaned_text)
     # 替换中文关键词
@@ -433,6 +461,8 @@ def chn_text_preprocessing(text: str,FUZZ_MARK=False) -> str:
     return cleaned_text
 
 # 模糊标记文本中的关键词
+
+
 def fuzz_mark(text: str) -> str:
     text = text_split(text)
     tagged_text = explicit_fuzz_mark(text)
@@ -440,11 +470,14 @@ def fuzz_mark(text: str) -> str:
     return " ".join(tagged_text)
 
 # 标记可明显识别的关键词 如url port等
+
+
 def explicit_fuzz_mark(text: list) -> list:
-    logger.info(TAG+ "placeholder_extract(): placeholder extract{}".format(str(PLACEHOLDERS_CORRESPONDING_TYPE)))
-    logger.info(TAG+ "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
+    logger.info(TAG + "placeholder_extract(): placeholder extract{}".format(
+        str(PLACEHOLDERS_CORRESPONDING_TYPE)))
+    logger.info(TAG + "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
     tagged_text = []
-    logger.info(TAG+ "explicit_fuzz mark input list: {}".format(text))
+    logger.info(TAG + "explicit_fuzz mark input list: {}".format(text))
     for i in range(len(text)):
         if text[i] in PLACEHOLDERS_CORRESPONDING_TYPE:
             type_info = PLACEHOLDERS_CORRESPONDING_TYPE[text[i]][0]
@@ -453,7 +486,7 @@ def explicit_fuzz_mark(text: list) -> list:
                 'port': '{port}',
                 'url': '{address}',
                 'ip': '{address}',
-                'phonenumber':'{phonenumber}'
+                'phonenumber': '{phonenumber}'
             }
             # type info looks like ['email']
             if type_info and type_info[0] in switch:
@@ -461,12 +494,15 @@ def explicit_fuzz_mark(text: list) -> list:
             tagged_text.append(text[i])
         else:
             tagged_text.append(text[i])
-    logger.info(TAG+ "fuzz_mark(): explicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
+    logger.info(
+        TAG + "fuzz_mark(): explicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text
 
 # 标记隐式项 如用户名 密码等
+
+
 def implicit_fuzz_mark(text: list) -> list:
-    logger.info(TAG+ "implicit_fuzz_mark(): input list: {}".format(text))
+    logger.info(TAG + "implicit_fuzz_mark(): input list: {}".format(text))
     tagged_text = []
     for i in range(len(text)):
         if is_protected_item(text[i]):
@@ -474,18 +510,23 @@ def implicit_fuzz_mark(text: list) -> list:
         elif text[i] in REPLACED_KEYWORDS_LIST:
             tagged_text.append(text[i])
         else:
-            logger.info(TAG+ "implicit_fuzz_mark(): password_classifier input: {}".format(text[i]))
+            logger.info(
+                TAG + "implicit_fuzz_mark(): password_classifier input: {}".format(text[i]))
             password_classifier_result = password_classifier(text[i])
-            logger.info(TAG+ "implicit_fuzz_mark(): password_classifier result: {}".format(password_classifier_result))
+            logger.info(
+                TAG + "implicit_fuzz_mark(): password_classifier result: {}".format(password_classifier_result))
             if password_classifier_result:
                 tagged_text.append('{password}')
             else:
                 tagged_text.append('{user}')
             tagged_text.append(text[i])
-    logger.info(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
-    return tagged_text 
+    logger.info(
+        TAG + "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
+    return tagged_text
 
 # 对标记后的字符串进行调整
+
+
 def marked_text_refinement(text: str) -> str:
     def is_valid_address(address):
         if address.startswith("?") and address.endswith("?"):
@@ -496,13 +537,12 @@ def marked_text_refinement(text: str) -> str:
         if port.isdigit() and 0 < int(port) < 65536:
             return True
         return False
-    
+
     def is_valid_user(user):
         return True
 
     def is_valid_password(password):
         return True
-
 
     # 根据 PLACEHOLDERS_CORRESPONDING_TYPE 全局变量，对文本进行调整
     for key in PLACEHOLDERS_CORRESPONDING_TYPE:
@@ -519,21 +559,21 @@ def marked_text_refinement(text: str) -> str:
     keyword = "{port}"
     for i in range(len(text)):
         # 处理端口号
-        if text[i] == keyword:           
+        if text[i] == keyword:
             for j in range(max(i - MAX_DISTANCE, 0), min(i + MAX_DISTANCE + 1, len(text))):
                 if j != i and text[j].isdigit() and 0 < int(text[j]) < 65536:
                     # Swap the keyword with a valid integer within the specified distance
-                    logger.debug(TAG + 'Swapping {} with {}'.format(text[i], text[j]))
+                    logger.debug(
+                        TAG + 'Swapping {} with {}'.format(text[i], text[j]))
                     text[i+1], text[j] = text[j], text[i+1]
                     break
     logger.debug(TAG + 'Text after position adjustment: '+' '.join(text))
-
 
     # 移除连续出现的，其后无有效关键词的指示词
     for i in range(len(text)-1):
         if is_a_mark(text[i]) and is_a_mark(text[i+1]):
             text[i] = ""
-    
+
     # 移除指示词和其后的关键词之外的内容
     new_text = []
     for i in range(len(text)-1):
@@ -547,19 +587,23 @@ def marked_text_refinement(text: str) -> str:
     for i in range(len(text)-1):
         if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
             if text[i] == "{address}" and not is_valid_address(text[i+1]):
-                logger.debug(TAG + 'marked_text_refinement(): Removing invalid address: '+str(text[i+1]))
+                logger.debug(
+                    TAG + 'marked_text_refinement(): Removing invalid address: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
             if text[i] == "{port}" and not is_valid_port(text[i+1]):
-                logger.debug(TAG + 'marked_text_refinement(): Removing invalid port: '+str(text[i+1]))
+                logger.debug(
+                    TAG + 'marked_text_refinement(): Removing invalid port: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
             if text[i] == "{user}" and not is_valid_user(text[i+1]):
-                logger.debug(TAG + 'marked_text_refinement(): Removing invalid user: '+str(text[i+1]))
+                logger.debug(
+                    TAG + 'marked_text_refinement(): Removing invalid user: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
             if text[i] == "{password}" and not is_valid_password(text[i+1]):
-                logger.debug(TAG + 'marked_text_refinement(): Removing invalid password: '+str(text[i+1]))
+                logger.debug(
+                    TAG + 'marked_text_refinement(): Removing invalid password: '+str(text[i+1]))
                 text[i] = ""
                 text[i+1] = ""
 
@@ -574,8 +618,10 @@ def marked_text_refinement(text: str) -> str:
     logger.debug(TAG + 'Text after repeated keywords adjustment: '+' '.join(text.split()))
     return text
 
-##########################信息提取函数###############################
+########################## 信息提取函数###############################
 # 从预处理过后的文本中提取成对信息
+
+
 def extract_paired_info(text):
     result_pair = []
     a_paired_info = paired_info_pattern()
@@ -593,15 +639,15 @@ def extract_paired_info(text):
                     result_pair.append(a_paired_info.output())
                 else:
                     # TODO 移除info_pattern 使用    is_a_mark
-   
+
                     a_paired_info.setter(INFO_PATTERN[text[i].replace(
                         '{', '').replace('}', '')], text[i+1])
 
-            logger.debug(TAG + 'Adding attr to paired info: '+text[i]+" "+text[i+1])
+            logger.debug(TAG + 'Adding attr to paired info: ' +
+                         text[i]+" "+text[i+1])
             a_paired_info.setter(INFO_PATTERN[text[i].replace(
                 '{', '').replace('}', '')], text[i+1])
             a_paired_info.set_data_headers(text[i])
-            
 
     if a_paired_info.check_header_complete():
         a_paired_info.remake_data()
@@ -621,8 +667,10 @@ def extract_paired_info(text):
     #         filtered_result_pair.append(filtered_item)
     # result_pair = filtered_result_pair
 
-    logger.debug(TAG + 'paired_info_extract(): beginning to restore replaced content')
-    logger.debug(TAG + 'paired_info_extract(): ITEM_PROTECTION_DICT: '+str(ITEM_PROTECTION_DICT))
+    logger.debug(
+        TAG + 'paired_info_extract(): beginning to restore replaced content')
+    logger.debug(
+        TAG + 'paired_info_extract(): ITEM_PROTECTION_DICT: '+str(ITEM_PROTECTION_DICT))
     # 还原被替换的内容
     result_pair = restore_placeholders(result_pair)
     for item in result_pair:
@@ -632,7 +680,8 @@ def extract_paired_info(text):
 
 
 def rule_based_info_extract(text: str) -> dict:
-    logger.info(TAG + 'rule_based_info_extract(): Rule based processing for text')
+    logger.info(
+        TAG + 'rule_based_info_extract(): Rule based processing for text')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -645,7 +694,8 @@ def rule_based_info_extract(text: str) -> dict:
     for value in result_dict.values():
         value = "Rule based: "+value
 
-    logger.info(TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_dict))
+    logger.info(
+        TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_dict))
     # logger.info(TAG + 'rule_based_info_extract(): using paired_info_class to check valid info')
     # a_paired_info = paired_info_pattern()
     # for key, value in result_dict.items():
@@ -656,7 +706,9 @@ def rule_based_info_extract(text: str) -> dict:
     # logger.info(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
     return result_dict
 
-#代码等文件的提取
+# 代码等文件的提取
+
+
 def code_info_extract(text: str) -> dict:
     original_text = text
     logger.info(TAG + 'code_info_extract(): Code processing for text '+' '.join(text.split()))
@@ -677,8 +729,8 @@ def code_info_extract(text: str) -> dict:
         new_lines.append(line)
     XML_FILE = False
     for line in new_lines:
-        if  "name" in line and "value" in line:
-                XML_FILE = True
+        if "name" in line and "value" in line:
+            XML_FILE = True
     text = '\n'.join(new_lines)
     logger.debug(TAG + 'code_info_extract(): text after removing outer " start:@@@ '+' '.join(text.split())+' end:@@@')
     # 仅保留形如 xx = "xx"的行 和含有两个字符串的行
@@ -706,16 +758,17 @@ def code_info_extract(text: str) -> dict:
     text = text.split("\n")
     lines = []
     for line in text:
-        line=line.strip()
-        line=line.replace("\"", " ")
+        line = line.strip()
+        line = line.replace("\"", " ")
         # line=line.replace("=", " ")
         lines.append(line)
-    logger.info(TAG + 'code_info_extract(): text after removing outer " and only keeping string: '+str(lines))
+    logger.info(
+        TAG + 'code_info_extract(): text after removing outer " and only keeping string: '+str(lines))
     text = lines
     lines = []
     for line in text:
         line_sliced = []
-        if  "name" in line and "value" in line:
+        if "name" in line and "value" in line:
             logger.debug(TAG + 'Dividing by name and value: '+line)
             # 使用正则表达式匹配属性名和属性值
             pattern = r'\s*name\s*=\s*([^\s]+)\s*value\s*=\s*([^\s]+)'
@@ -732,7 +785,8 @@ def code_info_extract(text: str) -> dict:
         if len(line_sliced) == 2:
             lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
 
-    logger.info(TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
+    logger.info(
+        TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
     # text = lines
     result_dict = {}
     logger.debug(TAG + 'Special processing for text: '+str(lines))
@@ -747,7 +801,8 @@ def code_info_extract(text: str) -> dict:
         words_list += line.split(" ")
     for i in range(len(words_list) - 1):
         # print(words_list[i])
-        logger.debug(TAG + 'Code processing for text: '+words_list[i]+" "+words_list[i+1])
+        logger.debug(TAG + 'Code processing for text: ' +
+                     words_list[i]+" "+words_list[i+1])
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
             key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
         ):
@@ -763,7 +818,7 @@ def code_info_extract(text: str) -> dict:
     # TODO this section is just for test, remove it later
     rule_based_info_extract_result = rule_based_info_extract(original_text)
     result_dict.update(rule_based_info_extract_result)
-    
+
     result_dict_temp = {}
     logger.info(TAG + 'code_info_extract(): remove invalid info')
     for key, value in result_dict.items():
@@ -775,7 +830,8 @@ def code_info_extract(text: str) -> dict:
     for key, value in result_dict.items():
         # Remove /, space, :, {, and } from key and value
         cleaned_key = key.replace('/', '').replace(' ', '').\
-            replace(':', '').replace('{', '').replace('}', '').replace('\"', '').replace('\'', '')
+            replace(':', '').replace('{', '').replace(
+                '}', '').replace('\"', '').replace('\'', '')
         # cleaned_value = value.replace('/', '').replace(' ', '').\
         #     replace(':', '').replace('{', '').replace('}', '').replace('\"', '').replace('\'', '')
 
@@ -785,8 +841,11 @@ def code_info_extract(text: str) -> dict:
     return result_dict
 
 # 配置文件的提取
+
+
 def config_info_extract(text: str) -> dict:
     return code_info_extract(text)
+
 
 def ocr_code_processing(text: str) -> dict:
     logger.info(TAG + 'ocr_code_processing(): processing for text: '+' '.join(text.split()))
@@ -841,7 +900,8 @@ def ocr_code_processing(text: str) -> dict:
         # print(words_list[i])
         if words_list[i] in processed_words_list:
             continue
-        logger.debug(TAG + 'Special processing for text: '+words_list[i]+" "+words_list[i+1])
+        logger.debug(TAG + 'Special processing for text: ' +
+                     words_list[i]+" "+words_list[i+1])
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
             key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
         ):
@@ -855,30 +915,32 @@ def ocr_code_processing(text: str) -> dict:
     return result_dict
 
 
-
-##########################入口函数###############################
+########################## 入口函数###############################
 # 从处理过后的纯文本字符串中提取成对信息
 # 输入：处理过后的字符串
 # 输出：成对信息列表
 # RETURN_TYPE_DICT 为True时返回字典
 # FUZZ_MARK 为True时进行模糊标记
 # RETURN_MARKED_TEXT 为True时返回标记后的文本
-def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False,RETURN_MARKED_TEXT=False) -> list:
+def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=False, RETURN_MARKED_TEXT=False) -> list:
     original_text = text
     global ITEM_PROTECTION_DICT
-    logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT before fuzz extract: '+str(ITEM_PROTECTION_DICT))
-    logger.debug(TAG + 'plain_text_info_extraction(): Text before sensitive info protection: '+text)
+    logger.debug(
+        TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT before fuzz extract: '+str(ITEM_PROTECTION_DICT))
+    logger.debug(
+        TAG + 'plain_text_info_extraction(): Text before sensitive info protection: '+text)
     text, item_protection_dict1 = information_protection(text)
-    logger.debug(TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
+    logger.debug(
+        TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
 
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
-        text = chn_text_preprocessing(text,FUZZ_MARK)
+        text = chn_text_preprocessing(text, FUZZ_MARK)
     else:
         logger.info(TAG + 'This is an English text.')
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
-        text = eng_text_preprocessing(text,FUZZ_MARK)
+        text = eng_text_preprocessing(text, FUZZ_MARK)
     if ITEM_PROTECTION_DICT == {}:
         ITEM_PROTECTION_DICT = item_protection_dict1
     if FUZZ_MARK:
@@ -896,20 +958,23 @@ def plain_text_info_extraction(text: str,RETURN_TYPE_DICT=False,FUZZ_MARK=False,
             if text[i] in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
                 result_dict[text[i]] = text[i+1]
                 i = i+1
-        return result_dict    
+        return result_dict
     paired_info = extract_paired_info(text)
     logger.info(TAG + 'Info extraction result: '+str(paired_info))
     return paired_info
 
+
 # info_core入口 根据输入内容的类型（表格，文本）进行不同的处理
 # flag: 0: text 1: table
 IS_CONFIG_FILE = 1
-def begin_info_extraction(info,flag=0,file_path='') -> dict:
+
+
+def begin_info_extraction(info, flag=0, file_path='') -> dict:
     switch = {
-    'code': code_info_extract,
-    'config': config_info_extract,
-    'ocr': ocr_code_processing
-    }  
+        'code': code_info_extract,
+        'config': config_info_extract,
+        'ocr': ocr_code_processing
+    }
     logger.info(TAG + "begin_info_extraction(): input is {}".format(info))
     if flag == IS_CONFIG_FILE:
         return config_info_extract(info)
@@ -917,8 +982,9 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
     if isinstance(info, str):
         # 若文本中不存在中文和英文关键词，进行模糊提取
         new_info = info.replace("\n", "")
-        file_type = determine_file_type(file_path,info)
-        logger.info(TAG + "begin_info_extraction(): input type is {}".format(file_type))
+        file_type = determine_file_type(file_path, info)
+        logger.info(
+            TAG + "begin_info_extraction(): input type is {}".format(file_type))
         if file_type in switch:
             logger.info(TAG + "begin_info_extraction(): input is code/config")
             # result = code_info_extract(info)
@@ -937,23 +1003,20 @@ def begin_info_extraction(info,flag=0,file_path='') -> dict:
             else:
                 logger.info(TAG + "begin_info_extraction(): unknown input")
                 result = plain_text_info_extraction(info)
-                logger.info(TAG + "begin_info_extraction(): fuzz_extract result: {}".format(str(result)))
-        return result_manager(result,info,file_path)
+                logger.info(
+                    TAG + "begin_info_extraction(): fuzz_extract result: {}".format(str(result)))
+        return result_manager(result, info, file_path)
     # 表格
     elif isinstance(info, list):
-        if is_png_text(info):
-            text = ""
-            for item in info[1:]:
-                item_to_string = "\n".join(item)
-                text = text+"\n"+item_to_string
-            text = fix_ocr(text)
-            result =  begin_info_extraction(text,file_path=file_path)
-            return result_manager(result,text,file_path)
-        else:
-            # result_table = one_table_remove_irrelevant_columns(
-            #     globalVar.get_sensitive_word(), info[1:])
-            result_table = []
-            return result_table
+        logger.info(TAG + "info_extraction(): input is ordinary picture")
+        text = ""
+        for item in info[1:]:
+            item_to_string = "\n".join(item)
+            text = text+"\n"+item_to_string
+        text = fix_ocr(text)
+        result = begin_info_extraction(text, file_path=file_path)
+        return result_manager(result, text, file_path)
+
 
 # 在常规提取失败后，使用特殊方法提取信息
 def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
@@ -983,17 +1046,21 @@ def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
         'ocr': ocr_code_processing
     }
     if result == []:
-        logger.warning(TAG + 'No paired info extracted during plain text info extraction!')     
-        logger.info(TAG + "result_manager(): input type is {}".format(file_type))
+        logger.warning(
+            TAG + 'No paired info extracted during plain text info extraction!')
+        logger.info(
+            TAG + "result_manager(): input type is {}".format(file_type))
         if file_type in switch:
             logger.info(TAG + "result_manager(): input is code/config")
             # result = code_info_extract(info)
             result = switch[file_type](info)
         else:
             logger.info(TAG + "result_manager(): unknown input")
-            result = plain_text_info_extraction(info,FUZZ_MARK=True)
-            logger.info(TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
+            result = plain_text_info_extraction(info, FUZZ_MARK=True)
+            logger.info(
+                TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
     return result
+
 
 if __name__ == '__main__':
     # file = open("test/.bash_history", "r")

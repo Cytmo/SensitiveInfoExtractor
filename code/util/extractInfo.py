@@ -1,3 +1,5 @@
+from informationEngine.keyInfoExtract import *
+from util.decompressionUtil import *
 import shutil
 from util.resultUtil import ResOut
 from toStringUtils.universalUtil import *
@@ -28,12 +30,22 @@ logger = LoggerSingleton().get_logger()
 
 # 此处更换敏感信息提取api
 def sensitive_info_detect(file_path, text, flag=0):
+    sensitive_info = []
     if flag == 1:
-        sensitive_info = begin_info_extraction(
-            text, flag=1, file_path=file_path)
+        try:
+            sensitive_info = begin_info_extraction(
+                text, flag=1, file_path=file_path)
+        except Exception as e:
+            logger.error(e)
+            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
     else:
-        sensitive_info = begin_info_extraction(text, file_path=file_path)
-    res_out.add_new_json(file_path, sensitive_info)
+        try:
+            sensitive_info = begin_info_extraction(text, file_path=file_path)
+        except Exception as e:
+            logger.error(e)
+            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+    if sensitive_info:
+        res_out.add_new_json(file_path, sensitive_info)
 
 
 ######################### 常见文件 #################################################
@@ -64,10 +76,33 @@ def extract_config(file_path, nameclean):
 # 图片文件ocr读取和提取操作, 如.jpg/.png...
 def extract_pic(file_path, nameclean):
     logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
-    text = ocr_table_batch(file_path)
-    # text = ocr_paddleocr(file_path)
-    sensitive_info_detect(file_path, text[0])
 
+    pic_list = ocr_table_batch(file_path)
+
+    [print(data) for data in pic_list[0][0:]]
+
+    text_or_table_flag = is_png_text(pic_list[0])
+
+    if text_or_table_flag:
+        # is table
+        pd_table_data = pd.DataFrame(pic_list[0][1:])
+        print(pd_table_data)
+        res = single_table_sensitive_extraction(pd_table_data)
+    else:
+        # is pic
+        print(pic_list[0][1:])
+        res = begin_info_extraction(pic_list[0], file_path=file_path)
+
+    res_out.add_new_json(file_path, res)
+
+
+# 判断图片识别结果（表格形式）还是文本
+def is_png_text(info):
+    if len(info[1]) > 1:
+        logger.info(TAG + "is_png_text(): input is [table] png ")
+        return True
+    logger.info(TAG + "is_png_text(): input is [text] png ")
+    return False
 
 ######################### pdf file ###########################################
 
@@ -173,33 +208,6 @@ def extract_et(file_path, nameclean):
     res_out.add_new_json(file_path, text)
 
 
-######################### e-mail file ########################################
-
-# TODO
-# # .eml文件读取和提取操作
-def extract_eml(file_path, nameclean):
-    logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
-    eml_header, eml_text, eml_attachment = eml_file(file_path)
-
-    sensitive_info = []
-    sensitive_info_text = begin_info_extraction(eml_text["text"])
-    if not len(sensitive_info_text) == 0:
-        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
-        sensitive_info.append(sensitive_info_text)
-
-    print(eml_text)
-    if "table" in eml_text:
-        logger.info(TAG+"extract_eml(): eml body has table")
-        sensitive_info = sensitive_info+eml_text["table"]
-
-    result = {
-        "eml_header": eml_header,
-        "sensitive_info": sensitive_info,
-        "eml_attachment": eml_attachment
-    }
-    res_out.add_new_json(file_path, result)
-
-
 ######################### code config file ################################
 
 # token文件读取和提取操作
@@ -217,82 +225,83 @@ def is_token_file(file_path):
 ######################### code file########################################
 
 # 源代码文件读取和提取操作
-# TODO:需要重新整理CODE的识别
 def extract_code_file(file_path, nameclean):
     logger.info(TAG+"extract_code_file(): " + os.path.basename(file_path))
     extract_direct_read(file_path, os.path.basename(file_path))
     return
 
 
-def is_code_file(code_dir_or_file):
-    # 代码后缀文件
-    extension_code = [
+######################### e-mail file ########################################
+extension_switch_eml = {
+    # 解压
+    process_rar_file: [".rar"],
+    process_zip_file: [".zip"],
+
+    # 各种格式文件提取
+    extract_universal: [".txt", ".epub", ".bash_history"],
+    extract_direct_read: [".md"],
+
+    extract_pdf: [".pdf"],
+    extract_doc: [".doc"],
+    extract_wps: [".wps"],
+    extract_docx: [".docx"],
+    extract_ppt: [".ppt"],
+    extract_dps: [".dps"],
+    extract_pptx: [".pptx"],
+    extract_xlsx: [".xlsx"],
+    extract_et: [".et"],
+
+
+    # 图片处理
+    extract_pic: [".png", ".jpg"],
+
+    # 配置文件处理
+    extract_config: [".yml", ".xml", ".properties"],
+
+    # 代码文件处理
+    extract_code_file: [
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
         '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
         '.ps1', 'Dockerfile', '.toml', '.h'
-    ]
+    ],
 
-    code_config = ['Dockerfile', '.dockerignore', '.gitignore']
+    # 带后缀的关键文件处理
+    process_pub_file: [".pub"],
+}
 
-    flag_code_file = False
 
-    if '.' in code_dir_or_file:
-        file_extension = os.path.splitext(code_dir_or_file)[1]
-        for item in extension_code:
-            if file_extension == item:
-                flag_code_file = True
-                break
+#  .eml文件读取和提取操作
+def extract_eml(file_path, nameclean):
+    logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
+    eml_header, eml_text, attach_files_list = eml_file(file_path)
 
-    for item in code_config:
-        if str(code_dir_or_file).split("/")[-1] == item:
-            flag_code_file = True
-            break
+    sensitive_info = []
+    sensitive_info_text = []
+    if "text" in eml_text:
+        sensitive_info_text = begin_info_extraction(eml_text["text"])
 
-    if not flag_code_file:
-        return False
+    if not len(sensitive_info_text) == 0:
+        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
+        sensitive_info.append(sensitive_info_text)
 
-    result_stdout, result_stderr = source_code_file(code_dir_or_file)
+    if "table" in eml_text:
+        logger.info(TAG+"extract_eml(): eml body has table")
+        sensitive_info = sensitive_info+eml_text["table"]
 
-    if len(result_stderr) == 0:
-        logger.info(TAG+"is_code_file(): " + code_dir_or_file +
-                    " , but none")
-        return True
+    result = {}
+    if eml_header != "":
+        result["eml_header"] = eml_header
+    if sensitive_info != []:
+        result["sensitive_info"] = sensitive_info
+    if attach_files_list != []:
+        for item_path in attach_files_list:
+            file_spilit = os.path.splitext(os.path.basename(item_path))
+            for process_function, suffix_list in extension_switch_eml.items():
+                if file_spilit[1] in suffix_list:
+                    process_function(item_path, file_spilit[0])
 
-    logger.info(TAG+"is_code_file(): " + code_dir_or_file +
-                " , has sensitive information.")
+        result["attach_files_list"] = attach_files_list
 
-    result_stdout_json = json.loads(result_stdout)
-
-    # 只保留 key和value
-    result_stdout = [{"key": item["key"], "value": item["value"]}
-                     for item in result_stdout_json]
-    # 去重
-    result_stdout_set = {tuple(item.items()) for item in result_stdout}
-    result_stdout = [dict(item) for item in result_stdout_set]
-
-    result_stdout_copy = result_stdout
-    extract_out = []
-    ak_sk = {}
-
-    for item in result_stdout:
-        if item["key"] == "ACCESSKEY":
-            ak_sk["ACCESSKEY"] = item["value"]
-            result_stdout_copy = [_item for _item in result_stdout_copy if not (
-                _item["key"] == "ACCESSKEY" and _item["value"] == item["value"])]
-            if not len(ak_sk) == 2:
-                continue
-        if item["key"] == "SECRETKEY":
-            ak_sk["SECRETKEY"] = item["value"]
-            result_stdout_copy = [_item for _item in result_stdout_copy if not (
-                _item["key"] == "SECRETKEY" and _item["value"] == item["value"])]
-            if not len(ak_sk) == 2:
-                continue
-        if len(ak_sk) == 2:
-            extract_out.append(ak_sk)
-            ak_sk = {}
-
-    # 特殊处理的项结果(ak与sk)+未特殊处理的原有项
-    res = extract_out+result_stdout_copy
-    res_out.add_new_json(code_dir_or_file, res)
-    return True
+    if result != {}:
+        res_out.add_new_json(file_path, result)
