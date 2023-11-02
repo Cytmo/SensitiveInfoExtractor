@@ -78,18 +78,19 @@ def extract_pic(file_path, nameclean):
         res = single_table_sensitive_extraction(pd_table_data)
     else:
         # is pic
-        res = begin_info_extraction(pic_list[0])
+        print(pic_list[0][1:])
+        res = begin_info_extraction(pic_list[0], file_path=file_path)
 
     res_out.add_new_json(file_path, res)
 
 
 # 判断图片识别结果（表格形式）还是文本
 def is_png_text(info):
-    if len(info[1]) >= 2:
+    if len(info[1]) > 1:
         logger.info(TAG + "is_png_text(): input is [table] png ")
-        return False
+        return True
     logger.info(TAG + "is_png_text(): input is [text] png ")
-    return True
+    return False
 
 ######################### pdf file ###########################################
 
@@ -243,6 +244,3 @@ def extract_code_file(file_path, nameclean):
     logger.info(TAG+"extract_code_file(): " + os.path.basename(file_path))
     extract_direct_read(file_path, os.path.basename(file_path))
     return
-
-
-######################### Tools ########################################

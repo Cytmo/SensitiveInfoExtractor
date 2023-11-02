@@ -256,4 +256,11 @@ def pad_2d_list(input_2d_list):
         else:
             padded_list.append(row)
 
-    return padded_list
+    # 检查每列是否全为空字符串，如果不是则保留该列
+    filtered_data = [col for col in zip(
+        *padded_list) if any(col) or not all(c == "" for c in col)]
+
+    # 转置筛选后的数据，得到二维列表
+    filtered_data_transposed = [list(col) for col in zip(*filtered_data)]
+
+    return filtered_data_transposed

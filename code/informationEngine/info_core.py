@@ -1016,10 +1016,10 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         for item in info[1:]:
             item_to_string = "\n".join(item)
             text = text+"\n"+item_to_string
-        logger.info(text)
         text = fix_ocr(text)
-        result = plain_text_info_extraction(text)
+        result = begin_info_extraction(text, file_path=file_path)
         return result_manager(result, text, file_path)
+
 
 # 在常规提取失败后，使用特殊方法提取信息
 # TODO 部分文件并判定为未知并进行了fuzz_extract 解决此问题
