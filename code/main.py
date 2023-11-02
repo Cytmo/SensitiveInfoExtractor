@@ -170,6 +170,8 @@ logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
 with open(args.time, "a+") as f:
     f.write(time_info+"\n")
+
+# 记录异常
 error_list = globalVar.get_error_list()
 if error_list is not None and len(error_list) > 0:
     logger.critical(

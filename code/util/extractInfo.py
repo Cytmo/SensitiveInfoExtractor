@@ -36,14 +36,16 @@ def sensitive_info_detect(file_path, text, flag=0):
             sensitive_info = begin_info_extraction(
                 text, flag=1, file_path=file_path)
         except Exception as e:
-            logger.error(e)
             logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+            logger.error(e)
+            globalVar.set_error_list(file_path, e.stderr)
     else:
         try:
             sensitive_info = begin_info_extraction(text, file_path=file_path)
         except Exception as e:
-            logger.error(e)
             logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+            logger.error(e)
+            globalVar.set_error_list(file_path, e.stderr)
     if sensitive_info:
         res_out.add_new_json(file_path, sensitive_info)
 

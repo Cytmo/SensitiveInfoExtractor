@@ -26,10 +26,10 @@ def _init():  # 初始化
     flag_list = multiprocessing.Manager().list()
 
 
-
-def set_error_list(value):
+def set_error_list(file_path, value):
     # 定义一个全局变量
-    error_list.append(value)
+    error_list.append([file_path, value])
+
 
 def get_error_list():
     # 获得一个全局变量，不存在则提示读取对应变量失败
