@@ -35,6 +35,8 @@ logger = LoggerSingleton().get_logger()
 
 
 def restore_placeholders(result_dict: dict) -> dict:
+    logger.debug(
+        TAG + "restore_placeholders(): ITEM_PROTECTION_DICT: "+str(ITEM_PROTECTION_DICT))
     logger.debug(TAG + "restore_placeholders(): result_dict: " +
                  str(result_dict))
     # if result_dict is a list
@@ -69,7 +71,10 @@ def is_valid_info(info: str, VALID_INFO_THRESHOLD=3) -> bool:
 
 def determine_file_type(file_name, info):
     logger.info(TAG + "determine_file_type(): file_name: "+str(file_name))
+    logger.info(TAG + "determine_file_type(): info: "+str(info))
     # TODO 完善的文件类型判断
+    if "carbon" in file_name:
+        return "ocr"
     if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name:
         return "code"
     elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
@@ -633,6 +638,8 @@ def extract_paired_info(text):
                     a_paired_info.remake_data()
                     result_pair.append(a_paired_info.output())
                 else:
+                    # TODO 移除info_pattern 使用    is_a_mark
+
                     a_paired_info.setter(INFO_PATTERN[text[i].replace(
                         '{', '').replace('}', '')], text[i+1])
 
@@ -699,7 +706,7 @@ def rule_based_info_extract(text: str) -> dict:
     # logger.info(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
     return result_dict
 
-# 代码(目前仅有carbon.jpg)等文件的提取
+# 代码等文件的提取
 
 
 def code_info_extract(text: str) -> dict:
@@ -842,6 +849,74 @@ def config_info_extract(text: str) -> dict:
     return code_info_extract(text)
 
 
+def ocr_code_processing(text: str) -> dict:
+    logger.info(TAG + 'ocr_code_processing(): processing for text: '+str(text))
+    text, item_protection_dict1 = information_protection(text)
+    global ITEM_PROTECTION_DICT
+    ITEM_PROTECTION_DICT = item_protection_dict1
+    # text = fuzz_prevention(text)
+    text = text.lower()
+    text = fix_ocr(text)
+    text = text.replace("'", '"')
+    # text = text.replace(":", "\"")
+    # text = text.replace("=", "\"")
+
+    text = text.split("\n")
+    lines = []
+    # 用于分割的符号
+    split_symbols = [":", "=", '"']
+    # remove outer "
+    for line in text:
+        if line.startswith('"') and line.endswith('"'):
+            line = line[1:-1]
+        lines.append(line)
+    text = lines
+    lines = []
+    # only  keep each eng_keywords_list between ""
+    for line in text:
+        new_line = ""
+        if ":" in line:
+            line = line.split(":")
+        elif "=" in line:
+            line = line.split("=")
+        elif '"' in line:
+            line = line.split('"')
+        for i in range(len(line)):
+            if i % 2 == 1:
+                new_line += "{} ".format(line[i])
+        lines.append(new_line)
+
+    logger.debug(TAG + 'Special processing for text: '+str(lines))
+    # remove empty eng_keywords_list
+    lines_temp = []
+    for line in lines:
+        line = line.strip()
+        lines_temp.append(line)
+    lines = lines_temp
+    words_list = []
+    for line in lines:
+        words_list += line.split(" ")
+    processed_words_list = []
+    result_dict = {}
+    for i in range(len(words_list) - 1):
+        # print(words_list[i])
+        if words_list[i] in processed_words_list:
+            continue
+        logger.debug(TAG + 'Special processing for text: ' +
+                     words_list[i]+" "+words_list[i+1])
+        if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
+            key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
+        ):
+            logger.debug(TAG + 'Extract: '+words_list[i]+" "+words_list[i+1])
+
+            result_dict[words_list[i]] = words_list[i + 1]
+            processed_words_list.append(words_list[i])
+            processed_words_list.append(words_list[i+1])
+    result_dict = restore_placeholders(result_dict)
+    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    return result_dict
+
+
 ########################## 入口函数###############################
 # 从处理过后的纯文本字符串中提取成对信息
 # 输入：处理过后的字符串
@@ -857,8 +932,6 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
     logger.debug(
         TAG + 'plain_text_info_extraction(): Text before sensitive info protection: '+text)
     text, item_protection_dict1 = information_protection(text)
-    logger.debug(
-        TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
     logger.debug(
         TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
 
@@ -899,42 +972,44 @@ IS_CONFIG_FILE = 1
 
 
 def begin_info_extraction(info, flag=0, file_path='') -> dict:
+    switch = {
+        'code': code_info_extract,
+        'config': config_info_extract,
+        'ocr': ocr_code_processing
+    }
+    logger.info(TAG + "begin_info_extraction(): input is {}".format(info))
     if flag == IS_CONFIG_FILE:
         return config_info_extract(info)
     # 纯文本
     if isinstance(info, str):
         # 若文本中不存在中文和英文关键词，进行模糊提取
         new_info = info.replace("\n", "")
-        if not any(key in new_info for key in ENG_KEYWORDS_LIST) and not any(key in new_info for key in CHN_KEYWORDS_LIST):
-            logger.info(TAG + "info_extraction(): fuzz extract")
-            # 判断是否中文
-            if is_chinese_text(info):
-                logger.info(TAG + 'This is a Chinese text.')
-                result = plain_text_info_extraction(info)
-                logger.info(
-                    TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
-                return result
-            file_type = determine_file_type(file_path, info)
-            switch = {
-                'code': code_info_extract,
-                'config': config_info_extract
-            }
-            logger.info(
-                TAG + "begin_info_extraction(): input type is {}".format(file_type))
-            if file_type in switch:
-                logger.info(
-                    TAG + "begin_info_extraction(): input is code/config")
-                # result = code_info_extract(info)
-                result = switch[file_type](info)
+        file_type = determine_file_type(file_path, info)
+        logger.info(
+            TAG + "begin_info_extraction(): input type is {}".format(file_type))
+        if file_type in switch:
+            logger.info(TAG + "begin_info_extraction(): input is code/config")
+            # result = code_info_extract(info)
+            result = switch[file_type](info)
+            return result
+        else:
+            if not any(key in new_info for key in ENG_KEYWORDS_LIST) and not any(key in new_info for key in CHN_KEYWORDS_LIST):
+                logger.info(TAG + "info_extraction(): fuzz extract")
+                # 判断是否中文
+                if is_chinese_text(info):
+                    logger.info(TAG + 'This is a Chinese text.')
+                    result = plain_text_info_extraction(info)
+                    logger.info(
+                        TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
+                    return result
+                plain_text_info_extraction(info, FUZZ_MARK=True)
             else:
                 logger.info(TAG + "begin_info_extraction(): unknown input")
-                result = plain_text_info_extraction(info, FUZZ_MARK=True)
+                result = plain_text_info_extraction(info)
                 logger.info(
                     TAG + "begin_info_extraction(): fuzz_extract result: {}".format(str(result)))
-            return result
-        logger.info(TAG + "info_extraction(): input is string")
-        result = plain_text_info_extraction(info)
         return result_manager(result, info, file_path)
+    # 表格
     elif isinstance(info, list):
         logger.info(TAG + "info_extraction(): input is ordinary picture")
         text = ""
@@ -945,7 +1020,6 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         text = fix_ocr(text)
         result = plain_text_info_extraction(text)
         return result_manager(result, text, file_path)
-
 
 # 在常规提取失败后，使用特殊方法提取信息
 # TODO 部分文件并判定为未知并进行了fuzz_extract 解决此问题
@@ -958,7 +1032,8 @@ def result_manager(result, info, file_path) -> dict:
     file_type = determine_file_type(file_path, info)
     switch = {
         'code': code_info_extract,
-        'config': config_info_extract
+        'config': config_info_extract,
+        'ocr': ocr_code_processing
     }
     if result == []:
         logger.warning(
