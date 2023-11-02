@@ -233,5 +233,4 @@ def ocr_table_batch(folder_path):
             logger.info(TAG+"ocr_table_batch() with old hash: "+image_path)
             ocr_result.append(result)
 
-    return " "
     return ocr_result
