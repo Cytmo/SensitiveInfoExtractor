@@ -223,7 +223,7 @@ class paired_info_pattern():
         self.data["port"] = None
         self.data["phonenumber"] = None
 
-        self.check_header = {"user": False, "address": False}
+        self.check_header = {"user": False, "address": False,'AWSaccesskey':False,'AWSsecretkey':False}
 
     def reset_data(self):
         # 后续可以仿照下面改成递推式
@@ -233,7 +233,7 @@ class paired_info_pattern():
         self.data["address"] = None
         self.data["port"] = None
         self.data["phonenumber"] = None
-        self.check_header = {"user": False, "address": False}
+        self.check_header = {"user": False, "address": False,'AWSaccesskey':False,'AWSsecretkey':False}
     def reset_headers(self):
         self.check_header.update({k: False for k, v in self.data.items()})
 
@@ -260,9 +260,9 @@ class paired_info_pattern():
 
         # 对称整合
         for k, v in TWO_WAY_CONNECTED_INFO.items():
-            if self.data.get(v) == None or self.data.get(k) != None:
+            if self.data.get(v) == None and self.data.get(k) != None:
                 self.data[k] = None
-            if self.data.get(v) != None or self.data.get(k) == None:
+            if self.data.get(v) != None and self.data.get(k) == None:
                 self.data[v] = None
 
     def setter(self, name: str, value: Any) -> None:
@@ -732,7 +732,6 @@ def extract_paired_info(text):
                 a_paired_info.setter(text_i_striped.replace(
                 '{', '').replace('}', ''),text[i+1])
             a_paired_info.set_data_headers(text_i_striped)
-
     if a_paired_info.check_header_complete():
         a_paired_info.last_keyword = None
         a_paired_info.remake_data()
@@ -1032,7 +1031,6 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
         text = eng_text_preprocessing(text, FUZZ_MARK)
     if ITEM_PROTECTION_DICT == {}:
         ITEM_PROTECTION_DICT = item_protection_dict1
-
     if FUZZ_MARK:
         text = fuzz_mark(text)
     if RETURN_MARKED_TEXT:
@@ -1081,8 +1079,9 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
             result = switch[file_type](info)
             return result_manager(result,info,file_path,IS_CODE_OR_CONFIG=True)
         else:
-
-            if should_fuzz(new_info):
+            # TODO
+            if False:
+            # if should_fuzz(new_info):
                 logger.info(TAG + "info_extraction(): fuzz extract")
                 # 判断是否中文
                 if is_chinese_text(info):
