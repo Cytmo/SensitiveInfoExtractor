@@ -24,6 +24,8 @@ INFO_PATTERN = {"user": "user", "password": "password",
 # TODO: 单项依赖, ID放后面
 # 单项依赖信息组---前者需要后者存在
 ONE_WAY_CONNECTED_INFO = {"port": "address",
+                          "address": "password",
+                          "user":"password",
                           "AWSMWSkey": "AWSMWSID",
                           "AWSAPIKey": "AWSAPIGateway",
                           "AWSS3Bucket": "AWSAccessKeyIDValue",

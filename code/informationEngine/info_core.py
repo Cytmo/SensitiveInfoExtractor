@@ -292,12 +292,26 @@ class paired_info_pattern():
             self.reset_data()
             return False
         else:
-            if self.last_output != {}:
+
+            if self.last_output != {} and self.check_result_valiated():
                 # Re slice output
                 self.result_regroup()
+            elif self.last_output != {}:
+                data_backup = self.data
+                self.data = self.last_output
+                self.add_to_result_set()
+                self.data = data_backup
             self.last_output = {}
         return True
 
+    def check_result_valiated(self):
+        result = {}
+        for key in self.data:
+            if self.data[key] != None:
+                result[key] = self.data[key]
+        if len(result) < 2:
+            return False
+        return True
 
     def result_regroup(self):
         sliced_result_1 = {}
@@ -321,17 +335,14 @@ class paired_info_pattern():
         logger.info(TAG+"Paired_info():result_regroup(): sliced_result_2 is " + str(sliced_result_2))
 
         self.data = sliced_result_1
-        self.remake_data()
         self.add_to_result_set()
         self.data = sliced_result_2
-        self.remake_data()
         self.add_to_result_set()
         self.data = data_backup
 
     def output(self):
         if self.last_output != {}:
             self.data=self.last_output
-            self.remake_data()
             self.add_to_result_set()
         return self.result_set
 
@@ -711,18 +722,18 @@ def extract_paired_info(text):
         # TODO change to is a mark
         if is_a_mark(text_i_striped) and not is_a_mark(text[i+1]):
             if a_paired_info.check_data_headers(text_i_striped):
-                if a_paired_info.getter("password") != None:
-                    if a_paired_info.slice_word_check(text_i_striped):
-                        a_paired_info.remake_data()
-                        a_paired_info.add_to_result_set()
-                    a_paired_info.last_keyword = text_i_striped
-                else:
-                    if INFO_PATTERN.get(text_i_striped)!=None:
-                        a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
-                        '{', '').replace('}', '')], text[i+1])
-                    else:
-                        a_paired_info.setter(text_i_striped.replace(
-                '{', '').replace('}', ''),text[i+1])
+                a_paired_info.remake_data()
+                # if a_paired_info.getter("password") != None:
+                if a_paired_info.slice_word_check(text_i_striped):
+                    a_paired_info.add_to_result_set()
+                a_paired_info.last_keyword = text_i_striped
+                # else:
+                #     if INFO_PATTERN.get(text_i_striped)!=None:
+                #         a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
+                #         '{', '').replace('}', '')], text[i+1])
+                #     else:
+                #         a_paired_info.setter(text_i_striped.replace(
+                # '{', '').replace('}', ''),text[i+1])
             logger.debug(TAG + 'Adding attr to paired info: ' +
                          text_i_striped+" "+text[i+1])
             if INFO_PATTERN.get(text_i_striped)!=None:
