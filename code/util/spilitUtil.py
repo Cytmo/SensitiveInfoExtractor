@@ -21,6 +21,7 @@ extension_switch_new = {
     extract_direct_read: [".md"],
 
     extract_pdf: [".pdf"],
+    extract_csv: [".csv"],
     extract_doc: [".doc"],
     extract_wps: [".wps"],
     extract_docx: [".docx"],
@@ -140,4 +141,4 @@ def spilit_process_file(file, root_directory):
                 logger.debug(TAG + "=>Unsupported file format: " + file_name)
     except Exception as e:
         logger.debug(TAG + "=>Unsupported file format: " + file_name)
-        #globalVar.set_error_list(file_name, e, "不支持该文件类型")
+        # globalVar.set_error_list(file_name, e, "不支持该文件类型")

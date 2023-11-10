@@ -36,9 +36,9 @@ def sensitive_info_detect(file_path, text, flag=0):
         sensitive_info = begin_info_extraction(
             text, flag=1, file_path=file_path)
         # except Exception as e:
-            # logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
-            # logger.error(e)
-            # #globalVar.set_error_list(file_path, e)
+        # logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+        # logger.error(e)
+        # #globalVar.set_error_list(file_path, e)
     else:
         # try:
         sensitive_info = begin_info_extraction(text, file_path=file_path)
@@ -114,6 +114,12 @@ def extract_pdf(file_path, nameclean):
     logger.debug(TAG+"extract_pdf(): " + file_path.split("/")[-1])
     text = pdf_file(file_path)
     sensitive_info_detect(file_path, text)
+
+
+def extract_csv(file_path, nameclean):
+    logger.debug(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
+    text = csv_file(file_path)
+    res_out.add_new_json(file_path, text)
 
 
 ######################### office/wps file########################################

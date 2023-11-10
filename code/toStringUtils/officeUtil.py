@@ -1,3 +1,4 @@
+from informationEngine.table_extract import single_table_sensitive_extraction
 import queue
 from docx import Document
 from docx.oxml import OxmlElement
@@ -84,7 +85,7 @@ def pdf_file(file_path):
                 except Exception as e:
                     logger.error(TAG+"pdf_file(): " + file_path)
                     logger.error(e)
-                    #globalVar.set_error_list(file_path, e)
+                    # globalVar.set_error_list(file_path, e)
 
             logger.debug(TAG+"pdf_file()-图片文本信息:")
             logger.debug(image_all_text_res)
@@ -99,7 +100,7 @@ def pdf_file(file_path):
     except Exception as e:
         logger.error(TAG+"pdf_file(): " + file_path)
         logger.error(e)
-        #globalVar.set_error_list(file_path, e)
+        # globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -147,7 +148,7 @@ def docs_file(file_path, type):
     except Exception as e:
         logger.error(TAG+"docs_file(): " + file_path)
         logger.error(e)
-        #globalVar.set_error_list(file_path, e)
+        # globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -185,7 +186,7 @@ def docx_file_info_extract(docx_path, image_dir):
     except Exception as e:
         logger.debug(TAG+"docx_file_info_extract(): 图片占位符设置失败")
         logger.error(e)
-        #globalVar.set_error_list(docx_path, e)
+        # globalVar.set_error_list(docx_path, e)
         docx_text = " "
         for paragraph in target_docx.paragraphs:
             if "Evaluation Only. Created with Aspose.Words. Copyright 2003-2023  Aspose" not in paragraph.text and "Ltd." not in paragraph.text:
@@ -243,7 +244,7 @@ def docx_file_info_extract(docx_path, image_dir):
     except Exception as e:
         logger.error(TAG+"docx_file_info_extract(): 图片信息提取失败, 只返回文本信息")
         logger.error(e)
-        #globalVar.set_error_list(docx_path, e)
+        # globalVar.set_error_list(docx_path, e)
         return docx_text
 
 
@@ -284,7 +285,7 @@ def ppts_file(file_path, type):
     except Exception as e:
         logger.error(TAG+"ppts_file(): ppt转化失败")
         logger.error(e)
-        #globalVar.set_error_list(file_path, e)
+        # globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -292,7 +293,7 @@ def ppts_file(file_path, type):
 def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
 
     logger.debug(TAG+"ppts_file(): " + pptx_path + " " +
-                result_image_path + " "+ppt_pptx_name)
+                 result_image_path + " "+ppt_pptx_name)
 
     try:
 
@@ -349,7 +350,7 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                     # 处理 IndexError 异常
                     logger.error(TAG+"ppts_file(): 处理 IndexError 异常")
                     logger.error(e)
-                    #globalVar.set_error_list(pptx_path, e)
+                    # globalVar.set_error_list(pptx_path, e)
             logger.debug(TAG+"pptx_file_info_extract(): 图片文本信息:")
             logger.debug(image_all_text_res)
         else:
@@ -363,7 +364,7 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
     except Exception as e:
         logger.error(TAG+"ppts_file(): ppt转化失败")
         logger.error(e)
-        #globalVar.set_error_list(pptx_path, e)
+        # globalVar.set_error_list(pptx_path, e)
         return ""
 
 
@@ -410,6 +411,13 @@ def xlsx_file(file_path):
         else:
             while not que_add.empty():
                 xlsx_queue.put(que_add.get())
+    return res
+
+
+def csv_file(file_path):
+    # 读取CSV文件
+    pd_csv_data = pd.read_csv(file_path, header=None)
+    res = single_table_sensitive_extraction(pd_csv_data)
     return res
 
 
