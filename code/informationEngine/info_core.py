@@ -277,7 +277,10 @@ class paired_info_pattern():
         # else:
         #     return False
         # TODO
+        print(self.data)
         self.data[name] = value
+        print(self.data)
+
         return True
     
 
@@ -293,7 +296,7 @@ class paired_info_pattern():
             return False
         else:
 
-            if self.last_output != {} and self.check_result_valiated():
+            if self.last_output != {} and self.check_result_validity():
                 # Re slice output
                 self.result_regroup()
             elif self.last_output != {}:
@@ -304,11 +307,23 @@ class paired_info_pattern():
             self.last_output = {}
         return True
 
-    def check_result_valiated(self):
+    def check_result_validity(self):
         result = {}
-        for key in self.data:
-            if self.data[key] != None:
-                result[key] = self.data[key]
+        data_tmp = self.data.copy()
+        # 依赖整合
+        for k, v in ONE_WAY_CONNECTED_INFO.items():
+            if data_tmp.get(v) == None and data_tmp.get(k) != None:
+                data_tmp[k] = None
+
+        # 对称整合
+        for k, v in TWO_WAY_CONNECTED_INFO.items():
+            if data_tmp.get(v) == None and data_tmp.get(k) != None:
+                data_tmp[k] = None
+            if data_tmp.get(v) != None and data_tmp.get(k) == None:
+                data_tmp[v] = None
+        for key in data_tmp:
+            if data_tmp[key] != None:
+                result[key] = data_tmp[key]
         if len(result) < 2:
             return False
         return True
@@ -721,7 +736,10 @@ def extract_paired_info(text):
             continue
         # TODO change to is a mark
         if is_a_mark(text_i_striped) and not is_a_mark(text[i+1]):
-            if a_paired_info.check_data_headers(text_i_striped):
+            logger.info(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
+
+            if a_paired_info.check_data_headers(text_i_striped) and a_paired_info.check_result_validity():
+                # logger.info(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
                 a_paired_info.remake_data()
                 # if a_paired_info.getter("password") != None:
                 if a_paired_info.slice_word_check(text_i_striped):
@@ -736,13 +754,19 @@ def extract_paired_info(text):
                 # '{', '').replace('}', ''),text[i+1])
             logger.debug(TAG + 'Adding attr to paired info: ' +
                          text_i_striped+" "+text[i+1])
-            if INFO_PATTERN.get(text_i_striped)!=None:
+            if any( value in text_i_striped for value in INFO_PATTERN):
                 a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                 '{', '').replace('}', '')], text[i+1])
+                print(1)
+                print(text_i_striped.replace('{', '').replace('}', ''))
+                print(text[i+1])
             else:
+                print(2)
+
                 a_paired_info.setter(text_i_striped.replace(
                 '{', '').replace('}', ''),text[i+1])
             a_paired_info.set_data_headers(text_i_striped)
+    print(a_paired_info.data)
     if a_paired_info.check_header_complete():
         a_paired_info.last_keyword = None
         a_paired_info.remake_data()
