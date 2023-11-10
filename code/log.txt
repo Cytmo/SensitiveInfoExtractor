@@ -1,0 +1,317 @@
+[{'Status': 'disabled', 'Username': 'Administrator', 'UserID': 500, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': '31d6cfe0d16ae931b73c59d7e0c089c0', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}, {'Status': 'disabled', 'Username': 'Guest', 'UserID': 501, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': '31d6cfe0d16ae931b73c59d7e0c089c0', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}, {'Status': 'disabled', 'Username': 'None', 'UserID': 503, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': '31d6cfe0d16ae931b73c59d7e0c089c0', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}, {'Status': 'disabled', 'Username': 'None', 'UserID': 504, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': '31d6cfe0d16ae931b73c59d7e0c089c0', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}, {'Status': 'enabled', 'Username': 'Zther0', 'UserID': 1000, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': '31d6cfe0d16ae931b73c59d7e0c089c0', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}]
+String: '-' with probability [0.95876733 0.04123267] and prediction [0]
+'-' is not a password with probability 0.96
+String: '-' with probability [0.95876733 0.04123267] and prediction [0]
+'-' is not a password with probability 0.96
+String: '密码' with probability [0.95770755 0.04229245] and prediction [0]
+'密码' is not a password with probability 0.96
+String: '000000' with probability [0.31958997 0.68041003] and prediction [1]
+'000000' is a password with probability 0.68
+String: '1.' with probability [0.95532208 0.04467792] and prediction [0]
+'1.' is not a password with probability 0.96
+String: '2.' with probability [0.95532208 0.04467792] and prediction [0]
+'2.' is not a password with probability 0.96
+String: '3.' with probability [0.95532208 0.04467792] and prediction [0]
+'3.' is not a password with probability 0.96
+String: '1.' with probability [0.95532208 0.04467792] and prediction [0]
+'1.' is not a password with probability 0.96
+String: '2.' with probability [0.95532208 0.04467792] and prediction [0]
+'2.' is not a password with probability 0.96
+String: '3.' with probability [0.95532208 0.04467792] and prediction [0]
+'3.' is not a password with probability 0.96
+String: '84655555' with probability [1.35502572e-05 9.99986450e-01] and prediction [1]
+'84655555' is a password with probability 1.00
+处理敏感数据中，敏感数据大小为 (28, 9)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+处理敏感数据中，敏感数据大小为 (12, 11)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+处理敏感数据中，敏感数据大小为 (10, 1)
+String: '1' with probability [0.95817191 0.04182809] and prediction [0]
+'1' is not a password with probability 0.96
+String: '2' with probability [0.95817191 0.04182809] and prediction [0]
+'2' is not a password with probability 0.96
+String: '3' with probability [0.95817191 0.04182809] and prediction [0]
+'3' is not a password with probability 0.96
+String: '4' with probability [0.95817191 0.04182809] and prediction [0]
+'4' is not a password with probability 0.96
+String: '5' with probability [0.95817191 0.04182809] and prediction [0]
+'5' is not a password with probability 0.96
+String: '6' with probability [0.95817191 0.04182809] and prediction [0]
+'6' is not a password with probability 0.96
+String: '7' with probability [0.95817191 0.04182809] and prediction [0]
+'7' is not a password with probability 0.96
+String: '8' with probability [0.95817191 0.04182809] and prediction [0]
+'8' is not a password with probability 0.96
+String: '9' with probability [0.95817191 0.04182809] and prediction [0]
+'9' is not a password with probability 0.96
+String: '1' with probability [0.95817191 0.04182809] and prediction [0]
+'1' is not a password with probability 0.96
+String: '2' with probability [0.95817191 0.04182809] and prediction [0]
+'2' is not a password with probability 0.96
+String: '3' with probability [0.95817191 0.04182809] and prediction [0]
+'3' is not a password with probability 0.96
+String: '4' with probability [0.95817191 0.04182809] and prediction [0]
+'4' is not a password with probability 0.96
+String: '5' with probability [0.95817191 0.04182809] and prediction [0]
+'5' is not a password with probability 0.96
+String: '6' with probability [0.95817191 0.04182809] and prediction [0]
+'6' is not a password with probability 0.96
+String: '7' with probability [0.95817191 0.04182809] and prediction [0]
+'7' is not a password with probability 0.96
+String: '8' with probability [0.95817191 0.04182809] and prediction [0]
+'8' is not a password with probability 0.96
+String: '9' with probability [0.95817191 0.04182809] and prediction [0]
+'9' is not a password with probability 0.96
+处理敏感数据中，敏感数据大小为 (10, 2)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+[2023/11/10 10:51:16] ppocr WARNING: When args.layout is false, args.ocr is automatically set to false
+['../data/HCC维护信息.png']
+['服务名称', '地址', '用户名', '密码', '备注']
+['办公PC', 'rdp://10.10.1.101', 'admin', '5C5WQI9FSzHcT4Mz', '']
+['办公PC', 'rdp://10.10.1.102', 'admin', 'alaFmj7SEnsiR2zW', '']
+['办公PC', 'rdp://10.10.1.103', 'admin', 'YPXOEqMIZnefe5Um', '']
+['办公PC', 'rdp://10.10.1.104', 'admin', 'HAkpWz0yXh9fbbCN', '']
+['DMK', 'http://10100010:8080', 'sysadmin', 'xvqxPG615mh2NE6D', '']
+['DMK', 'http://10100.0 15:8080', 'sysadmin', '12vQunVGdQDgUYUa', '']
+['DMK', 'http://10 100.017-8080', 'sysadmin', 'A4SCWcwshvBDyOCw', '']
+['', '北京实验室https//10100.019:8443', 'bj-xxlab', '9odVQJM2WIQF6uBB', '']
+['研发1', 'ssh://192.168.33.10', 'root', 'M52QOtugwsQEjEC5', '']
+['研发2', 'ssh://192.168.33.11', 'root', 'CFRN4yltcKzbh9DF', '']
+['研发3', 'ssh://192.168.33.12', 'root', 'b506S0qUqFZMEUmY', '']
+['Vpn.', '192.168.33.100:8443', 'vpn', 'KxvFsofPLMCWIsrV', '']
+['网络节点', 'ssh: 10.200.2.99', 'root', 'c6mdIBIR8MDOjLDf', '网关']
+['ESXI', '10.200.3.191', 'root', 'GwtX2bm48sauzEK0', '重要设备']
+['', '', '', '', '']
+       0                           1         2                 3     4
+0   服务名称                          地址       用户名                密码    备注
+1   办公PC           rdp://10.10.1.101     admin  5C5WQI9FSzHcT4Mz      
+2   办公PC           rdp://10.10.1.102     admin  alaFmj7SEnsiR2zW      
+3   办公PC           rdp://10.10.1.103     admin  YPXOEqMIZnefe5Um      
+4   办公PC           rdp://10.10.1.104     admin  HAkpWz0yXh9fbbCN      
+5    DMK        http://10100010:8080  sysadmin  xvqxPG615mh2NE6D      
+6    DMK      http://10100.0 15:8080  sysadmin  12vQunVGdQDgUYUa      
+7    DMK      http://10 100.017-8080  sysadmin  A4SCWcwshvBDyOCw      
+8         北京实验室https//10100.019:8443  bj-xxlab  9odVQJM2WIQF6uBB      
+9    研发1         ssh://192.168.33.10      root  M52QOtugwsQEjEC5      
+10   研发2         ssh://192.168.33.11      root  CFRN4yltcKzbh9DF      
+11   研发3         ssh://192.168.33.12      root  b506S0qUqFZMEUmY      
+12  Vpn.         192.168.33.100:8443       vpn  KxvFsofPLMCWIsrV      
+13  网络节点            ssh: 10.200.2.99      root  c6mdIBIR8MDOjLDf    网关
+14  ESXI                10.200.3.191      root  GwtX2bm48sauzEK0  重要设备
+15                                                                    
+处理敏感数据中，敏感数据大小为 (16, 5)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+String: '-' with probability [0.95876733 0.04123267] and prediction [0]
+'-' is not a password with probability 0.96
+String: '-' with probability [0.95876733 0.04123267] and prediction [0]
+'-' is not a password with probability 0.96
+String: '密码' with probability [0.95770755 0.04229245] and prediction [0]
+'密码' is not a password with probability 0.96
+String: '000000' with probability [0.31958997 0.68041003] and prediction [1]
+'000000' is a password with probability 0.68
+String: '1.' with probability [0.95532208 0.04467792] and prediction [0]
+'1.' is not a password with probability 0.96
+String: '2.' with probability [0.95532208 0.04467792] and prediction [0]
+'2.' is not a password with probability 0.96
+String: '3.' with probability [0.95532208 0.04467792] and prediction [0]
+'3.' is not a password with probability 0.96
+String: '1.' with probability [0.95532208 0.04467792] and prediction [0]
+'1.' is not a password with probability 0.96
+String: '2.' with probability [0.95532208 0.04467792] and prediction [0]
+'2.' is not a password with probability 0.96
+String: '3.' with probability [0.95532208 0.04467792] and prediction [0]
+'3.' is not a password with probability 0.96
+String: '84655555' with probability [1.35502572e-05 9.99986450e-01] and prediction [1]
+'84655555' is a password with probability 1.00
+处理敏感数据中，敏感数据大小为 (28, 9)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+处理敏感数据中，敏感数据大小为 (12, 11)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+处理敏感数据中，敏感数据大小为 (10, 1)
+String: '1' with probability [0.95817191 0.04182809] and prediction [0]
+'1' is not a password with probability 0.96
+String: '2' with probability [0.95817191 0.04182809] and prediction [0]
+'2' is not a password with probability 0.96
+String: '3' with probability [0.95817191 0.04182809] and prediction [0]
+'3' is not a password with probability 0.96
+String: '4' with probability [0.95817191 0.04182809] and prediction [0]
+'4' is not a password with probability 0.96
+String: '5' with probability [0.95817191 0.04182809] and prediction [0]
+'5' is not a password with probability 0.96
+String: '6' with probability [0.95817191 0.04182809] and prediction [0]
+'6' is not a password with probability 0.96
+String: '7' with probability [0.95817191 0.04182809] and prediction [0]
+'7' is not a password with probability 0.96
+String: '8' with probability [0.95817191 0.04182809] and prediction [0]
+'8' is not a password with probability 0.96
+String: '9' with probability [0.95817191 0.04182809] and prediction [0]
+'9' is not a password with probability 0.96
+String: '1' with probability [0.95817191 0.04182809] and prediction [0]
+'1' is not a password with probability 0.96
+String: '2' with probability [0.95817191 0.04182809] and prediction [0]
+'2' is not a password with probability 0.96
+String: '3' with probability [0.95817191 0.04182809] and prediction [0]
+'3' is not a password with probability 0.96
+String: '4' with probability [0.95817191 0.04182809] and prediction [0]
+'4' is not a password with probability 0.96
+String: '5' with probability [0.95817191 0.04182809] and prediction [0]
+'5' is not a password with probability 0.96
+String: '6' with probability [0.95817191 0.04182809] and prediction [0]
+'6' is not a password with probability 0.96
+String: '7' with probability [0.95817191 0.04182809] and prediction [0]
+'7' is not a password with probability 0.96
+String: '8' with probability [0.95817191 0.04182809] and prediction [0]
+'8' is not a password with probability 0.96
+String: '9' with probability [0.95817191 0.04182809] and prediction [0]
+'9' is not a password with probability 0.96
+处理敏感数据中，敏感数据大小为 (10, 2)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+String: 'root' with probability [0.96532452 0.03467548] and prediction [0]
+'root' is not a password with probability 0.97
+String: 'Pass@word!!!' with probability [7.24944261e-07 9.99999275e-01] and prediction [1]
+'Pass@word!!!' is a password with probability 1.00
+String: '163' with probability [0.93654316 0.06345684] and prediction [0]
+'163' is not a password with probability 0.94
+String: 'Huawei@123456' with probability [3.0000009e-14 1.0000000e+00] and prediction [1]
+'Huawei@123456' is a password with probability 1.00
+String: 'root' with probability [0.96532452 0.03467548] and prediction [0]
+'root' is not a password with probability 0.97
+String: '2!Um37hvjk' with probability [7.76468782e-09 9.99999992e-01] and prediction [1]
+'2!Um37hvjk' is a password with probability 1.00
+[2023/11/10 10:51:23] ppocr WARNING: When args.layout is false, args.ocr is automatically set to false
+['../data/carbon.jpg']
+['']
+['']
+["define（'DB_NAME'，'db_＇。‘d41d8'）；／/数据库名"]
+["define（'DB_USER'，‘user_＇·'a42f8')；//数据库用户名"]
+["define（‘DB_PASSW0RD'，‘b8921hs90a')；// 数据库密码"]
+["define（‘DB_HOsT'，'localhost’)；//数据库主机地址"]
+['/**#@+ * Authentication Unique Keys and Salts.']
+['']
+["def ine( 'AUTH_KEY', '3b365d019564585107cf79c67f06ca6d' ); define('SECURE_AUTH_KEY',"]
+["'d32e5d0189b9b0c5503c70b18f9e9715');"]
+["define('LOGGED_IN_KEY', '4c85fbbfaadea04db992ec6c0f7988b8'); def ine( 'NONCE_KEY',"]
+["'8c449f8a50768189727baf688a5fbbe9');"]
+["define('AUTH_SALT' '81f9d54f5b7d7917d6f3a2e6ad64b8fa');"]
+["define('SECURE_AUTH_SALT', '51e59e1d1c0db3ebd1cb48f03d0e3971');"]
+["define('LOGGED_IN_SALT' 'fdbc2dc7d40ef9e4bb353c6b6740097e');"]
+["define('NONCE_SALT', '53ed4eb34cfbfae4d8574967e7c97d3f');"]
+["$table_prefix='wp_'；// 表前缀"]
+["define('WP_DEBUG'，false）;//调试模式"]
+["/** WordPress 设置－可以通过访问您的网页来进行修改。 define( 'ABSPATH', dirname( -_FILE_- ）.'/' );"]
+["require_once( ABSPATH . 'wp-settings.php' ); ？>"]
+['']
+[[''], [''], ["define（'DB_NAME'，'db_＇。‘d41d8'）；／/数据库名"], ["define（'DB_USER'，‘user_＇·'a42f8')；//数据库用户名"], ["define（‘DB_PASSW0RD'，‘b8921hs90a')；// 数据库密码"], ["define（‘DB_HOsT'，'localhost’)；//数据库主机地址"], ['/**#@+ * Authentication Unique Keys and Salts.'], [''], ["def ine( 'AUTH_KEY', '3b365d019564585107cf79c67f06ca6d' ); define('SECURE_AUTH_KEY',"], ["'d32e5d0189b9b0c5503c70b18f9e9715');"], ["define('LOGGED_IN_KEY', '4c85fbbfaadea04db992ec6c0f7988b8'); def ine( 'NONCE_KEY',"], ["'8c449f8a50768189727baf688a5fbbe9');"], ["define('AUTH_SALT' '81f9d54f5b7d7917d6f3a2e6ad64b8fa');"], ["define('SECURE_AUTH_SALT', '51e59e1d1c0db3ebd1cb48f03d0e3971');"], ["define('LOGGED_IN_SALT' 'fdbc2dc7d40ef9e4bb353c6b6740097e');"], ["define('NONCE_SALT', '53ed4eb34cfbfae4d8574967e7c97d3f');"], ["$table_prefix='wp_'；// 表前缀"], ["define('WP_DEBUG'，false）;//调试模式"], ["/** WordPress 设置－可以通过访问您的网页来进行修改。 define( 'ABSPATH', dirname( -_FILE_- ）.'/' );"], ["require_once( ABSPATH . 'wp-settings.php' ); ？>"], ['']]
+处理敏感数据中，敏感数据大小为 (8, 8)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+String: 'xxxx' with probability [0.96532452 0.03467548] and prediction [0]
+'xxxx' is not a password with probability 0.97
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: '1.' with probability [0.95532208 0.04467792] and prediction [0]
+'1.' is not a password with probability 0.96
+String: '2.' with probability [0.95532208 0.04467792] and prediction [0]
+'2.' is not a password with probability 0.96
+String: '3.' with probability [0.95532208 0.04467792] and prediction [0]
+'3.' is not a password with probability 0.96
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: 'xxxx' with probability [0.96532452 0.03467548] and prediction [0]
+'xxxx' is not a password with probability 0.97
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: '1.' with probability [0.95532208 0.04467792] and prediction [0]
+'1.' is not a password with probability 0.96
+String: '2.' with probability [0.95532208 0.04467792] and prediction [0]
+'2.' is not a password with probability 0.96
+String: '3.' with probability [0.95532208 0.04467792] and prediction [0]
+'3.' is not a password with probability 0.96
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+String: 'IT' with probability [0.94874602 0.05125398] and prediction [0]
+'IT' is not a password with probability 0.95
+处理敏感数据中，敏感数据大小为 (31, 8)
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+{'邮箱': '邮箱', '用户名': '用户名', '密码': '密码', '地址': '地址', '责任人': '责任人', '使用人': '使用人', '口令': '口令', '密钥': '密钥', '学号': '学号', '工号': '工号', '地点': '地点', '型号': '型号', '数量': '数量', 'URL': 'URL', 'ip': 'ip', 'IP': 'IP', 'email': 'email', 'username': 'username', 'password': 'password', 'address': 'address'}
+[{'Status': 'enabled', 'Username': 'Administrator', 'UserID': 500, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': 'ccef208c6485269c20db2cad21734fe7', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}, {'Status': 'disabled', 'Username': 'Guest', 'UserID': 501, 'LMHash': 'aad3b435b51404eeaad3b435b51404ee', 'NTLMHash': '31d6cfe0d16ae931b73c59d7e0c089c0', 'DomainName': 'None', 'GroupID': 'None', 'Description': 'None'}]

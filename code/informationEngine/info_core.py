@@ -198,6 +198,9 @@ def is_a_mark(item: str) -> bool:
 class paired_info_pattern():
     def __init__(self):
         self.data = {}
+        self.result_set = []
+        self.last_output = {}
+        self.last_keyword = None
         # add three neccessary attributes
         self.data["user"] = None
         self.data["password"] = None
@@ -215,7 +218,7 @@ class paired_info_pattern():
         self.data["address"] = None
         self.data["port"] = None
         self.data["phonenumber"] = None
-
+        self.check_header = {"user": False, "address": False}
     def reset_headers(self):
         self.check_header.update({k: False for k, v in self.data.items()})
 
@@ -261,8 +264,63 @@ class paired_info_pattern():
         # TODO
         self.data[name] = value
         return True
+    
+
+    def slice_word_check(self,slice_word)->bool:
+        if slice_word != self.last_keyword:
+            if self.last_keyword != None:
+                logger.info(TAG+"Paired_info(): different slice word detected, which are " +slice_word+self.last_keyword)
+            else:
+                logger.info(TAG+"Paired_info(): different slice word detected, which are " +slice_word+ " None")
+ 
+            self.last_output = self.data
+            self.reset_data()
+            return False
+        else:
+            if self.last_output != {}:
+                # Re slice output
+                self.result_regroup()
+            self.last_output = {}
+        return True
+
+
+    def result_regroup(self):
+        sliced_result_1 = {}
+        sliced_result_2 = {}
+        items_need_pop = []
+        logger.info(TAG+"Paired_info():result_regroup(): data is " + str(self.data))
+        logger.info(TAG+"Paired_info():result_regroup(): last_output is " + str(self.last_output))
+
+        for key,value in self.data.items():
+            if value != None and self.last_output.get(key) != None:
+                sliced_result_1[key] = self.last_output.get(key)
+                items_need_pop.append(key)
+        for key in items_need_pop:
+            self.last_output.pop(key)
+
+        sliced_result_2 = self.last_output
+        data_backup = self.data
+
+        logger.info(TAG+"Paired_info():result_regroup(): data backup is " + str(data_backup))
+        logger.info(TAG+"Paired_info():result_regroup(): sliced_result_1 is " + str(sliced_result_1))
+        logger.info(TAG+"Paired_info():result_regroup(): sliced_result_2 is " + str(sliced_result_2))
+
+        self.data = sliced_result_1
+        self.remake_data()
+        self.add_to_result_set()
+        self.data = sliced_result_2
+        self.remake_data()
+        self.add_to_result_set()
+        self.data = data_backup
 
     def output(self):
+        if self.last_output != {}:
+            self.data=self.last_output
+            self.remake_data()
+            self.add_to_result_set()
+        return self.result_set
+
+    def add_to_result_set(self):
         result = {}
         for key in self.data:
             if self.data[key] != None:
@@ -274,14 +332,16 @@ class paired_info_pattern():
         # for key in ["user", "password", "address", "port", "phonenumber"]:
         #     if key not in result:
         #         result[key] = None
-        self.__init__()
-        return result
+        self.reset_data()
+    
+        self.result_set.append(result)
 
     def getter(self, name: str):
         if name in self.data:
             return self.data[name]
         else:
             return None
+    
 
     def if_same_attr(self, name: str, value: Any) -> bool:
         # check if name is in self.data
@@ -628,30 +688,35 @@ def extract_paired_info(text):
     text = text.split()
 
     for i in range(len(text)-1):
+        text_i_striped = text[i].strip()
         # 密码不会最先出现
-        if text[i].strip() == "{password}" and a_paired_info.is_None():
+        if text_i_striped == "{password}" and a_paired_info.is_None():
             continue
-
-        if text[i].strip() in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
-            if a_paired_info.check_data_headers(text[i]):
+        # TODO change to is a mark
+        if text_i_striped in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
+            if a_paired_info.check_data_headers(text_i_striped):
                 if a_paired_info.getter("password") != None:
-                    a_paired_info.remake_data()
-                    result_pair.append(a_paired_info.output())
+                    if a_paired_info.slice_word_check(text_i_striped):
+                        a_paired_info.remake_data()
+                        a_paired_info.add_to_result_set()
+                    a_paired_info.last_keyword = text_i_striped
                 else:
-                    # TODO 移除info_pattern 使用    is_a_mark
 
-                    a_paired_info.setter(INFO_PATTERN[text[i].replace(
+                    a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                         '{', '').replace('}', '')], text[i+1])
 
             logger.debug(TAG + 'Adding attr to paired info: ' +
-                         text[i]+" "+text[i+1])
-            a_paired_info.setter(INFO_PATTERN[text[i].replace(
+                         text_i_striped+" "+text[i+1])
+            a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                 '{', '').replace('}', '')], text[i+1])
-            a_paired_info.set_data_headers(text[i])
+            a_paired_info.set_data_headers(text_i_striped)
 
     if a_paired_info.check_header_complete():
+        a_paired_info.last_keyword = None
         a_paired_info.remake_data()
-        result_pair.append(a_paired_info.output())
+        a_paired_info.add_to_result_set()
+    for item in a_paired_info.output():
+        result_pair.append(item)
     # 移除空项
     logger.debug(TAG + 'Paired info before filtering: '+str(result_pair))
     # filtered_result_pair = []
