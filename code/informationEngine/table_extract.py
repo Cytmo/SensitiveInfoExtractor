@@ -1,3 +1,4 @@
+from collections import Counter
 import pandas as pd
 import queue
 import yaml
@@ -12,6 +13,13 @@ def contains_chinese(data):
     pattern = re.compile(r'[\u4e00-\u9fff]')
     return bool(pattern.search(str(data)))
 
+def is_pure_chinese(text):
+    # 使用正则表达式匹配中文字符
+    pattern = re.compile('[\u4e00-\u9fa5]+')
+    result = pattern.findall(str(text))
+    
+    # 如果匹配结果等于原始字符串，表示字符串只包含中文字符
+    return ''.join(result) == text
 # # print(data.shape[0])
 
 
@@ -88,6 +96,27 @@ def count_most_frequent_strings(data):
                      len(unique_strings))
 
     return counts
+
+def shade_tag_sensitive(word_list):
+    tag_list_tmp = []
+    for item in word_list:
+        if is_pure_chinese(item):
+            tag_list_tmp.append(None)
+        else:
+            tag_list_tmp.append(find_tag_sensitive(item))
+    
+    filtered_list = [item for item in tag_list_tmp if item is not None]
+
+    if not filtered_list:
+        return None
+
+    # Counting the frequency of each item
+    item_counts = Counter(filtered_list)
+    most_common_item, count = item_counts.most_common(1)[0]
+    if count / len(word_list)>0.7:
+        return most_common_item
+    return None
+
 
 
 def find_tag_sensitive(word):
@@ -271,6 +300,33 @@ class XlsxDevider:
 
     def check_Pass(self):
         return self.raw_pass and self.col_pass and self.key_pass
+    
+    def raw_extract(self):
+        json_data = []
+        # 行反向映射
+        word_condition_last=[]
+        use_data = self.xlsx_data.iloc[1:]
+        for index, (col_name, col) in enumerate(use_data.items()):
+            word_condition_last.append(shade_tag_sensitive(col))
+        
+
+        # 首行，首行校验->逐行提取
+        word_condition_key = [element if find_tag_sensitive(
+            element) is not None else None for element in self.xlsx_data.iloc[0]]
+        
+        word_condition = [b if a is None else a for a, b in zip(word_condition_last, word_condition_key)]
+
+        word_index = [index for index, value in enumerate(
+            word_condition) if value is not None]
+        if len(word_index) > 1:
+            use_data = self.xlsx_data.iloc[1:]
+            for ind, row in use_data.iterrows():
+                nan_flag = pd.isna(row)
+                sub_result = {word_condition[index]: row.values[index]
+                              for index in word_index if not nan_flag[index]}
+                if len(sub_result) > 1:
+                    json_data.append(sub_result)
+        return json_data
 
     # 敏感数据提取
     def extract_sensitive_xlsx(self):
@@ -290,40 +346,20 @@ class XlsxDevider:
         elif self.xlsx_data.shape[1] == 1:
             return process_bind_prase(self.xlsx_data.iloc[:, 0].tolist())
         # TODO 处理提取分好块中的敏感数据
-        # 行反向映射
+
+
         
-        # 首行，首行校验->逐行提取
-        word_condition = [find_tag_sensitive(
-            element) for element in self.xlsx_data.iloc[0]]
-
-        word_index = [index for index, value in enumerate(
-            word_condition) if value is not None]
-        if len(word_index) > 1:
-            use_data = self.xlsx_data.iloc[1:]
-            for ind, row in use_data.iterrows():
-                nan_flag = pd.isna(row)
-                sub_result = {word_condition[index]: row.values[index]
-                              for index in word_index if not nan_flag[index]}
-                if len(sub_result) > 1:
-                    json_data.append(sub_result)
+        # 行关键词映射及关键词补全
+        json_data = self.raw_extract()
+        if len(json_data) > 0:
             return json_data
-        
+        self.xlsx_data = self.xlsx_data.transpose()
 
-
-        # 首列，首列校验->逐列提取
-        word_condition = [find_tag_sensitive(
-            element) for element in self.xlsx_data.iloc[:, 0]]
-        word_index = [index for index, value in enumerate(
-            word_condition) if value is not None]
-        if len(word_index) > 1:
-            use_data = self.xlsx_data.iloc[:, 1:]
-            for index, (col_name, col) in enumerate(use_data.items()):
-                nan_flag = pd.isna(col)
-                sub_result = {word_condition[index]: col.values[index]
-                              for index in word_index if not nan_flag[index]}
-                if len(sub_result) > 1:
-                    json_data.append(sub_result)
+        # 列关键词映射及关键词补全
+        json_data = self.raw_extract()
+        if len(json_data) > 0:
             return json_data
+        self.xlsx_data = self.xlsx_data.transpose()
 
         # 行模糊提取
         json_data = self.xlsx_fuzz_extract()
@@ -359,12 +395,16 @@ class XlsxDevider:
         use_data.columns = list(range(0, use_data.shape[1]))
         guss_tag_list = []
         # # print(use_data)
+        # 逐行扫
         for ind, row in use_data.iterrows():
             # # print(row)
+            #行拼接
             str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
             # # print(str_use)
+            #行提取
             text = plain_text_info_extraction(str_use, False, True, True)
             text = text.split(' ')
+            #行标签
             guss_tag = []
             for i in range(len(text)-1):
                 if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
