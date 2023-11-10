@@ -14,6 +14,7 @@ from config.info_core_config import (
     SENSITIVE_INFO_PATTERN,
     ONE_WAY_CONNECTED_INFO,
     TWO_WAY_CONNECTED_INFO,
+    KEYWORDS
 )
 import magic
 from typing import Tuple
@@ -31,6 +32,19 @@ logger = LoggerSingleton().get_logger()
 # 导入全局变量
 
 ########################## 工具函数和类###############################
+
+
+def should_fuzz(text)->bool:
+    # text,temp = information_protection(text)
+    # text = marked_text_refinement(text)
+    new_info = text.replace("/n",'')
+
+    if not any(key in new_info for key in KEYWORDS):
+        return True
+    else:
+        return False
+
+
 # 从结果类中还原占位符
 
 
@@ -189,6 +203,7 @@ def is_protected_item(item: str) -> bool:
 
 
 def is_a_mark(item: str) -> bool:
+    item = item.strip()
     pattern = r'\{.*\}'
     return bool(re.search(pattern, item))
 
@@ -446,6 +461,7 @@ def information_protection(text: str) -> Tuple[str, dict]:
         str(PLACEHOLDERS_CORRESPONDING_TYPE)))
     logger.info(
         TAG + "information_protection(): placeholders{}".format(str(placeholders)))
+
     return text, placeholders
 
 # 防止文件名等并识别为关键字，如user.txt
@@ -603,7 +619,6 @@ def marked_text_refinement(text: str) -> str:
 
     def is_valid_password(password):
         return True
-
     # 根据 PLACEHOLDERS_CORRESPONDING_TYPE 全局变量，对文本进行调整
     for key in PLACEHOLDERS_CORRESPONDING_TYPE:
         if PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0] not in INFO_PATTERN:
@@ -612,6 +627,7 @@ def marked_text_refinement(text: str) -> str:
             logger.debug(TAG + 'marked_text_refinement(): Text before replacement: '+' '.join(text.split()))
             text = text.replace(key, replaced_content)
             logger.debug(TAG + 'marked_text_refinement(): Text after replacement: '+' '.join(text.split()))
+
 
     # 调整关键词和指示词的相对位置，保持关键词在指示词的后部
     text = text.split()
@@ -693,7 +709,7 @@ def extract_paired_info(text):
         if text_i_striped == "{password}" and a_paired_info.is_None():
             continue
         # TODO change to is a mark
-        if text_i_striped in REPLACED_KEYWORDS_LIST and text[i+1] not in REPLACED_KEYWORDS_LIST:
+        if is_a_mark(text_i_striped) and not is_a_mark(text[i+1]):
             if a_paired_info.check_data_headers(text_i_striped):
                 if a_paired_info.getter("password") != None:
                     if a_paired_info.slice_word_check(text_i_striped):
@@ -701,14 +717,20 @@ def extract_paired_info(text):
                         a_paired_info.add_to_result_set()
                     a_paired_info.last_keyword = text_i_striped
                 else:
-
-                    a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
+                    if INFO_PATTERN.get(text_i_striped)!=None:
+                        a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                         '{', '').replace('}', '')], text[i+1])
-
+                    else:
+                        a_paired_info.setter(text_i_striped.replace(
+                '{', '').replace('}', ''),text[i+1])
             logger.debug(TAG + 'Adding attr to paired info: ' +
                          text_i_striped+" "+text[i+1])
-            a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
+            if INFO_PATTERN.get(text_i_striped)!=None:
+                a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                 '{', '').replace('}', '')], text[i+1])
+            else:
+                a_paired_info.setter(text_i_striped.replace(
+                '{', '').replace('}', ''),text[i+1])
             a_paired_info.set_data_headers(text_i_striped)
 
     if a_paired_info.check_header_complete():
@@ -997,7 +1019,9 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
     text, item_protection_dict1 = information_protection(text)
     logger.debug(
         TAG + 'plain_text_info_extraction():ITEM_PROTECTION_DICT after fuzz extract: '+str(ITEM_PROTECTION_DICT))
-
+    new_info=text.replace("\n",'')
+    # if any("{"+key+"}" in new_info for key in KEYWORDS):
+    #     FUZZ_MARK = False
     if is_chinese_text(text):
         logger.info(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text, FUZZ_MARK)
@@ -1008,6 +1032,7 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
         text = eng_text_preprocessing(text, FUZZ_MARK)
     if ITEM_PROTECTION_DICT == {}:
         ITEM_PROTECTION_DICT = item_protection_dict1
+
     if FUZZ_MARK:
         text = fuzz_mark(text)
     if RETURN_MARKED_TEXT:
@@ -1056,7 +1081,8 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
             result = switch[file_type](info)
             return result_manager(result,info,file_path,IS_CODE_OR_CONFIG=True)
         else:
-            if not any(key in new_info for key in ENG_KEYWORDS_LIST) and not any(key in new_info for key in CHN_KEYWORDS_LIST):
+
+            if should_fuzz(new_info):
                 logger.info(TAG + "info_extraction(): fuzz extract")
                 # 判断是否中文
                 if is_chinese_text(info):

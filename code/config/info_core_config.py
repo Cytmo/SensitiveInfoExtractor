@@ -17,7 +17,9 @@ CHN_REPLACEMENT_DICT = {"账号": "user", "端口": "port", "名称": "user", "�
                         "密钥为": "password", "密码": "password", "IP": "address", "地址": "address", "姓名": "name"}
 # 信息提取列表
 INFO_PATTERN = {"user": "user", "password": "password",
-                "address": "address", "port": "port", "phonenumber": "phonenumber", "email": "email", "ip": "address", "url": "address"}
+                "address": "address",
+    
+                  "port": "port", "phonenumber": "phonenumber", "email": "email", "ip": "address", "url": "address"}
 
 # TODO: 单项依赖, ID放后面
 # 单项依赖信息组---前者需要后者存在
@@ -56,6 +58,11 @@ TWO_WAY_CONNECTED_INFO = {"AWSsecretkey": "AWSaccesskey"}
 REPLACED_KEYWORDS_LIST = ["{user}", "{password}",
                           "{address}", "{port}", "{phonenumber}", "{email}"]
 
+
+
+
+
+
 # 代码提取词列表
 SPECIAL_KEYWORDS_LIST = [
     "user",
@@ -86,5 +93,13 @@ IMAGE_FILE_EXTENSION = [
 with open('config/rules-stable.yml', 'r') as yaml_file:
     SENSITIVE_INFO_PATTERN = yaml.safe_load(yaml_file)
     for pattern in SENSITIVE_INFO_PATTERN['patterns']:
-        name = pattern['pattern']['name'].strip()
+        name = pattern['pattern']['name'].strip().replace(" ",'')
         REPLACED_KEYWORDS_LIST.append("{"+name+"}")
+
+# 检查是否模糊的依据
+KEYWORDS=[]
+KEYWORDS += ENG_KEYWORDS_LIST
+KEYWORDS += CHN_KEYWORDS_LIST
+for pattern in SENSITIVE_INFO_PATTERN['patterns']:
+    name = pattern['pattern']['name'].strip().replace(" ",'')
+    KEYWORDS.append(name)
