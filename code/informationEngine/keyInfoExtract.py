@@ -55,8 +55,8 @@ def win_reg_file(sam_path, system_path):
     try:
         result.check_returncode()
     except subprocess.CalledProcessError as e:
-        logger.error(TAG+"win_reg_file(): " + e.stderr)
-        globalVar.set_error_list(sam_path, e.stderr)
+        logger.error(TAG+"win_reg_file(): " + e)
+        globalVar.set_error_list(sam_path, e)
         return ""
     return result.stdout
 

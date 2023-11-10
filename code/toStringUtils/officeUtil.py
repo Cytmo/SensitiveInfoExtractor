@@ -84,7 +84,7 @@ def pdf_file(file_path):
                 except Exception as e:
                     logger.error(TAG+"pdf_file(): " + file_path)
                     logger.error(e)
-                    globalVar.set_error_list(file_path, e.stderr)
+                    globalVar.set_error_list(file_path, e)
 
             logger.info(TAG+"pdf_file()-图片文本信息:")
             logger.info(image_all_text_res)
@@ -99,7 +99,7 @@ def pdf_file(file_path):
     except Exception as e:
         logger.error(TAG+"pdf_file(): " + file_path)
         logger.error(e)
-        globalVar.set_error_list(file_path, e.stderr)
+        globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -147,7 +147,7 @@ def docs_file(file_path, type):
     except Exception as e:
         logger.error(TAG+"docs_file(): " + file_path)
         logger.error(e)
-        globalVar.set_error_list(file_path, e.stderr)
+        globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -185,7 +185,7 @@ def docx_file_info_extract(docx_path, image_dir):
     except Exception as e:
         logger.info(TAG+"docx_file_info_extract(): 图片占位符设置失败")
         logger.error(e)
-        globalVar.set_error_list(docx_path, e.stderr)
+        globalVar.set_error_list(docx_path, e)
         docx_text = " "
         for paragraph in target_docx.paragraphs:
             if "Evaluation Only. Created with Aspose.Words. Copyright 2003-2023  Aspose" not in paragraph.text and "Ltd." not in paragraph.text:
@@ -243,7 +243,7 @@ def docx_file_info_extract(docx_path, image_dir):
     except Exception as e:
         logger.error(TAG+"docx_file_info_extract(): 图片信息提取失败, 只返回文本信息")
         logger.error(e)
-        globalVar.set_error_list(docx_path, e.stderr)
+        globalVar.set_error_list(docx_path, e)
         return docx_text
 
 
@@ -284,7 +284,7 @@ def ppts_file(file_path, type):
     except Exception as e:
         logger.error(TAG+"ppts_file(): ppt转化失败")
         logger.error(e)
-        globalVar.set_error_list(file_path, e.stderr)
+        globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -349,7 +349,7 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                     # 处理 IndexError 异常
                     logger.error(TAG+"ppts_file(): 处理 IndexError 异常")
                     logger.error(e)
-                    globalVar.set_error_list(pptx_path, e.stderr)
+                    globalVar.set_error_list(pptx_path, e)
             logger.info(TAG+"pptx_file_info_extract(): 图片文本信息:")
             logger.info(image_all_text_res)
         else:
@@ -363,7 +363,7 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
     except Exception as e:
         logger.error(TAG+"ppts_file(): ppt转化失败")
         logger.error(e)
-        globalVar.set_error_list(pptx_path, e.stderr)
+        globalVar.set_error_list(pptx_path, e)
         return ""
 
 

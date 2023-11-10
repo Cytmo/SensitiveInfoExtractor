@@ -18,7 +18,7 @@ CHN_REPLACEMENT_DICT = {"账号": "user", "端口": "port", "名称": "user", "�
 # 信息提取列表
 INFO_PATTERN = {"user": "user", "password": "password",
                 "address": "address",
-    
+                "db.user": "user", "db.password": "password", "db.address": "address", "db.url": "address",
                   "port": "port", "phonenumber": "phonenumber", "email": "email", "ip": "address", "url": "address"}
 
 # TODO: 单项依赖, ID放后面

@@ -239,6 +239,7 @@ class paired_info_pattern():
 
     # 判断是否一个对象存在关键对象
     def check_header_complete(self):
+        print(self.check_header)
         return not all(value is False for value in self.check_header.values())
 
     def check_data_headers(self, data):
@@ -249,7 +250,8 @@ class paired_info_pattern():
 
     def set_data_headers(self, data):
         for k in self.check_header.keys():
-            if data == "{"+k+"}":
+            data = data.replace("{","").replace("}","")
+            if data == k:
                 self.check_header[k] = True
 
     def remake_data(self):
@@ -754,23 +756,34 @@ def extract_paired_info(text):
                 # '{', '').replace('}', ''),text[i+1])
             logger.debug(TAG + 'Adding attr to paired info: ' +
                          text_i_striped+" "+text[i+1])
-            if any( value in text_i_striped for value in INFO_PATTERN):
+            # logger.debug(TAG + 'extract_paired_info(): text_i_striped: ' + text_i_striped.replace("{","").replace("","}"))
+            # logger.debug(TAG + 'extract_paired_info(): INFO_PATTERN: ' + str(INFO_PATTERN))
+            # logger.debug(TAG + 'extract_paired_info():' +str(text_i_striped.replace("{","").replace("","}") in INFO_PATTERN))
+            if text_i_striped.replace("{","").replace("}","") in INFO_PATTERN:
+                logger.debug(TAG + 'extract_paired_info(): adding attr to paired info: ' +
+                         INFO_PATTERN[text_i_striped.replace(
+                '{', '').replace('}', '')]+" "+text[i+1])
+            # if any( value in text_i_striped for value in INFO_PATTERN):
                 a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                 '{', '').replace('}', '')], text[i+1])
                 print(1)
                 print(text_i_striped.replace('{', '').replace('}', ''))
                 print(text[i+1])
+                a_paired_info.set_data_headers(INFO_PATTERN[text_i_striped.replace('{', '').replace('}', '')])
             else:
                 print(2)
 
                 a_paired_info.setter(text_i_striped.replace(
                 '{', '').replace('}', ''),text[i+1])
-            a_paired_info.set_data_headers(text_i_striped)
+                a_paired_info.set_data_headers(text_i_striped)
     print(a_paired_info.data)
     if a_paired_info.check_header_complete():
+        print(a_paired_info.data)
         a_paired_info.last_keyword = None
         a_paired_info.remake_data()
+        print(a_paired_info.data)
         a_paired_info.add_to_result_set()
+        print(a_paired_info.data)
     for item in a_paired_info.output():
         result_pair.append(item)
     # 移除空项
@@ -959,10 +972,26 @@ def code_info_extract(text: str) -> dict:
         # Add the cleaned key-value pair to the new dictionary
         cleaned_dict[cleaned_key] = value
     result_dict = cleaned_dict
-    return result_dict
 
+
+    return re_pair_info_extract(result_dict)
 # 配置文件的提取
 
+def re_pair_info_extract(result_dict: dict) -> dict:
+    text = ""
+    logger.debug(TAG + "code_info_extract(): raw_result_dict is "+ str(result_dict))
+    if type(result_dict) == dict and result_dict != {}:
+        for key, value in result_dict.items():  # Use items() to iterate through key-value pairs
+            text += "{"+key + "} "+value+"\n"
+        extract_paired_info_result = extract_paired_info(text)
+        return extract_paired_info_result
+    elif type(result_dict) == list and result_dict != []:
+        for item in result_dict:
+            for key, value in item.items():
+                text += "{"+key + "} "+value+"\n"
+        extract_paired_info_result = extract_paired_info(text)
+        return extract_paired_info_result
+    return {}
 
 def config_info_extract(text: str) -> dict:
     return code_info_extract(text)
@@ -1143,17 +1172,21 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         return result_manager(result, text, file_path)
 
 
-# 在常规提取失败后，使用特殊方法提取信息
-def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
-    logger.info(TAG + "result_manager(): extract result: {}".format(str(result)))
-    if IS_CODE_OR_CONFIG or isinstance(result, dict):
+def result_filter(result,VALID_RESULT_THRESHOLD=2) -> dict:
+    if result == [] or result == {}:
+        logger.warning(TAG + 'result_filter(): skip empty result')
+        return result
+    logger.info(TAG + "result_filter(): extract result: {}".format(str(result)))
+    if isinstance(result, dict):
+    # if IS_CODE_OR_CONFIG or isinstance(result, dict):
         # TODO 代码文件的结果过滤
         filtered_item = {}
         for key, value in result.items():
             if is_valid_info(value) and is_valid_info(key):
                 filtered_item[key] = value
-        result = filtered_item
-        return result
+        if len(filtered_item) >= VALID_RESULT_THRESHOLD:
+            result = filtered_item
+
     else:
         filtered_result = []
         for item in result:
@@ -1161,8 +1194,17 @@ def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
             for key, value in item.items():
                 if is_valid_info(value) and is_valid_info(key):
                     filtered_item[key] = value
-            filtered_result.append(filtered_item)
+            if len(filtered_item) >= VALID_RESULT_THRESHOLD:
+                filtered_result.append(filtered_item)
         result = filtered_result
+    logger.info(TAG + "result_filter(): filtered result: {}".format(str(result)))
+    return result
+
+# 在常规提取失败后，使用特殊方法提取信息
+def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
+    logger.info(TAG + "result_manager(): extract result: {}".format(str(result)))
+    result = result_filter(result)
+    # result = re_pair_info_extract(result)
     # file_extension = file_path.split(".")[-1]
     file_type = determine_file_type(file_path,info)
     switch = {
@@ -1184,6 +1226,8 @@ def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
             result = plain_text_info_extraction(info, FUZZ_MARK=True)
             logger.info(
                 TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
+    result = result_filter(result)
+    # result = re_pair_info_extract(result)
     return result
 
 

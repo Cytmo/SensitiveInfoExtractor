@@ -290,6 +290,8 @@ class XlsxDevider:
         elif self.xlsx_data.shape[1] == 1:
             return process_bind_prase(self.xlsx_data.iloc[:, 0].tolist())
         # TODO 处理提取分好块中的敏感数据
+        # 行反向映射
+        
         # 首行，首行校验->逐行提取
         word_condition = [find_tag_sensitive(
             element) for element in self.xlsx_data.iloc[0]]
@@ -305,6 +307,8 @@ class XlsxDevider:
                 if len(sub_result) > 1:
                     json_data.append(sub_result)
             return json_data
+        
+
 
         # 首列，首列校验->逐列提取
         word_condition = [find_tag_sensitive(

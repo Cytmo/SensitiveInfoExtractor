@@ -32,20 +32,20 @@ logger = LoggerSingleton().get_logger()
 def sensitive_info_detect(file_path, text, flag=0):
     sensitive_info = []
     if flag == 1:
-        try:
-            sensitive_info = begin_info_extraction(
-                text, flag=1, file_path=file_path)
-        except Exception as e:
-            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
-            logger.error(e)
-            globalVar.set_error_list(file_path, e.stderr)
+        # try:
+        sensitive_info = begin_info_extraction(
+            text, flag=1, file_path=file_path)
+        # except Exception as e:
+            # logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+            # logger.error(e)
+            # globalVar.set_error_list(file_path, e)
     else:
-        try:
-            sensitive_info = begin_info_extraction(text, file_path=file_path)
-        except Exception as e:
-            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
-            logger.error(e)
-            globalVar.set_error_list(file_path, e.stderr)
+        # try:
+        sensitive_info = begin_info_extraction(text, file_path=file_path)
+        # except Exception as e:
+        #     logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+        #     logger.error(e)
+        #     globalVar.set_error_list(file_path, e)
     if sensitive_info:
         res_out.add_new_json(file_path, sensitive_info)
 
