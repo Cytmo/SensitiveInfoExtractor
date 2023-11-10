@@ -66,17 +66,17 @@ def pdf_file(file_path):
                 continue
         pdf.close()
 
-        logger.info(TAG+"pdf_file()-文本信息:")
-        logger.info(text)
+        logger.debug(TAG+"pdf_file()-文本信息:")
+        logger.debug(text)
 
         # 解析图片信息
         image_all_text_res = []
         if globalVar.flag_list[0] == True:
             image_all_text = ocr_table_batch(result_image_path)
             # image_all_text = ocr_batch_textract(image_dir)
-            logger.info(TAG+"pdf_file()-image_all_text: ")
+            logger.debug(TAG+"pdf_file()-image_all_text: ")
             for row in image_all_text:
-                # logger.info(row)
+                # logger.debug(row)
                 try:
                     single_result = " ".join(
                         [element for sublist in row[1:] for element in sublist])
@@ -84,22 +84,22 @@ def pdf_file(file_path):
                 except Exception as e:
                     logger.error(TAG+"pdf_file(): " + file_path)
                     logger.error(e)
-                    globalVar.set_error_list(file_path, e)
+                    #globalVar.set_error_list(file_path, e)
 
-            logger.info(TAG+"pdf_file()-图片文本信息:")
-            logger.info(image_all_text_res)
+            logger.debug(TAG+"pdf_file()-图片文本信息:")
+            logger.debug(image_all_text_res)
 
             res = replace_picture_texts(text, image_all_text_res)
             return "\n".join(res)
         else:
-            logger.info(TAG+"pdf_file()-不处理文件内部的图片!!")
+            logger.debug(TAG+"pdf_file()-不处理文件内部的图片!!")
             text = "\n".join(text).replace("$PictureIsHere$", "")
             return text
 
     except Exception as e:
         logger.error(TAG+"pdf_file(): " + file_path)
         logger.error(e)
-        globalVar.set_error_list(file_path, e)
+        #globalVar.set_error_list(file_path, e)
         return ""
 
 
@@ -110,19 +110,19 @@ def pdf_file(file_path):
 def docs_file(file_path, type):
     time = datetime.now().strftime("%Y%m%d%H%M%S%f")
     if type == ".doc":
-        logger.info(TAG+"docs_file(): .doc")
+        logger.debug(TAG+"docs_file(): .doc")
         doc_file_dir = "../workspace/office/doc/"
         result_image_path = "../workspace/image/office/doc"
         docx_path = doc_file_dir + \
             time+"_"+file_path.replace(".doc", ".docx").split("/")[-1]
     elif type == ".wps":
-        logger.info(TAG+"docs_file(): .wps")
+        logger.debug(TAG+"docs_file(): .wps")
         doc_file_dir = "../workspace/wps/wps/"
         result_image_path = "../workspace/image/wps/wps"
         docx_path = doc_file_dir + \
             time+"_"+file_path.replace(".doc", ".docx").split("/")[-1]
     elif type == ".docx":
-        logger.info(TAG+"docs_file(): .docx")
+        logger.debug(TAG+"docs_file(): .docx")
         result_image_path = "../workspace/image/office/docx"
         image_dir = f"{result_image_path}/{time}_{os.path.basename(file_path)}/"
         return docx_file_info_extract(file_path, image_dir)
@@ -130,7 +130,7 @@ def docs_file(file_path, type):
         return ""
 
     os.makedirs(doc_file_dir, exist_ok=True)
-    logger.info(TAG+"docs_file(): "+docx_path)
+    logger.debug(TAG+"docs_file(): "+docx_path)
 
     os.makedirs(result_image_path, exist_ok=True)
     doc_docx_name = time+"_"+file_path.split("/")[-1]
@@ -139,7 +139,7 @@ def docs_file(file_path, type):
     try:
         doc = aw.Document(file_path)
         doc.save(docx_path, aw.SaveFormat.DOCX)
-        logger.info(TAG+"docs_file(): "+"Document conversion successful!")
+        logger.debug(TAG+"docs_file(): "+"Document conversion successful!")
 
         image_dir = f"{result_image_path}/{doc_docx_name}/"
 
@@ -147,13 +147,13 @@ def docs_file(file_path, type):
     except Exception as e:
         logger.error(TAG+"docs_file(): " + file_path)
         logger.error(e)
-        globalVar.set_error_list(file_path, e)
+        #globalVar.set_error_list(file_path, e)
         return ""
 
 
 # 1-2.提取.docx中的文本和图片文本信息
 def docx_file_info_extract(docx_path, image_dir):
-    logger.info(TAG+"docx_file_info_extract():")
+    logger.debug(TAG+"docx_file_info_extract():")
 
     docx_text = " "
 
@@ -178,20 +178,20 @@ def docx_file_info_extract(docx_path, image_dir):
             "Ltd.", "")
 
         flag = True
-        logger.info(TAG+"docx_file_info_extract(): 成功设置图片占位符")
-        logger.info(TAG+"docx_file_info_extract()-文本信息:")
-        logger.info(docx_text)
+        logger.debug(TAG+"docx_file_info_extract(): 成功设置图片占位符")
+        logger.debug(TAG+"docx_file_info_extract()-文本信息:")
+        logger.debug(docx_text)
 
     except Exception as e:
-        logger.info(TAG+"docx_file_info_extract(): 图片占位符设置失败")
+        logger.debug(TAG+"docx_file_info_extract(): 图片占位符设置失败")
         logger.error(e)
-        globalVar.set_error_list(docx_path, e)
+        #globalVar.set_error_list(docx_path, e)
         docx_text = " "
         for paragraph in target_docx.paragraphs:
             if "Evaluation Only. Created with Aspose.Words. Copyright 2003-2023  Aspose" not in paragraph.text and "Ltd." not in paragraph.text:
                 docx_text += (paragraph.text + "\n")
-        logger.info(TAG+"docx_file_info_extract()-文本信息:")
-        logger.info(docx_text)
+        logger.debug(TAG+"docx_file_info_extract()-文本信息:")
+        logger.debug(docx_text)
 
     try:
         # 保存照片
@@ -216,9 +216,9 @@ def docx_file_info_extract(docx_path, image_dir):
         if globalVar.flag_list[0] == True:
             image_all_text = ocr_table_batch(image_dir)
             # image_all_text = ocr_batch_textract(image_dir)
-            logger.info(TAG+"docx_file_info_extract()-image_all_text: ")
+            logger.debug(TAG+"docx_file_info_extract()-image_all_text: ")
             for row in image_all_text:
-                # logger.info(row)
+                # logger.debug(row)
                 try:
                     single_result = " ".join(
                         [element for sublist in row[1:] for element in sublist])
@@ -226,10 +226,10 @@ def docx_file_info_extract(docx_path, image_dir):
                 except IndexError as e:
                     # 处理 IndexError 异常
                     logger.error(e)
-            logger.info(TAG+"docx_file_info_extract()-图片文本信息: ")
-            logger.info(image_all_text_res)
+            logger.debug(TAG+"docx_file_info_extract()-图片文本信息: ")
+            logger.debug(image_all_text_res)
         else:
-            logger.info(TAG+"docx_file_info_extract()-不处理文件内部的图片!!")
+            logger.debug(TAG+"docx_file_info_extract()-不处理文件内部的图片!!")
 
         if flag:
             docx_text_list = re.split(r'(\$PictureIsHere\$)', docx_text)
@@ -243,7 +243,7 @@ def docx_file_info_extract(docx_path, image_dir):
     except Exception as e:
         logger.error(TAG+"docx_file_info_extract(): 图片信息提取失败, 只返回文本信息")
         logger.error(e)
-        globalVar.set_error_list(docx_path, e)
+        #globalVar.set_error_list(docx_path, e)
         return docx_text
 
 
@@ -251,19 +251,19 @@ def docx_file_info_extract(docx_path, image_dir):
 def ppts_file(file_path, type):
     time = datetime.now().strftime("%Y%m%d%H%M%S%f")
     if type == ".ppt":
-        logger.info(TAG+"ppts_file(): .ppt")
+        logger.debug(TAG+"ppts_file(): .ppt")
         ppt_file_dir = "../workspace/office/ppt/"
         result_image_path = "../workspace/image/office/ppt"
         pptx_path = ppt_file_dir + \
             time+"_"+file_path.replace(".ppt", ".pptx").split("/")[-1]
     elif type == ".dps":
-        logger.info(TAG+"ppts_file(): .dps")
+        logger.debug(TAG+"ppts_file(): .dps")
         ppt_file_dir = "../workspace/wps/dps/"
         result_image_path = "../workspace/image/wps/dps"
         pptx_path = ppt_file_dir + \
             time+"_"+file_path.replace(".dps", ".pptx").split("/")[-1]
     elif type == ".pptx":
-        logger.info(TAG+"ppts_file(): .pptx")
+        logger.debug(TAG+"ppts_file(): .pptx")
         ppt_file_dir = "../workspace/wps/pptx/"
         result_image_path = "../workspace/image/office/pptx"
         ppt_pptx_name = time+"_" + \
@@ -273,7 +273,7 @@ def ppts_file(file_path, type):
         return ""
 
     os.makedirs(ppt_file_dir, exist_ok=True)
-    logger.info(TAG+"ppt_file(): "+pptx_path)
+    logger.debug(TAG+"ppt_file(): "+pptx_path)
     os.makedirs(result_image_path, exist_ok=True)
     ppt_pptx_name = time+"_"+file_path.split("/")[-1]
 
@@ -284,14 +284,14 @@ def ppts_file(file_path, type):
     except Exception as e:
         logger.error(TAG+"ppts_file(): ppt转化失败")
         logger.error(e)
-        globalVar.set_error_list(file_path, e)
+        #globalVar.set_error_list(file_path, e)
         return ""
 
 
 # 2-2.提取.pptx中的文本和图片文本信息
 def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
 
-    logger.info(TAG+"ppts_file(): " + pptx_path + " " +
+    logger.debug(TAG+"ppts_file(): " + pptx_path + " " +
                 result_image_path + " "+ppt_pptx_name)
 
     try:
@@ -327,8 +327,8 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
 
                     image_count += 1
 
-        logger.info(TAG+"pptx_file_info_extract()-文本信息:")
-        logger.info(slide_text)
+        logger.debug(TAG+"pptx_file_info_extract()-文本信息:")
+        logger.debug(slide_text)
 
         text_all = " "
 
@@ -338,9 +338,9 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
             image_folder_path = f"{result_image_path}/{ppt_pptx_name}/"
             image_all_text = ocr_table_batch(image_folder_path)
             # image_all_text = ocr_batch_textract(image_folder_path)
-            logger.info(TAG+"ppt_file(): image_all_text: ")
+            logger.debug(TAG+"ppt_file(): image_all_text: ")
             for row in image_all_text:
-                # logger.info(row)
+                # logger.debug(row)
                 try:
                     single_result = " ".join(
                         [element for sublist in row[1:] for element in sublist])
@@ -349,11 +349,11 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
                     # 处理 IndexError 异常
                     logger.error(TAG+"ppts_file(): 处理 IndexError 异常")
                     logger.error(e)
-                    globalVar.set_error_list(pptx_path, e)
-            logger.info(TAG+"pptx_file_info_extract(): 图片文本信息:")
-            logger.info(image_all_text_res)
+                    #globalVar.set_error_list(pptx_path, e)
+            logger.debug(TAG+"pptx_file_info_extract(): 图片文本信息:")
+            logger.debug(image_all_text_res)
         else:
-            logger.info(TAG+"pptx_file_info_extract(): 不处理文件内部的图片!!")
+            logger.debug(TAG+"pptx_file_info_extract(): 不处理文件内部的图片!!")
 
         # 将图片文本信息按顺序插入到文本内部: 文本-文本-图片(如果存在)-文本
         res = replace_picture_texts(slide_text, image_all_text_res)
@@ -363,13 +363,13 @@ def pptx_file_info_extract(pptx_path, result_image_path, ppt_pptx_name):
     except Exception as e:
         logger.error(TAG+"ppts_file(): ppt转化失败")
         logger.error(e)
-        globalVar.set_error_list(pptx_path, e)
+        #globalVar.set_error_list(pptx_path, e)
         return ""
 
 
 # 将图片文本信息按顺序插入到文本内部: 文本-文本-图片(如果存在)-文本
 def replace_picture_texts(text_list, image_text_list):
-    logger.info(TAG+"replace_picture_texts():")
+    logger.debug(TAG+"replace_picture_texts():")
 
     i = 0  # 用于追踪textlist的索引
     j = 0  # 用于追踪image_all_text_res的索引

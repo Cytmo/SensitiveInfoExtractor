@@ -12,7 +12,7 @@ def contains_chinese(data):
     pattern = re.compile(r'[\u4e00-\u9fff]')
     return bool(pattern.search(str(data)))
 
-# print(data.shape[0])
+# # print(data.shape[0])
 
 
 def init_sensitive_word(yml_file_path):
@@ -32,7 +32,7 @@ def init_sensitive_word(yml_file_path):
 
 def process_bind_prase(data):
     # TODO 提取未知单条数据
-    # print("处理单条数据",data)
+    # # print("处理单条数据",data)
 
     str_list = [str(item) for item in data]
 
@@ -93,7 +93,7 @@ def count_most_frequent_strings(data):
 def find_tag_sensitive(word):
     word = str(word)
     global _sensitive_word_tmp
-    print(_sensitive_word_tmp)
+    # print(_sensitive_word_tmp)
     result = _sensitive_word_tmp.get(word)
     if result is not None:
         return result
@@ -221,7 +221,7 @@ class XlsxDevider:
             [index_single, index_prase] = line_spilit_index_key(
                 empty_cols_index)
 
-            # print(empty_cols_index)
+            # # print(empty_cols_index)
 
             for index in index_single:
                 data_part = pd.DataFrame(
@@ -275,11 +275,11 @@ class XlsxDevider:
     # 敏感数据提取
     def extract_sensitive_xlsx(self):
         json_data = []
-        if self.check_Pass():
-            print("处理敏感数据中，敏感数据大小为", self.xlsx_data.shape)
-        else:
-            print("处理敏感数据中，敏感数据大小为", self.xlsx_data.shape)
-            print("推荐优先处理分块以提高处理结果")
+        # if self.check_Pass():
+        #     # print("处理敏感数据中，敏感数据大小为", self.xlsx_data.shape)
+        # else:
+        #     # print("处理敏感数据中，敏感数据大小为", self.xlsx_data.shape)
+        #     # print("推荐优先处理分块以提高处理结果")
         # 单行单列的提取
         if self.xlsx_data.shape[0] < 1:
             return json_data
@@ -342,7 +342,7 @@ class XlsxDevider:
         str_last_in = str_last_in.replace("\"", " ")
         str_last_in = str_last_in.replace("'", " ")
         str_last_in = str_last_in.replace("=", " ")
-        logger.info(TAG+"testest"+str_last_in)
+        logger.debug(TAG+"testest"+str_last_in)
         return begin_info_extraction(str_last_in)
 
     def xlsx_fuzz_extract(self):
@@ -358,11 +358,11 @@ class XlsxDevider:
             chinese_columns, axis=1).reset_index(drop=True)
         use_data.columns = list(range(0, use_data.shape[1]))
         guss_tag_list = []
-        # print(use_data)
+        # # print(use_data)
         for ind, row in use_data.iterrows():
-            # print(row)
+            # # print(row)
             str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
-            # print(str_use)
+            # # print(str_use)
             text = plain_text_info_extraction(str_use, False, True, True)
             text = text.split(' ')
             guss_tag = []
@@ -390,12 +390,12 @@ class XlsxDevider:
             # 模糊提取的输出
             for ind, row in use_data.iterrows():
                 nan_flag = pd.isna(row)
-                # print(row)
+                # # print(row)
                 sub_result = {guss_most[index].replace('{', '').replace(
                     '}', ''): row.values[index] for index in tag_use if not nan_flag[index]}
                 if len(sub_result) > 1:
                     json_data.append(sub_result)
-        # print(json_data)
+        # # print(json_data)
         return json_data
 
 
@@ -436,4 +436,4 @@ def single_table_sensitive_extraction(data):
 
 # while not que_add.empty():
 #     tmp_use = que_add.get()
-#     print(tmp_use.xlsx_data)
+#     # print(tmp_use.xlsx_data)

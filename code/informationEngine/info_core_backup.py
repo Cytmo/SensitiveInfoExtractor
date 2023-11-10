@@ -28,11 +28,11 @@ from config.info_core_config import (
 ##########################工具函数和类###############################
 # 分割字符串并移除空项
 def text_split(text: str) -> list:
-    logger.info(TAG + "text_split(): text split input: "+str(text))
+    logger.debug(TAG + "text_split(): text split input: "+str(text))
     # 使用 \n \t 空格 分割字符串
     text = re.split(r'\n|\t| ', text)
     text = [item for item in text if item != '' and item != ' ']
-    logger.info (TAG + "text_split(): text split result: "+str(text))
+    logger.debug (TAG + "text_split(): text split result: "+str(text))
     return text
 
 def is_chinese_text(text: str) -> bool:
@@ -108,9 +108,9 @@ def is_png_text(info):
     total_length = sum(len(item) for item in info[1:])
     average_length = total_length / float(len(info[1:]))
     if average_length >= 2:
-        logger.info(TAG + "is_png_text(): input is [table] png ")
+        logger.debug(TAG + "is_png_text(): input is [table] png ")
         return False
-    logger.info(TAG + "is_png_text(): input is [text] png ")
+    logger.debug(TAG + "is_png_text(): input is [text] png ")
     return True
 
 
@@ -133,7 +133,7 @@ class paired_info_pattern():
         # return False
 
         # if name in attr_switch:
-        #     # print("Setting "+str(name)+" " +str( value))
+        #     # # print("Setting "+str(name)+" " +str( value))
         #     return attr_switch[name](value)
         # else:
         #     return False
@@ -208,7 +208,7 @@ class paired_info_pattern():
             "phonenumber": lambda x: self.set_phonenumber(x)
         }
         if name in attr_switch:
-            # print("Setting "+str(name)+" " +str( value))
+            # # print("Setting "+str(name)+" " +str( value))
             return attr_switch[name](value)
         else:
             return False
@@ -286,9 +286,9 @@ def information_protection(text: str) -> Tuple[str, dict]:
         match = re.search(regex, text)
 
         if match:
-            # print(f"Matched pattern: {name}")
-            # print(f"Confidence: {confidence}")
-            # print(f"Matched text: {match.group(0)}\n")
+            # # print(f"Matched pattern: {name}")
+            # # print(f"Confidence: {confidence}")
+            # # print(f"Matched text: {match.group(0)}\n")
             if match.group(0) not in match_result:
                 sensitive_info_pattern_match_result[match.group(0)] = []
                 sensitive_info_pattern_match_result[match.group(0)].append(name)
@@ -302,9 +302,9 @@ def information_protection(text: str) -> Tuple[str, dict]:
     for key in placeholders:
         if key not in PLACEHOLDERS_CORRESPONDING_TYPE:
             PLACEHOLDERS_CORRESPONDING_TYPE[key] = []
-        # print("place type:"+str(PLACEHOLDERS_CORRESPONDING_TYPE[key]))
-        # print("pl    type:"+str(placeholders[key]))
-        # print("match type:"+str(match_result[key]))
+        # # print("place type:"+str(PLACEHOLDERS_CORRESPONDING_TYPE[key]))
+        # # print("pl    type:"+str(placeholders[key]))
+        # # print("match type:"+str(match_result[key]))
         # remove space in type to append
         PLACEHOLDERS_CORRESPONDING_TYPE[key].append(match_result[placeholders[key]])
     # 遍历字典，去除值中的空格
@@ -384,10 +384,10 @@ def fuzz_mark(text: str) -> str:
 
 # 标记可明显识别的关键词 如url port等
 def explicit_fuzz_mark(text: list) -> list:
-    logger.info(TAG+ "placeholder_extract(): placeholder extract{}".format(str(PLACEHOLDERS_CORRESPONDING_TYPE)))
-    logger.info(TAG+ "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
+    logger.debug(TAG+ "placeholder_extract(): placeholder extract{}".format(str(PLACEHOLDERS_CORRESPONDING_TYPE)))
+    logger.debug(TAG+ "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
     tagged_text = []
-    logger.info(TAG+ "explicit_fuzz mark input list: {}".format(text))
+    logger.debug(TAG+ "explicit_fuzz mark input list: {}".format(text))
     for i in range(len(text)):
         if text[i] in PLACEHOLDERS_CORRESPONDING_TYPE:
             if PLACEHOLDERS_CORRESPONDING_TYPE[text[i]] == 'url':
@@ -403,12 +403,12 @@ def explicit_fuzz_mark(text: list) -> list:
             tagged_text.append(text[i])
         else:
             tagged_text.append(text[i])
-    logger.info(TAG+ "fuzz_mark(): explicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
+    logger.debug(TAG+ "fuzz_mark(): explicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text
 
 # 标记隐式项 如用户名 密码等
 def implicit_fuzz_mark(text: list) -> list:
-    logger.info(TAG+ "implicit_fuzz_mark(): input list: {}".format(text))
+    logger.debug(TAG+ "implicit_fuzz_mark(): input list: {}".format(text))
     tagged_text = []
     for i in range(len(text)):
         if is_protected_item(text[i]):
@@ -416,15 +416,15 @@ def implicit_fuzz_mark(text: list) -> list:
         elif text[i] in REPLACED_KEYWORDS_LIST:
             tagged_text.append(text[i])
         else:
-            logger.info(TAG+ "implicit_fuzz_mark(): password_classifier input: {}".format(text[i]))
+            logger.debug(TAG+ "implicit_fuzz_mark(): password_classifier input: {}".format(text[i]))
             password_classifier_result = password_classifier(text[i])
-            logger.info(TAG+ "implicit_fuzz_mark(): password_classifier result: {}".format(password_classifier_result))
+            logger.debug(TAG+ "implicit_fuzz_mark(): password_classifier result: {}".format(password_classifier_result))
             if password_classifier_result:
                 tagged_text.append('{password}')
             else:
                 tagged_text.append('{user}')
             tagged_text.append(text[i])
-    logger.info(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
+    logger.debug(TAG+ "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text 
 
 
@@ -557,7 +557,7 @@ def extract_paired_info(text):
 
 #代码等文件的提取
 def special_processing(text: str) -> dict:
-    logger.info(TAG + 'Special processing for text')
+    logger.debug(TAG + 'Special processing for text')
     text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -599,7 +599,7 @@ def special_processing(text: str) -> dict:
     for line in lines:
         words_list += line.split(" ")
     for i in range(len(words_list) - 1):
-        # print(words_list[i])
+        # # print(words_list[i])
         logger.debug(TAG + 'Special processing for text: '+words_list[i]+" "+words_list[i+1])
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
             key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
@@ -613,12 +613,12 @@ def special_processing(text: str) -> dict:
     for key, value in result_dict.items():
         if value in ITEM_PROTECTION_DICT:
             result_dict[key] = ITEM_PROTECTION_DICT[value]
-    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    logger.debug(TAG + 'Special processing result: '+str(result_dict))
     return result_dict
 
 # 配置文件的提取
 def config_processing(text: str) -> dict:
-    logger.info(TAG + 'Special processing for config')
+    logger.debug(TAG + 'Special processing for config')
     text1, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -671,7 +671,7 @@ def config_processing(text: str) -> dict:
     for key, value in result_dict.items():
         if value in ITEM_PROTECTION_DICT:
             result_dict[key] = ITEM_PROTECTION_DICT[value]
-    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    logger.debug(TAG + 'Special processing result: '+str(result_dict))
     return result_dict
 
 # 使用模糊识别的方法提取信息，打关键词,抽取在之后做
@@ -683,10 +683,10 @@ def fuzz_extract(text: str) -> dict:
     # text = re.sub(r'//.*', '', text)
     logger.debug(TAG + 'Text before IoC protection: '+text)
     if is_chinese_text(text):
-        logger.info(TAG + 'This is a Chinese text.')
+        logger.debug(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
     else:
-        logger.info(TAG + 'This is an English text.')
+        logger.debug(TAG + 'This is an English text.')
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after IoC protection: '+text)
         text = eng_text_preprocessing(text)
@@ -696,9 +696,9 @@ def fuzz_extract(text: str) -> dict:
     text = fuzz_mark(text)
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
-    logger.info(TAG + 'Info extraction result: '+str(paired_info))
+    logger.debug(TAG + 'Info extraction result: '+str(paired_info))
     return paired_info    
-    logger.info(TAG + "fuzz_extract(): fuzz extract")
+    logger.debug(TAG + "fuzz_extract(): fuzz extract")
     result_dict = {}
     result=[]
     
@@ -713,7 +713,7 @@ def fuzz_extract(text: str) -> dict:
             if a_paired_info.getter("user") != None and a_paired_info.getter("password") != None:
                 result.append(a_paired_info.output())
                 a_paired_info = paired_info_pattern()
-            logger.info(TAG + "fuzz_extract(): input is IP address")
+            logger.debug(TAG + "fuzz_extract(): input is IP address")
             a_paired_info.set_address(line.strip())
         # 若该行仅含有字母和数字
         elif re.match(r'[a-zA-Z0-9]+', line):
@@ -721,7 +721,7 @@ def fuzz_extract(text: str) -> dict:
 
             # 是否是电话号码
             if re.match(r'^1[3-9]\d{9}$', line):
-                logger.info(TAG + "fuzz_extract(): input is phone number")
+                logger.debug(TAG + "fuzz_extract(): input is phone number")
                 a_paired_info.setter("phonenumber", line.strip())
             elif a_paired_info.getter("user") == None:
                 a_paired_info.setter("user", line.strip())
@@ -743,8 +743,8 @@ def fuzz_extract(text: str) -> dict:
                              value in item.items() if value is not None}
             filtered_result.append(filtered_item)
 
-    logger.info(TAG + "fuzz_extract(): fuzz extract result: "+str(filtered_result))
-    # logger.info(TAG + "fuzz_extract(): fuzz extract result: "+str(result))
+    logger.debug(TAG + "fuzz_extract(): fuzz extract result: "+str(filtered_result))
+    # logger.debug(TAG + "fuzz_extract(): fuzz extract result: "+str(result))
     return filtered_result 
 
 ##########################入口函数###############################
@@ -757,19 +757,19 @@ def plain_text_info_extraction(text: str) -> dict:
     # 移除代码注释 // # 等
     logger.debug(TAG + 'Text before IoC protection: '+text)
     if is_chinese_text(text):
-        logger.info(TAG + 'This is a Chinese text.')
+        logger.debug(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text)
     else:
-        logger.info(TAG + 'This is an English text.')
+        logger.debug(TAG + 'This is an English text.')
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
         text = eng_text_preprocessing(text)
     text = marked_text_refinement(text)
     paired_info = extract_paired_info(text)
-    logger.info(TAG + 'Info extraction result: '+str(paired_info))
+    logger.debug(TAG + 'Info extraction result: '+str(paired_info))
     if paired_info == []:
-        logger.warning(TAG + 'No paired info extracted!')
-        logger.info(TAG + "original_text: "+original_text)
+        logger.debug(TAG + 'No paired info extracted!')
+        logger.debug(TAG + "original_text: "+original_text)
         paired_info = special_processing(original_text)
     return paired_info
 
@@ -784,12 +784,12 @@ def begin_info_extraction(info,flag=0) -> dict:
         # 若文本中不存在中文和英文关键词，进行模糊提取
         new_info = info.replace("\n", "")
         if not any(key in new_info for key in ENG_KEYWORDS_LIST) and not any(key in new_info for key in CHN_KEYWORDS_LIST):
-            logger.info(TAG + "info_extraction(): fuzz extract")
+            logger.debug(TAG + "info_extraction(): fuzz extract")
             # 判断是否中文
             if is_chinese_text(info):
                 return plain_text_info_extraction(info)
             return fuzz_extract(info)
-        logger.info(TAG + "info_extraction(): input is string")
+        logger.debug(TAG + "info_extraction(): input is string")
         return plain_text_info_extraction(info)
     # 表格
     elif isinstance(info, list):

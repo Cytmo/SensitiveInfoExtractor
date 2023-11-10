@@ -17,7 +17,7 @@ def process_rar_file(filename, nameclean):
     rf.extractall('../workspace')
     globalVar.root_folder_list.put(
         '../workspace/'+nameclean)
-    # logger.info("Process compelete rar file:", filename)
+    # logger.debug("Process compelete rar file:", filename)
     del rf
     del filename
     del nameclean
@@ -30,7 +30,7 @@ def process_zip_file(filename, nameclean):
     zip_file.extractall('../workspace')
     globalVar.root_folder_list.put(
         '../workspace/'+nameclean)
-    # logger.info("Process compelete zip file:", filename)
+    # logger.debug("Process compelete zip file:", filename)
     del zip_file
     del filename
     del nameclean

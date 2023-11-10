@@ -38,14 +38,14 @@ def sensitive_info_detect(file_path, text, flag=0):
         # except Exception as e:
             # logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
             # logger.error(e)
-            # globalVar.set_error_list(file_path, e)
+            # #globalVar.set_error_list(file_path, e)
     else:
         # try:
         sensitive_info = begin_info_extraction(text, file_path=file_path)
         # except Exception as e:
         #     logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
         #     logger.error(e)
-        #     globalVar.set_error_list(file_path, e)
+        #     #globalVar.set_error_list(file_path, e)
     if sensitive_info:
         res_out.add_new_json(file_path, sensitive_info)
 
@@ -53,14 +53,14 @@ def sensitive_info_detect(file_path, text, flag=0):
 ######################### 常见文件 #################################################
 # 常用文件提取操作, 如.txt...
 def extract_universal(file_path, nameclean):
-    logger.info(TAG+"extract_universal(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_universal(): " + file_path.split("/")[-1])
     text = universal_textract(file_path)
     sensitive_info_detect(file_path, text)
 
 
 # 直接读取文件文本
 def extract_direct_read(file_path, namclean):
-    logger.info(TAG+"extract_direct_read(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_direct_read(): " + file_path.split("/")[-1])
     # 打开文件并读取其内容
     content = ""
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -70,29 +70,29 @@ def extract_direct_read(file_path, namclean):
 
 # 配置文件读取和提取操作, 如.xml/.yml/.properties...
 def extract_config(file_path, nameclean):
-    logger.info(TAG+"extract_config(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_config(): " + file_path.split("/")[-1])
     text = universal_file(file_path)
     sensitive_info_detect(file_path, text, flag=1)
 
 
 # 图片文件ocr读取和提取操作, 如.jpg/.png...
 def extract_pic(file_path, nameclean):
-    logger.info(TAG+"extract_pic(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_pic(): " + file_path.split("/")[-1])
 
     pic_list = ocr_table_batch(file_path)
 
-    [print(data) for data in pic_list[0][0:]]
+    # [# print(data) for data in pic_list[0][0:]]
 
     text_or_table_flag = is_png_text(pic_list[0])
 
     if text_or_table_flag:
         # is table
         pd_table_data = pd.DataFrame(pic_list[0][1:])
-        print(pd_table_data)
+        # print(pd_table_data)
         res = single_table_sensitive_extraction(pd_table_data)
     else:
         # is pic
-        print(pic_list[0][1:])
+        # print(pic_list[0][1:])
         res = begin_info_extraction(pic_list[0], file_path=file_path)
 
     res_out.add_new_json(file_path, res)
@@ -101,9 +101,9 @@ def extract_pic(file_path, nameclean):
 # 判断图片识别结果（表格形式）还是文本
 def is_png_text(info):
     if len(info[1]) > 1:
-        logger.info(TAG + "is_png_text(): input is [table] png ")
+        logger.debug(TAG + "is_png_text(): input is [table] png ")
         return True
-    logger.info(TAG + "is_png_text(): input is [text] png ")
+    logger.debug(TAG + "is_png_text(): input is [text] png ")
     return False
 
 ######################### pdf file ###########################################
@@ -111,7 +111,7 @@ def is_png_text(info):
 
 # .pdf文件读取和提取操作
 def extract_pdf(file_path, nameclean):
-    logger.info(TAG+"extract_pdf(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_pdf(): " + file_path.split("/")[-1])
     text = pdf_file(file_path)
     sensitive_info_detect(file_path, text)
 
@@ -124,14 +124,14 @@ def extract_pdf(file_path, nameclean):
 
 # (1-1).doc文件读取和提取操作
 def extract_doc(file_path, nameclean):
-    logger.info(TAG+"extract_doc(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_doc(): " + file_path.split("/")[-1])
     text = docs_file(file_path, type=".doc")
     sensitive_info_detect(file_path, text)
 
 
 # (1-2).wps文件读取和提取操作
 def extract_wps(file_path, nameclean):
-    logger.info(TAG+"extract_wps(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_wps(): " + file_path.split("/")[-1])
 
     if not file_path.endswith(".wps"):
         return
@@ -149,21 +149,21 @@ def extract_wps(file_path, nameclean):
 
 # (1-3).docx文件读取和提取操作
 def extract_docx(file_path, nameclean):
-    logger.info(TAG+"extract_docx(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_docx(): " + file_path.split("/")[-1])
     text = docs_file(file_path, type=".docx")
     sensitive_info_detect(file_path, text)
 
 
 # (2-1).ppt文件读取和提取操作
 def extract_ppt(file_path, nameclean):
-    logger.info(TAG+"extract_ppt(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_ppt(): " + file_path.split("/")[-1])
     text = ppts_file(file_path, type=".ppt")
     sensitive_info_detect(file_path, text)
 
 
 # (2-2).dps文件读取和提取操作
 def extract_dps(file_path, nameclean):
-    logger.info(TAG+"extract_dps(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_dps(): " + file_path.split("/")[-1])
 
     if not file_path.endswith(".dps"):
         return
@@ -181,21 +181,21 @@ def extract_dps(file_path, nameclean):
 
 # (2-3).pptx文件读取和提取操作
 def extract_pptx(file_path, nameclean):
-    logger.info(TAG+"extract_pptx(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_pptx(): " + file_path.split("/")[-1])
     text = ppts_file(file_path, type=".pptx")
     sensitive_info_detect(file_path, text)
 
 
 # (3-1).xlsx文件读取和提取操作
 def extract_xlsx(file_path, nameclean):
-    logger.info(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_xlsx(): " + file_path.split("/")[-1])
     text = xlsx_file(file_path)
     res_out.add_new_json(file_path, text)
 
 
 # (3-2).et文件读取和提取操作
 def extract_et(file_path, nameclean):
-    logger.info(TAG+"extract_et(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_et(): " + file_path.split("/")[-1])
     if not file_path.endswith(".et"):
         return
     time = datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -216,7 +216,7 @@ def extract_et(file_path, nameclean):
 def is_token_file(file_path):
 
     if "token" in file_path:
-        logger.info(TAG+"is_token_file(): " + file_path)
+        logger.debug(TAG+"is_token_file(): " + file_path)
         text = universal_file(file_path)
         res_out.add_new_json(file_path, text)
         return True
@@ -228,7 +228,7 @@ def is_token_file(file_path):
 
 # 源代码文件读取和提取操作
 def extract_code_file(file_path, nameclean):
-    logger.info(TAG+"extract_code_file(): " + os.path.basename(file_path))
+    logger.debug(TAG+"extract_code_file(): " + os.path.basename(file_path))
     extract_direct_read(file_path, os.path.basename(file_path))
     return
 
@@ -275,7 +275,7 @@ extension_switch_eml = {
 
 #  .eml文件读取和提取操作
 def extract_eml(file_path, nameclean):
-    logger.info(TAG+"extract_eml(): " + file_path.split("/")[-1])
+    logger.debug(TAG+"extract_eml(): " + file_path.split("/")[-1])
     eml_header, eml_text, attach_files_list = eml_file(file_path)
 
     sensitive_info = []
@@ -284,11 +284,11 @@ def extract_eml(file_path, nameclean):
         sensitive_info_text = begin_info_extraction(eml_text["text"])
 
     if not len(sensitive_info_text) == 0:
-        logger.info(TAG+"extract_eml(): eml body has  sensitive infomation")
+        logger.debug(TAG+"extract_eml(): eml body has  sensitive infomation")
         sensitive_info.append(sensitive_info_text)
 
     if "table" in eml_text:
-        logger.info(TAG+"extract_eml(): eml body has table")
+        logger.debug(TAG+"extract_eml(): eml body has table")
         sensitive_info = sensitive_info+eml_text["table"]
 
     result = {}

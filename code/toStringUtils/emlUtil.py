@@ -82,7 +82,7 @@ def eml_file(eml_file_path):
 
 # 解析eml中的文本中的html
 def html_extract(body):
-    logger.info(TAG+"html_extract():")
+    logger.debug(TAG+"html_extract():")
     # 创建BeautifulSoup对象
     soup = BeautifulSoup(body, 'html.parser')
     # 找到所有的<p>标签
@@ -111,13 +111,13 @@ def html_extract(body):
                 row_data.append(cell.get_text().strip())
             table_data.append(row_data)
         pd_table_data = pd.DataFrame(table_data)
-        logger.info(TAG+"html_extract():")
-        logger.info(table_data)
-        logger.info(TAG+"html_extract():")
-        logger.info(pd_table_data)
+        logger.debug(TAG+"html_extract():")
+        logger.debug(table_data)
+        logger.debug(TAG+"html_extract():")
+        logger.debug(pd_table_data)
         res = single_table_sensitive_extraction(pd_table_data)
-        logger.info(TAG+"html_extract()-html-res:")
-        logger.info(res)
+        logger.debug(TAG+"html_extract()-html-res:")
+        logger.debug(res)
         result = {
             'text': p_text_string,
             'table': res

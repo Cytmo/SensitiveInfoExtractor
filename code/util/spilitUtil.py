@@ -137,7 +137,7 @@ def spilit_process_file(file, root_directory):
             if first_line:
                 extract_direct_read(file_name, os.path.splitext(file_name)[0])
             else:
-                logger.warning(TAG + "=>Unsupported file format: " + file_name)
+                logger.debug(TAG + "=>Unsupported file format: " + file_name)
     except Exception as e:
-        logger.warning(TAG + "=>Unsupported file format: " + file_name)
-        globalVar.set_error_list(file_name, e, "不支持该文件类型")
+        logger.debug(TAG + "=>Unsupported file format: " + file_name)
+        #globalVar.set_error_list(file_name, e, "不支持该文件类型")

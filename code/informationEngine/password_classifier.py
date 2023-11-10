@@ -54,7 +54,7 @@ svm_classifier.fit(X_train, y_train)
 # 模型评估
 y_pred = svm_classifier.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy: {accuracy}")
+# print(f"Accuracy: {accuracy}")
 
 
 # # 定义键盘布局
@@ -117,7 +117,7 @@ print(f"Accuracy: {accuracy}")
 # text = "your_password_here"
 # layout = 'dvorak'
 # features = extract_features(text, layout)
-# print(features)
+# # print(features)
 
 # vectorizer = TfidfVectorizer()
 # X = np.array([list(extract_features(text).values()) for text in passwords + non_passwords])
@@ -138,7 +138,7 @@ print(f"Accuracy: {accuracy}")
 # # 模型评估
 # y_pred = svm_classifier.predict(X_test)
 # accuracy = accuracy_score(y_test, y_pred)
-# print(f"Accuracy: {accuracy}")
+# # print(f"Accuracy: {accuracy}")
 
 
 # 6. 预测新字符串
@@ -147,9 +147,9 @@ print(f"Accuracy: {accuracy}")
 
 # for i, input_str in enumerate(new_input):
 #     if predictions[i] == 1:
-#         print(f"'{input_str}' is a password.")
+#         # print(f"'{input_str}' is a password.")
 #     else:
-#         print(f"'{input_str}' is not a password.")
+#         # print(f"'{input_str}' is not a password.")
 
 
 # 是否可视化

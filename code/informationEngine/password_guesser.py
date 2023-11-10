@@ -438,7 +438,7 @@ def effectiveness(passwords, non_passwords, regular_words):
     X = np.array([list(extract_features(text).values()) for text in passwords + non_passwords + regular_words])
     y = np.array([1] * len(passwords) + [0] * len(non_passwords) + [0] * len(regular_words))
     svm_classifier.fit(X, y)
-    print("Accuracy:", svm_classifier.score(X, y))
+    # print("Accuracy:", svm_classifier.score(X, y))
 
 
 
@@ -449,23 +449,23 @@ def predict_password(string_to_guess:list)->list:
     # new_input = passwords1 + non_passwords1 + regular_words
     new_input = string_to_guess
     X_new = np.array([list(extract_features(text).values()) for text in new_input])
-    # print(X_new)
+    # # print(X_new)
     results = []
     probabilities = svm_classifier.predict_proba(X_new)  # Use predict_proba to get probabilities
 
     for i, input_str in enumerate(new_input):
         prediction = svm_classifier.predict([X_new[i]])
         probability = probabilities[i]
-        print(f"String: '{input_str}' with probability {probability} and prediction {prediction}")
+        # print(f"String: '{input_str}' with probability {probability} and prediction {prediction}")
         if prediction[0] == 1:
-            print(f"'{input_str}' is a password with probability {probability[1]:.2f}")
+            # print(f"'{input_str}' is a password with probability {probability[1]:.2f}")
             results.append([True, probability[1]])
         else:
-            print(f"'{input_str}' is not a password with probability {probability[0]:.2f}")
+            # print(f"'{input_str}' is not a password with probability {probability[0]:.2f}")
             results.append([False, probability[0]])
     return results
 
 if __name__ == "__main__":
     # effectiveness(passwords1, non_passwords1, regular_words)
     results = predict_password(["123456","123456789"])
-    print(results)
+    # print(results)

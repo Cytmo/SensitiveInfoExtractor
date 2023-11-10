@@ -114,7 +114,7 @@ def ocr_paddleocr(file):
         for x in line:
             res.append(x[1][0])
 
-    [print(item) for item in res]
+    # [# print(item) for item in res]
     return res
 
 
@@ -130,7 +130,7 @@ def ocr_batch_paddle(folder_path):
 
     image_all_text = ""
     for image_path in image_paths:
-        logger.info(TAG+"ppt_and_dps_file(): "+image_path)
+        logger.debug(TAG+"ppt_and_dps_file(): "+image_path)
         image_info = ocr.ocr(image_path)
         res = []
         for line in image_info:
@@ -149,7 +149,7 @@ def ocr_batch_textract(folder_path):
 
     image_all_text = ""
     for image_path in image_paths:
-        logger.info(TAG+"ppt_and_dps_file(): "+image_path)
+        logger.debug(TAG+"ppt_and_dps_file(): "+image_path)
         image_info = ocr_textract(image_path)
         if not len(image_info) == 0:
             image_string = "\n".join(image_info)
@@ -201,7 +201,7 @@ def ocr_table_batch(folder_path):
         result = find_image_by_hash(single_pic_hash)
 
         if result == False:
-            logger.info(TAG+"ocr_table_batch() with new hash: "+image_path)
+            logger.debug(TAG+"ocr_table_batch() with new hash: "+image_path)
             img = cv2.imread(image_path)
             result = table_engine(img)
 
@@ -226,13 +226,13 @@ def ocr_table_batch(folder_path):
             # 补全二维list
             final_list = [filtered_list[0]]+pad_2d_list(filtered_list[1:])
 
-            logger.info(TAG+"Picture result")
-            [logger.info(data) for data in final_list]
+            logger.debug(TAG+"Picture result")
+            [logger.debug(data) for data in final_list]
 
             globalVar._pic_hash[single_pic_hash] = final_list
             ocr_result.append(final_list)
         else:
-            logger.info(TAG+"ocr_table_batch() with old hash: "+image_path)
+            logger.debug(TAG+"ocr_table_batch() with old hash: "+image_path)
             ocr_result.append(result)
 
     return ocr_result

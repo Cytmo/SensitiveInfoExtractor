@@ -76,15 +76,15 @@ class SensitiveInformation:
 
     #控制台打印特殊敏感信息
     def print_sensitive(self):
-        # print("")
-        # print(sensitive_data_type.get(str(self.type)))
+        # # print("")
+        # # print(sensitive_data_type.get(str(self.type)))
         templete_list = []
         for item in self.data_templete:
             templete_list = templete_list + \
                 sensitive_data_templete.get(str(item))
         for i in range(len(templete_list)):
             if self.data[i] != "" and templete_list[i] != 0:
-                logger.info(sensitive_data_pairs.get(
+                logger.debug(sensitive_data_pairs.get(
                     str(templete_list[i]))+":" + self.data[i])
 
     #添加

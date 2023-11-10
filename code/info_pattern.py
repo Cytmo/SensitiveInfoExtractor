@@ -41,8 +41,8 @@ class paired_info_pattern_modified():
         # check if name is in self.data
         if self.data.get(name) == None:
             return False
-        print("self.data:"+str(self.data))
-        print("1if_same_attr: "+str(self.data.get(name)+" "+str(value)))
+        # print("self.data:"+str(self.data))
+        # print("1if_same_attr: "+str(self.data.get(name)+" "+str(value)))
         return self.data.get(name) == value
 
     def is_None(self):
@@ -87,7 +87,7 @@ class paired_info_pattern():
             "phonenumber": lambda x: self.set_phonenumber(x)
         }
         if name in attr_switch:
-            # print("Setting "+str(name)+" " +str( value))
+            # # print("Setting "+str(name)+" " +str( value))
             return attr_switch[name](value)
         else:
             return False
@@ -128,14 +128,14 @@ original.set_password("pass1")
 modified.setter("password", "pass1")
 
 # Test if_same_attr method
-print(original.if_same_attr("user", "user1"))
-print(modified.if_same_attr("user", "user1"))
+# print(original.if_same_attr("user", "user1"))
+# print(modified.if_same_attr("user", "user1"))
 assert original.if_same_attr("user", "user1") == modified.if_same_attr("user", "user1")
 assert original.if_same_attr("password", "pass1") == modified.if_same_attr("password", "pass1")
 
 # Test output method
-print(original.output())
-print(modified.output())
+# print(original.output())
+# print(modified.output())
 assert original.output() == modified.output()
 
 # Test is_None method
@@ -155,7 +155,7 @@ assert original.output() == modified.output()
 # Test is_None method with different values
 assert original.is_None() == modified.is_None()
 
-print("Tests completed.")
+# print("Tests completed.")
 
 
 

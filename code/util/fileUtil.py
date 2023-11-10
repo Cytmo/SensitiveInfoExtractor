@@ -59,16 +59,16 @@ class DirectController:
                 file = File(item, parent=directory)
                 self.fileList.put(file)
                 # path_tmp = get_parent_directory(file)
-                # print(path_tmp)
+                # # print(path_tmp)
                 directory.files.append(file.name)
         return directory
     
     # 输出目录下的目录树（可删）
-    @classmethod
-    def print_directory_tree(cls,directory, indent=''):
-        print(indent + directory.name + '/')
-        for subdirectory in directory.subdirectories:
-            DirectController.print_directory_tree(subdirectory, indent + '  ')
-        for file in directory.files:
-            print(indent + '  - ' + file)
+    # @classmethod
+    # def print_directory_tree(cls,directory, indent=''):
+    #     # print(indent + directory.name + '/')
+    #     for subdirectory in directory.subdirectories:
+    #         DirectController.print_directory_tree(subdirectory, indent + '  ')
+        # for file in directory.files:
+        #     logger.de(indent + '  - ' + file)
     

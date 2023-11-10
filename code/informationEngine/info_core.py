@@ -67,7 +67,7 @@ def restore_placeholders(result_dict: dict) -> dict:
             result_dict[key] = value
     # 文本标记API专用，不应当在其他地方使用
     elif isinstance(result_dict, str):
-        logger.warning(
+        logger.debug(
             TAG + "restore_placeholders(): result_dict is str, only for text mark api")
         for placeholder, replacement in ITEM_PROTECTION_DICT.items():
             # 使用正则匹配，防止替换到错误的位置
@@ -84,8 +84,8 @@ def is_valid_info(info: str, VALID_INFO_THRESHOLD=3) -> bool:
 
 
 def determine_file_type(file_name, info):
-    logger.info(TAG + "determine_file_type(): file_name: "+str(file_name))
-    logger.info(TAG + "determine_file_type(): info: "+str(info))
+    logger.debug(TAG + "determine_file_type(): file_name: "+str(file_name))
+    logger.debug(TAG + "determine_file_type(): info: "+str(info))
     # TODO 完善的文件类型判断
     if "carbon" in file_name:
         return "ocr"
@@ -95,7 +95,7 @@ def determine_file_type(file_name, info):
         return "config"
     elif file_name.endswith(tuple(IMAGE_FILE_EXTENSION)):
         result = magic.from_buffer(info, mime=True)
-        logger.info(
+        logger.debug(
             TAG + "determine_file_type(): image's content's file type: "+str(result))
         switch = {
             "text/plain": "code",
@@ -117,11 +117,11 @@ def determine_file_type(file_name, info):
 
 
 def text_split(text: str) -> list:
-    logger.info(TAG + "text_split(): text split input: "+' '.join(text.split()))
+    logger.debug(TAG + "text_split(): text split input: "+' '.join(text.split()))
     # 使用 \n \t 空格 分割字符串
     text = re.split(r'\n|\t| ', text)
     text = [item for item in text if item != '' and item != ' ']
-    logger.info (TAG + "text_split(): text split result: "+' '.join(text))
+    logger.debug (TAG + "text_split(): text split result: "+' '.join(text))
     return text
 
 
@@ -164,7 +164,7 @@ def password_classifier(text: str) -> bool:
 
 
 def fix_ocr(text):
-    logger.info(TAG + "fix_ocr(): fix_ocr input: "+' '.join(text.split()))
+    logger.debug(TAG + "fix_ocr(): fix_ocr input: "+' '.join(text.split()))
     # 定义一个字典来映射中文标点符号到英文标点符号
     punctuation_mapping = {
         "，": ",",
@@ -191,7 +191,7 @@ def fix_ocr(text):
     # 使用字典进行替换
     for chinese_punctuation, english_punctuation in punctuation_mapping.items():
         text = text.replace(chinese_punctuation, english_punctuation)
-    logger.info(TAG + "fix_ocr(): fix_ocr result: "+' '.join(text.split()))
+    logger.debug(TAG + "fix_ocr(): fix_ocr result: "+' '.join(text.split()))
     return text
 
 # 判断是否是被保护的信息项
@@ -239,7 +239,7 @@ class paired_info_pattern():
 
     # 判断是否一个对象存在关键对象
     def check_header_complete(self):
-        print(self.check_header)
+        # # print(self.check_header)
         return not all(value is False for value in self.check_header.values())
 
     def check_data_headers(self, data):
@@ -274,14 +274,14 @@ class paired_info_pattern():
         # return False
 
         # if name in attr_switch:
-        #     # print("Setting "+str(name)+" " +str( value))
+        #     # # # print("Setting "+str(name)+" " +str( value))
         #     return attr_switch[name](value)
         # else:
         #     return False
         # TODO
-        print(self.data)
+        # # print(self.data)
         self.data[name] = value
-        print(self.data)
+        # # print(self.data)
 
         return True
     
@@ -289,9 +289,9 @@ class paired_info_pattern():
     def slice_word_check(self,slice_word)->bool:
         if slice_word != self.last_keyword:
             if self.last_keyword != None:
-                logger.info(TAG+"Paired_info(): different slice word detected, which are " +slice_word+self.last_keyword)
+                logger.debug(TAG+"Paired_info(): different slice word detected, which are " +slice_word+self.last_keyword)
             else:
-                logger.info(TAG+"Paired_info(): different slice word detected, which are " +slice_word+ " None")
+                logger.debug(TAG+"Paired_info(): different slice word detected, which are " +slice_word+ " None")
  
             self.last_output = self.data
             self.reset_data()
@@ -334,8 +334,8 @@ class paired_info_pattern():
         sliced_result_1 = {}
         sliced_result_2 = {}
         items_need_pop = []
-        logger.info(TAG+"Paired_info():result_regroup(): data is " + str(self.data))
-        logger.info(TAG+"Paired_info():result_regroup(): last_output is " + str(self.last_output))
+        logger.debug(TAG+"Paired_info():result_regroup(): data is " + str(self.data))
+        logger.debug(TAG+"Paired_info():result_regroup(): last_output is " + str(self.last_output))
 
         for key,value in self.data.items():
             if value != None and self.last_output.get(key) != None:
@@ -347,9 +347,9 @@ class paired_info_pattern():
         sliced_result_2 = self.last_output
         data_backup = self.data
 
-        logger.info(TAG+"Paired_info():result_regroup(): data backup is " + str(data_backup))
-        logger.info(TAG+"Paired_info():result_regroup(): sliced_result_1 is " + str(sliced_result_1))
-        logger.info(TAG+"Paired_info():result_regroup(): sliced_result_2 is " + str(sliced_result_2))
+        logger.debug(TAG+"Paired_info():result_regroup(): data backup is " + str(data_backup))
+        logger.debug(TAG+"Paired_info():result_regroup(): sliced_result_1 is " + str(sliced_result_1))
+        logger.debug(TAG+"Paired_info():result_regroup(): sliced_result_2 is " + str(sliced_result_2))
 
         self.data = sliced_result_1
         self.add_to_result_set()
@@ -452,15 +452,15 @@ def information_protection(text: str) -> Tuple[str, dict]:
         matches = re.finditer(regex, text)
 
         for match in matches:
-            logger.info(
+            logger.debug(
                 TAG + "information_protection(): Matched pattern: {}".format(name))
-            logger.info(
+            logger.debug(
                 TAG + "information_protection(): Confidence: {}".format(confidence))
-            logger.info(
+            logger.debug(
                 TAG + "information_protection(): Matched text: {}\n".format(match.group(0)))
-            # print(f"Matched pattern: {name}")
-            # print(f"Confidence: {confidence}")
-            # print(f"Matched text: {match.group(0)}\n")
+            # # # print(f"Matched pattern: {name}")
+            # # # print(f"Confidence: {confidence}")
+            # # # print(f"Matched text: {match.group(0)}\n")
             # if match.group(0) not in match_result:
             sensitive_info_pattern_match_result[match.group(0)] = []
             sensitive_info_pattern_match_result[match.group(0)].append(name)
@@ -474,9 +474,9 @@ def information_protection(text: str) -> Tuple[str, dict]:
     for key in placeholders:
         if key not in PLACEHOLDERS_CORRESPONDING_TYPE:
             PLACEHOLDERS_CORRESPONDING_TYPE[key] = []
-        # print("place type:"+str(PLACEHOLDERS_CORRESPONDING_TYPE[key]))
-        # print("pl    type:"+str(placeholders[key]))
-        # print("match type:"+str(match_result[key]))
+        # # # print("place type:"+str(PLACEHOLDERS_CORRESPONDING_TYPE[key]))
+        # # # print("pl    type:"+str(placeholders[key]))
+        # # # print("match type:"+str(match_result[key]))
         # remove space in type to append
         PLACEHOLDERS_CORRESPONDING_TYPE[key].append(
             match_result[placeholders[key]])
@@ -485,9 +485,9 @@ def information_protection(text: str) -> Tuple[str, dict]:
         # 使用列表解析去除值中的空格
         PLACEHOLDERS_CORRESPONDING_TYPE[key] = [
             [item[0].replace(' ', '')] for item in value]
-    logger.info(TAG + "information_protection(): placeholder extract{}".format(
+    logger.debug(TAG + "information_protection(): placeholder extract{}".format(
         str(PLACEHOLDERS_CORRESPONDING_TYPE)))
-    logger.info(
+    logger.debug(
         TAG + "information_protection(): placeholders{}".format(str(placeholders)))
 
     return text, placeholders
@@ -577,11 +577,11 @@ def fuzz_mark(text: str) -> str:
 
 
 def explicit_fuzz_mark(text: list) -> list:
-    logger.info(TAG + "placeholder_extract(): placeholder extract{}".format(
+    logger.debug(TAG + "placeholder_extract(): placeholder extract{}".format(
         str(PLACEHOLDERS_CORRESPONDING_TYPE)))
-    logger.info(TAG + "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
+    logger.debug(TAG + "fuzz_mark(): explicit_fuzz_mark input: {}".format(text))
     tagged_text = []
-    logger.info(TAG + "explicit_fuzz mark input list: {}".format(text))
+    logger.debug(TAG + "explicit_fuzz mark input list: {}".format(text))
     for i in range(len(text)):
         if text[i] in PLACEHOLDERS_CORRESPONDING_TYPE:
             type_info = PLACEHOLDERS_CORRESPONDING_TYPE[text[i]][0]
@@ -598,7 +598,7 @@ def explicit_fuzz_mark(text: list) -> list:
             tagged_text.append(text[i])
         else:
             tagged_text.append(text[i])
-    logger.info(
+    logger.debug(
         TAG + "fuzz_mark(): explicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text
 
@@ -606,7 +606,7 @@ def explicit_fuzz_mark(text: list) -> list:
 
 
 def implicit_fuzz_mark(text: list) -> list:
-    logger.info(TAG + "implicit_fuzz_mark(): input list: {}".format(text))
+    logger.debug(TAG + "implicit_fuzz_mark(): input list: {}".format(text))
     tagged_text = []
     for i in range(len(text)):
         if is_protected_item(text[i]):
@@ -614,17 +614,17 @@ def implicit_fuzz_mark(text: list) -> list:
         elif text[i] in REPLACED_KEYWORDS_LIST:
             tagged_text.append(text[i])
         else:
-            logger.info(
+            logger.debug(
                 TAG + "implicit_fuzz_mark(): password_classifier input: {}".format(text[i]))
             password_classifier_result = password_classifier(text[i])
-            logger.info(
+            logger.debug(
                 TAG + "implicit_fuzz_mark(): password_classifier result: {}".format(password_classifier_result))
             if password_classifier_result:
                 tagged_text.append('{password}')
             else:
                 tagged_text.append('{user}')
             tagged_text.append(text[i])
-    logger.info(
+    logger.debug(
         TAG + "implicit_fuzz_mark(): implicit_fuzz_mark result: {}".format(' '.join(tagged_text)))
     return tagged_text
 
@@ -738,10 +738,10 @@ def extract_paired_info(text):
             continue
         # TODO change to is a mark
         if is_a_mark(text_i_striped) and not is_a_mark(text[i+1]):
-            logger.info(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
+            logger.debug(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
 
             if a_paired_info.check_data_headers(text_i_striped) and a_paired_info.check_result_validity():
-                # logger.info(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
+                # logger.debug(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
                 a_paired_info.remake_data()
                 # if a_paired_info.getter("password") != None:
                 if a_paired_info.slice_word_check(text_i_striped):
@@ -766,24 +766,24 @@ def extract_paired_info(text):
             # if any( value in text_i_striped for value in INFO_PATTERN):
                 a_paired_info.setter(INFO_PATTERN[text_i_striped.replace(
                 '{', '').replace('}', '')], text[i+1])
-                print(1)
-                print(text_i_striped.replace('{', '').replace('}', ''))
-                print(text[i+1])
+                # # print(1)
+                # # print(text_i_striped.replace('{', '').replace('}', ''))
+                # # print(text[i+1])
                 a_paired_info.set_data_headers(INFO_PATTERN[text_i_striped.replace('{', '').replace('}', '')])
             else:
-                print(2)
+                # # print(2)
 
                 a_paired_info.setter(text_i_striped.replace(
                 '{', '').replace('}', ''),text[i+1])
                 a_paired_info.set_data_headers(text_i_striped)
-    print(a_paired_info.data)
+    # # print(a_paired_info.data)
     if a_paired_info.check_header_complete():
-        print(a_paired_info.data)
+        # # print(a_paired_info.data)
         a_paired_info.last_keyword = None
         a_paired_info.remake_data()
-        print(a_paired_info.data)
+        # # print(a_paired_info.data)
         a_paired_info.add_to_result_set()
-        print(a_paired_info.data)
+        # # print(a_paired_info.data)
     for item in a_paired_info.output():
         result_pair.append(item)
     # 移除空项
@@ -814,7 +814,7 @@ def extract_paired_info(text):
 
 
 def rule_based_info_extract(text: str) -> dict:
-    logger.info(
+    logger.debug(
         TAG + 'rule_based_info_extract(): Rule based processing for text')
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
@@ -828,16 +828,16 @@ def rule_based_info_extract(text: str) -> dict:
     for value in result_dict.values():
         value = "Rule based: "+value
 
-    logger.info(
+    logger.debug(
         TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_dict))
-    # logger.info(TAG + 'rule_based_info_extract(): using paired_info_class to check valid info')
+    # logger.debug(TAG + 'rule_based_info_extract(): using paired_info_class to check valid info')
     # a_paired_info = paired_info_pattern()
     # for key, value in result_dict.items():
     #     if key in a_paired_info.data:
     #         a_paired_info.setter(key, value)
     # a_paired_info.remake_data()
     # result_dict = a_paired_info.output()
-    # logger.info(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
+    # logger.debug(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
     return result_dict
 
 # 代码等文件的提取
@@ -845,7 +845,7 @@ def rule_based_info_extract(text: str) -> dict:
 
 def code_info_extract(text: str) -> dict:
     original_text = text
-    logger.info(TAG + 'code_info_extract(): Code processing for text '+' '.join(text.split()))
+    logger.debug(TAG + 'code_info_extract(): Code processing for text '+' '.join(text.split()))
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -896,7 +896,7 @@ def code_info_extract(text: str) -> dict:
         line = line.replace("\"", " ")
         # line=line.replace("=", " ")
         lines.append(line)
-    logger.info(
+    logger.debug(
         TAG + 'code_info_extract(): text after removing outer " and only keeping string: '+str(lines))
     text = lines
     lines = []
@@ -919,7 +919,7 @@ def code_info_extract(text: str) -> dict:
         if len(line_sliced) == 2:
             lines.append("{{{}}} {}".format(line_sliced[0], line_sliced[1]))
 
-    logger.info(
+    logger.debug(
         TAG + 'code_info_extract(): text after slicing and marking '+str(lines))
     # text = lines
     result_dict = {}
@@ -934,7 +934,7 @@ def code_info_extract(text: str) -> dict:
     for line in lines:
         words_list += line.split(" ")
     for i in range(len(words_list) - 1):
-        # print(words_list[i])
+        # # # print(words_list[i])
         logger.debug(TAG + 'Code processing for text: ' +
                      words_list[i]+" "+words_list[i+1])
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
@@ -948,13 +948,13 @@ def code_info_extract(text: str) -> dict:
                 result_dict[words_list[i]] = words_list[i + 1]
 
     result_dict = restore_placeholders(result_dict)
-    logger.info(TAG + 'Code processing result: '+str(result_dict))
+    logger.debug(TAG + 'Code processing result: '+str(result_dict))
     # TODO this section is just for test, remove it later
     rule_based_info_extract_result = rule_based_info_extract(original_text)
     result_dict.update(rule_based_info_extract_result)
 
     result_dict_temp = {}
-    logger.info(TAG + 'code_info_extract(): remove invalid info')
+    logger.debug(TAG + 'code_info_extract(): remove invalid info')
     for key, value in result_dict.items():
         if is_valid_info(value):
             result_dict_temp[key] = value
@@ -998,7 +998,7 @@ def config_info_extract(text: str) -> dict:
 
 
 def ocr_code_processing(text: str) -> dict:
-    logger.info(TAG + 'ocr_code_processing(): processing for text: '+' '.join(text.split()))
+    logger.debug(TAG + 'ocr_code_processing(): processing for text: '+' '.join(text.split()))
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
@@ -1047,7 +1047,7 @@ def ocr_code_processing(text: str) -> dict:
     processed_words_list = []
     result_dict = {}
     for i in range(len(words_list) - 1):
-        # print(words_list[i])
+        # # # print(words_list[i])
         if words_list[i] in processed_words_list:
             continue
         logger.debug(TAG + 'Special processing for text: ' +
@@ -1061,7 +1061,7 @@ def ocr_code_processing(text: str) -> dict:
             processed_words_list.append(words_list[i])
             processed_words_list.append(words_list[i+1])
     result_dict = restore_placeholders(result_dict)
-    logger.info(TAG + 'Special processing result: '+str(result_dict))
+    logger.debug(TAG + 'Special processing result: '+str(result_dict))
     return result_dict
 
 
@@ -1086,10 +1086,10 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
     # if any("{"+key+"}" in new_info for key in KEYWORDS):
     #     FUZZ_MARK = False
     if is_chinese_text(text):
-        logger.info(TAG + 'This is a Chinese text.')
+        logger.debug(TAG + 'This is a Chinese text.')
         text = chn_text_preprocessing(text, FUZZ_MARK)
     else:
-        logger.info(TAG + 'This is an English text.')
+        logger.debug(TAG + 'This is an English text.')
         text = prevent_eng_words_interference(text)
         logger.debug(TAG + 'Text after fuzz protection: '+text)
         text = eng_text_preprocessing(text, FUZZ_MARK)
@@ -1112,7 +1112,7 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
                 i = i+1
         return result_dict
     paired_info = extract_paired_info(text)
-    logger.info(TAG + 'Info extraction result: '+str(paired_info))
+    logger.debug(TAG + 'Info extraction result: '+str(paired_info))
     return paired_info
 
 
@@ -1127,7 +1127,7 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         'config': config_info_extract,
         'ocr': ocr_code_processing
     }
-    logger.info(TAG + "begin_info_extraction(): input is {}".format(info))
+    logger.debug(TAG + "begin_info_extraction(): input is {}".format(info))
     if flag == IS_CONFIG_FILE:
         return config_info_extract(info)
     # 纯文本
@@ -1135,10 +1135,10 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         # 若文本中不存在中文和英文关键词，进行模糊提取
         new_info = info.replace("\n", "")
         file_type = determine_file_type(file_path, info)
-        logger.info(
+        logger.debug(
             TAG + "begin_info_extraction(): input type is {}".format(file_type))
         if file_type in switch:
-            logger.info(TAG + "begin_info_extraction(): input is code/config")
+            logger.debug(TAG + "begin_info_extraction(): input is code/config")
             # result = code_info_extract(info)
             result = switch[file_type](info)
             return result_manager(result,info,file_path,IS_CODE_OR_CONFIG=True)
@@ -1146,23 +1146,23 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
             # TODO
             if False:
             # if should_fuzz(new_info):
-                logger.info(TAG + "info_extraction(): fuzz extract")
+                logger.debug(TAG + "info_extraction(): fuzz extract")
                 # 判断是否中文
                 if is_chinese_text(info):
-                    logger.info(TAG + 'This is a Chinese text.')
+                    logger.debug(TAG + 'This is a Chinese text.')
                     result = plain_text_info_extraction(info)
-                    logger.info(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
+                    logger.debug(TAG + "info_extraction(): plain text info extract result: {}".format(str(result)))
                     
                 result = plain_text_info_extraction(info,FUZZ_MARK=True)
             else:
-                logger.info(TAG + "begin_info_extraction(): unknown input")
+                logger.debug(TAG + "begin_info_extraction(): unknown input")
                 result = plain_text_info_extraction(info)
-                logger.info(
+                logger.debug(
                     TAG + "begin_info_extraction(): fuzz_extract result: {}".format(str(result)))
         return result_manager(result, info, file_path)
     # 表格
     elif isinstance(info, list):
-        logger.info(TAG + "info_extraction(): input is ordinary picture")
+        logger.debug(TAG + "info_extraction(): input is ordinary picture")
         text = ""
         for item in info[1:]:
             item_to_string = "\n".join(item)
@@ -1174,9 +1174,9 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
 
 def result_filter(result,VALID_RESULT_THRESHOLD=2) -> dict:
     if result == [] or result == {}:
-        logger.warning(TAG + 'result_filter(): skip empty result')
+        logger.debug(TAG + 'result_filter(): skip empty result')
         return result
-    logger.info(TAG + "result_filter(): extract result: {}".format(str(result)))
+    logger.debug(TAG + "result_filter(): extract result: {}".format(str(result)))
     if isinstance(result, dict):
     # if IS_CODE_OR_CONFIG or isinstance(result, dict):
         # TODO 代码文件的结果过滤
@@ -1197,12 +1197,12 @@ def result_filter(result,VALID_RESULT_THRESHOLD=2) -> dict:
             if len(filtered_item) >= VALID_RESULT_THRESHOLD:
                 filtered_result.append(filtered_item)
         result = filtered_result
-    logger.info(TAG + "result_filter(): filtered result: {}".format(str(result)))
+    logger.debug(TAG + "result_filter(): filtered result: {}".format(str(result)))
     return result
 
 # 在常规提取失败后，使用特殊方法提取信息
 def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
-    logger.info(TAG + "result_manager(): extract result: {}".format(str(result)))
+    logger.debug(TAG + "result_manager(): extract result: {}".format(str(result)))
     result = result_filter(result)
     # result = re_pair_info_extract(result)
     # file_extension = file_path.split(".")[-1]
@@ -1213,18 +1213,18 @@ def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
         'ocr': ocr_code_processing
     }
     if result == []:
-        logger.warning(
+        logger.debug(
             TAG + 'No paired info extracted during plain text info extraction!')
-        logger.info(
+        logger.debug(
             TAG + "result_manager(): input type is {}".format(file_type))
         if file_type in switch:
-            logger.info(TAG + "result_manager(): input is code/config")
+            logger.debug(TAG + "result_manager(): input is code/config")
             # result = code_info_extract(info)
             result = switch[file_type](info)
         else:
-            logger.info(TAG + "result_manager(): unknown input")
+            logger.debug(TAG + "result_manager(): unknown input")
             result = plain_text_info_extraction(info, FUZZ_MARK=True)
-            logger.info(
+            logger.debug(
                 TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
     result = result_filter(result)
     # result = re_pair_info_extract(result)

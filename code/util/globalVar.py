@@ -1,6 +1,9 @@
 import yaml
 import multiprocessing
+from util.logUtils import LoggerSingleton
 
+TAG = "utils.globalVar.py: "
+logger = LoggerSingleton().get_logger()
 """
 globalVar: 全局变量模块, 全局且多进程共享唯一
 usage:
@@ -49,7 +52,7 @@ def get_value(key):
     try:
         return _global_dict[key]
     except:
-        print('读取'+key+'失败\r\n')
+        logger.debug('读取'+key+'失败\r\n')
 
 
 def init_sensitive_word(yml_file_path):

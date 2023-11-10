@@ -62,7 +62,7 @@ def yml_file(file_path):
 def source_code_file(file_path, res_path=''):
     # 使用whispers解析
     command = "whispers {}".format(file_path)
-    # print("Running "+command)
+    # # print("Running "+command)
     result = subprocess.run(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     result_out = [result.stdout, result.stderr]
