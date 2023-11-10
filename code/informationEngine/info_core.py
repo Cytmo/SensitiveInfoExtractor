@@ -83,13 +83,28 @@ def is_valid_info(info: str, VALID_INFO_THRESHOLD=3) -> bool:
     return alphanumeric_count >= VALID_INFO_THRESHOLD
 
 
+def is_source_code(input_string)->bool:
+    # 使用正则表达式检查是否包含关键字或特殊符号
+    source_code_pattern = re.compile(r'\b(if|else|for|while|def|class|import)\b|[{}();=]')
+    
+    # 匹配次数大于阈值则判定为源代码
+    match_count = len(re.findall(source_code_pattern, input_string))
+    
+    # 设定一个简单的阈值，可以根据实际情况调整
+    line_no = len(input_string.splitlines())
+    if line_no == 0:
+        return False
+    ratio = match_count / line_no
+    return ratio > 1
+
+
 def determine_file_type(file_name, info):
     logger.debug(TAG + "determine_file_type(): file_name: "+str(file_name))
     logger.debug(TAG + "determine_file_type(): info: "+str(info))
     # TODO 完善的文件类型判断
     if "carbon" in file_name:
         return "ocr"
-    if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name:
+    if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name or is_source_code(info):
         return "code"
     elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
         return "config"

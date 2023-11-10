@@ -83,7 +83,7 @@ SPECIAL_KEYWORDS_LIST = [
 ]
 
 CODE_FILE_EXTENSION = [
-    '.java', '.py', '.go', '.js', '.php', '.c', '.cpp', '.cs', '.scala', '.html', '.css', '.xml', '.sh', '.bat', '.ps1', 'Dockerfile', '.h'
+    '.hpp','.java', '.py', '.go', '.js', '.php', '.c', '.cpp', '.cs', '.scala', '.html', '.css', '.xml', '.sh', '.bat', '.ps1', 'Dockerfile', '.h'
 ]
 CONFIG_FILE_EXTENSION = [
     '.yml', '.yaml', '.json', '.toml', '.properties', '.ini'
