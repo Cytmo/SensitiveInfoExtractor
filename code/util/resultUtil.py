@@ -1,7 +1,10 @@
 import json
 import os
 from multiprocessing import Manager
-
+from util.logUtils import LoggerSingleton
+TAG = "util.resultUtil.py-"
+# 添加日志模块
+logger = LoggerSingleton().get_logger()
 
 """
 class ResOut: 结果输出模块, 全局且多进程共享唯一
@@ -23,6 +26,8 @@ class ResOut:
         return cls._instance
 
     def add_new_json(self, file_path, sensitive_info):
+        logger.info(TAG+"==>文件处理完成: " + file_path)
+
         single_info = {"file_path": file_path,
                        "sensitive_info": sensitive_info}
         if len(sensitive_info) != 0:

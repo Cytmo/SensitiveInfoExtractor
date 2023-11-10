@@ -93,6 +93,7 @@ def spilit_process_file(file, root_directory):
     # 类方法：获取文件名后缀
     file_spilit = os.path.splitext(file.name)
     file_name = root_directory + '/' + File.get_parent_directory(file)
+    logger.info(TAG+"==>开始处理文件: " + file_name)
 
     # 后缀检测分发
     for process_function, suffix_list in extension_switch_new.items():
@@ -106,22 +107,22 @@ def spilit_process_file(file, root_directory):
         return
 
     # 判断是否是passwd文件
-    if if_passwd_file(file_name, file_spilit[0]):
+    if if_passwd_file(file_name, file.name):
         process_passwd_file(file_name)
         return
 
     # 判断是否是shadow文件
-    if if_shadow_file(file_name, file_spilit[0]):
+    if if_shadow_file(file_name, file.name):
         process_shadow_file(file_name)
         return
 
     # 判断是否是公钥文件
-    if if_authorized_keys_file(file_name, file_spilit[0]):
+    if if_authorized_keys_file(file_name, file.name):
         process_authorized_keys_file(file_name)
         return
 
     # 判断是否是私钥文件
-    if if_private_keys_file(file_name, file_spilit[0]):
+    if if_private_keys_file(file_name, file.name):
         process_priv_file(file_name)
         return
 

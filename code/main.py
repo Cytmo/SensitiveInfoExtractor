@@ -107,7 +107,6 @@ def main():
         while not direct_controller.fileList.empty():
             # 获取一个文件File类型
             file = direct_controller.fileList.get()
-
             if multiprocess_flag:
                 # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
                 process_manager.add_process(

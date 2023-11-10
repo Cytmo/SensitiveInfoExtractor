@@ -53,7 +53,7 @@ class LoggerSingleton:
         file_handler = logging.FileHandler(filename=self.filename)
 
         # 设置handler等级
-        console_handler.setLevel(level=logging.DEBUG)
+        console_handler.setLevel(level=logging.INFO)
         file_handler.setLevel(level=self.level)
 
         # 设置日志格式
@@ -79,7 +79,7 @@ class LoggerSingleton:
 
 
         self.logger.addHandler(console_handler)
-        self.logger.addHandler(file_handler)
+        # self.logger.addHandler(file_handler)
 
     def get_logger(self):
 

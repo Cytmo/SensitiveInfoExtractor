@@ -33,7 +33,7 @@ for i in range(len(src_buffers)):
 paginator = s3r.meta.client.get_paginator('list_objects_v2')
 pages = paginator.paginate(Bucket=BUCKET, Prefix='')
 listingb = [obj['Key'] for page in pages for obj in page['Contents']]
-print(listingb)
+# print(listingb)
 
 assert len(listingb) == len(src_buffers), "FAIL on returned number of objects from list"
 
@@ -54,7 +54,7 @@ assert contents == large_buffer, "FAIL on large buffer content match"
 stat = fs.info(BIGPATH)
 
 fast_stat = s.info(BIGPATH)
-print(fast_stat)
+# print(fast_stat)
 
 # Skipping LastModified for now because of timezone support.
 keys_to_check = ["Key", "ETag", "Size", "StorageClass", "VersionId"]

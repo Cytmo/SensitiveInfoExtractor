@@ -32,20 +32,20 @@ logger = LoggerSingleton().get_logger()
 def sensitive_info_detect(file_path, text, flag=0):
     sensitive_info = []
     if flag == 1:
-        # try:
-        sensitive_info = begin_info_extraction(
-            text, flag=1, file_path=file_path)
-        # except Exception as e:
-        # logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
-        # logger.error(e)
-        # #globalVar.set_error_list(file_path, e)
+        try:
+            sensitive_info = begin_info_extraction(
+                text, flag=1, file_path=file_path)
+        except Exception as e:
+            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+            logger.error(e)
+            #globalVar.set_error_list(file_path, e)
     else:
-        # try:
-        sensitive_info = begin_info_extraction(text, file_path=file_path)
-        # except Exception as e:
-        #     logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
-        #     logger.error(e)
-        #     #globalVar.set_error_list(file_path, e)
+        try:
+            sensitive_info = begin_info_extraction(text, file_path=file_path)
+        except Exception as e:
+            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+            logger.error(e)
+            #globalVar.set_error_list(file_path, e)
     if sensitive_info:
         res_out.add_new_json(file_path, sensitive_info)
 
@@ -63,8 +63,14 @@ def extract_direct_read(file_path, namclean):
     logger.debug(TAG+"extract_direct_read(): " + file_path.split("/")[-1])
     # 打开文件并读取其内容
     content = ""
-    with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+    except Exception as e:
+        pass
+        logger.debug(TAG+"extract_direct_read()-erro: " + file_path)
+        logger.debug(e)
+        #globalVar.set_error_list(file_path, e)
     sensitive_info_detect(file_path, content)
 
 
@@ -100,9 +106,10 @@ def extract_pic(file_path, nameclean):
 
 # 判断图片识别结果（表格形式）还是文本
 def is_png_text(info):
-    if len(info[1]) > 1:
-        logger.debug(TAG + "is_png_text(): input is [table] png ")
-        return True
+    if len(info)>1:
+        if len(info[1]) > 1:
+            logger.debug(TAG + "is_png_text(): input is [table] png ")
+            return True
     logger.debug(TAG + "is_png_text(): input is [text] png ")
     return False
 
