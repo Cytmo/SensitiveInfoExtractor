@@ -126,8 +126,6 @@ def spilit_process_file(file, root_directory):
         process_priv_file(file_name)
         return
 
-    # TODO: 下面更改放入通用提取接口
-
     # 判断是否是token文件
     if is_token_file(file_name):
         return

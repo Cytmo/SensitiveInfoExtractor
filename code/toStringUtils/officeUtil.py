@@ -394,30 +394,38 @@ def replace_picture_texts(text_list, image_text_list):
 
 # 提取.xlsx中的文本
 def xlsx_file(file_path):
-    xlsx = pd.ExcelFile(file_path)
-    sheet_names = xlsx.sheet_names
-    # for sheet_name in sheet_names:
-    #     data = xlsx.parse(sheet_name)
-    xlsx_queue = queue.Queue()
-    for name in sheet_names:
-        xlsx_queue.put(XlsxDevider(xlsx.parse(name, header=None)))
-    # xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[5],header=None)))
-    res = []
-    while not xlsx_queue.empty():
-        xlsxDevider = xlsx_queue.get()
-        que_add = XlsxDevider.process_xlsx(xlsxDevider)
-        if xlsxDevider.check_Pass():
-            res.append(xlsxDevider.extract_sensitive_xlsx())
-        else:
-            while not que_add.empty():
-                xlsx_queue.put(que_add.get())
+    res = ""
+    try:
+        xlsx = pd.ExcelFile(file_path)
+        sheet_names = xlsx.sheet_names
+        # for sheet_name in sheet_names:
+        #     data = xlsx.parse(sheet_name)
+        xlsx_queue = queue.Queue()
+        for name in sheet_names:
+            xlsx_queue.put(XlsxDevider(xlsx.parse(name, header=None)))
+        # xlsx_queue.put(XlsxDevider(xlsx.parse(sheet_names[5],header=None)))
+        res = []
+        while not xlsx_queue.empty():
+            xlsxDevider = xlsx_queue.get()
+            que_add = XlsxDevider.process_xlsx(xlsxDevider)
+            if xlsxDevider.check_Pass():
+                res.append(xlsxDevider.extract_sensitive_xlsx())
+            else:
+                while not que_add.empty():
+                    xlsx_queue.put(que_add.get())
+    except Exception as e:
+        logger.debug(TAG + "xlsx_file failed" + file_path)
     return res
 
 
+# 读取CSV文件
 def csv_file(file_path):
-    # 读取CSV文件
-    pd_csv_data = pd.read_csv(file_path, header=None)
-    res = single_table_sensitive_extraction(pd_csv_data)
+    res = ""
+    try:
+        pd_csv_data = pd.read_csv(file_path, header=None)
+        res = single_table_sensitive_extraction(pd_csv_data)
+    except Exception as e:
+        logger.debug(TAG + "=>csv file read failed " + file_path)
     return res
 
 
