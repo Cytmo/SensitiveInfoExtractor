@@ -33,7 +33,7 @@ class ResOut:
                        "sensitive_info": sensitive_info}
         if len(sensitive_info) != 0:
             # 敏感信息格式化打印
-            formatted_output = json.dumps(list(sensitive_info),indent=4, ensure_ascii=False)
+            formatted_output = json.dumps(sensitive_info,indent=2, ensure_ascii=False)
             logger.warning("检测到敏感信息: " + formatted_output)
             self.res_json.append(single_info)
 
