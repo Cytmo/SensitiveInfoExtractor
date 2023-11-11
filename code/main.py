@@ -44,7 +44,7 @@ argparse.add_argument("-t", "--time", default="output/time_info.txt",
                       help="time info output file")
 
 # 是否处理非图片文件内部中的图片, 默认为true
-argparse.add_argument("-p", "--picture", default="true",
+argparse.add_argument("-p", "--picture", default="false",
                       help="process picture in non image files")
 
 # 程序运行结束后是否清空workspace缓存目录

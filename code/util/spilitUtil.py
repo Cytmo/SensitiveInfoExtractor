@@ -43,8 +43,9 @@ extension_switch_new = {
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
         '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
-        '.ps1', 'Dockerfile', '.toml', '.h'
+        '.ps1', 'Dockerfile', '.toml', '.h', '.kt', '.js', '.wxss', '.wxml', '.html', '.php'
     ],
+
 
     # 带后缀的关键文件处理
     process_pub_file: [".pub"],
@@ -54,7 +55,6 @@ extension_switch_new = {
 
 # 按照文件类型分发各个文件
 def spilit_process_file(file, root_directory):
-
 
     # 获取文件的后缀
     # 类方法：获取文件名后缀
@@ -100,7 +100,6 @@ def spilit_process_file(file, root_directory):
     # 判断是否是token文件
     if is_token_file(file_name):
         return
-
 
     try:
         with open(file_name, 'r') as file:
