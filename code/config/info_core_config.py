@@ -20,8 +20,6 @@ INFO_PATTERN = {"user": "user", "password": "password",
                 "address": "address",
                 "db.user": "user", "db.password": "password", "db.address": "address", "db.url": "address",
                   "port": "port", "phonenumber": "phonenumber", "email": "email", "ip": "address", "url": "address"}
-
-# TODO: 单项依赖, ID放后面
 # 单项依赖信息组---前者需要后者存在
 ONE_WAY_CONNECTED_INFO = {"port": "address",
                           "address": "password",

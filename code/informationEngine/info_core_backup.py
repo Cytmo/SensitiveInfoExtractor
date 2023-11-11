@@ -114,7 +114,6 @@ def is_png_text(info):
     return True
 
 
-# TODO:url和端口号成组且支持一个用户对应多个url
 # 从处理过后的字符串中提取成对信息
 class paired_info_pattern():
     def __init__(self):
@@ -137,7 +136,6 @@ class paired_info_pattern():
         #     return attr_switch[name](value)
         # else:
         #     return False
-        # TODO 
         self.data[name] = value
         return True
 
@@ -240,7 +238,6 @@ class paired_info_pattern():
 
 ##########################预处理函数###############################
 # 提取易混淆的内容并进行标记 保存email地址 url ip地址等内容，防止被替换
-# TODO 修改混淆信息保护函数，加入以上内容，修改混淆信息保护函数输出的字典格式，type改为列表
 def information_protection(text: str) -> Tuple[str, dict]:
     placeholders = {}  # This dictionary will store placeholders and their corresponding content
     placeholders_counter = 1  # Counter for generating placeholders

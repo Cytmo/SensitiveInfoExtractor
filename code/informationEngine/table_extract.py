@@ -39,8 +39,6 @@ def init_sensitive_word(yml_file_path):
 
 
 def process_bind_prase(data):
-    # TODO 提取未知单条数据
-    # # print("处理单条数据",data)
 
     str_list = [str(item) for item in data]
 
@@ -203,7 +201,6 @@ class XlsxDevider:
             data_part.columns = list(range(0, prases[1]-prases[0]))
             queue_tmp.put(XlsxDevider(data_part))
 
-        # TODO 处理行分割
         return queue_tmp
 
     @classmethod
@@ -263,7 +260,6 @@ class XlsxDevider:
                 data_part.columns = list(range(0, prases[1]-prases[0]))
                 queue_tmp.put(XlsxDevider(data_part))
 
-        # TODO 处理行分割
         return queue_tmp
 
     @classmethod
@@ -345,10 +341,7 @@ class XlsxDevider:
             return json_data
         elif self.xlsx_data.shape[1] == 1:
             return process_bind_prase(self.xlsx_data.iloc[:, 0].tolist())
-        # TODO 处理提取分好块中的敏感数据
 
-
-        
         # 行关键词映射及关键词补全
         json_data = self.raw_extract()
         if len(json_data) > 0:

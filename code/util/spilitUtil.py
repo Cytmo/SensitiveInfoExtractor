@@ -10,7 +10,6 @@ from util.logUtils import LoggerSingleton
 # 添加日志模块
 logger = LoggerSingleton().get_logger()
 
-# TODO: .csv 调整
 extension_switch_new = {
     # 解压
     process_rar_file: [".rar"],

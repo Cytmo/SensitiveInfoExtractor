@@ -102,7 +102,6 @@ def is_source_code(input_string)->bool:
 def determine_file_type(file_name, info):
     logger.debug(TAG + "determine_file_type(): file_name: "+str(file_name))
     logger.debug(TAG + "determine_file_type(): info: "+str(info))
-    # TODO 完善的文件类型判断
     if "carbon" in file_name:
         return "ocr"
     if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name or is_source_code(info):
