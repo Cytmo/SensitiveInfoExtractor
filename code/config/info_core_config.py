@@ -91,6 +91,11 @@ CONFIG_FILE_EXTENSION = [
 IMAGE_FILE_EXTENSION = [
     '.jpg', '.png', '.bmp', '.jpeg', '.gif', '.svg'
 ]
+
+xxxxxxxxxxxx={
+    'name':['1','2']
+}
+
 # 读取YAML文件
 with open('config/rules-stable.yml', 'r') as yaml_file:
     SENSITIVE_INFO_PATTERN = yaml.safe_load(yaml_file)
@@ -102,6 +107,9 @@ with open('config/rules-stable.yml', 'r') as yaml_file:
 KEYWORDS=[]
 KEYWORDS += ENG_KEYWORDS_LIST
 KEYWORDS += CHN_KEYWORDS_LIST
+SLICE_WORDS=[v for k,v in INFO_PATTERN.items() if v != "email" and v != "phonenumber" ]
+
 for pattern in SENSITIVE_INFO_PATTERN['patterns']:
     name = pattern['pattern']['name'].strip().replace(" ",'')
     KEYWORDS.append(name)
+    SLICE_WORDS.append(name)

@@ -14,7 +14,8 @@ from config.info_core_config import (
     SENSITIVE_INFO_PATTERN,
     ONE_WAY_CONNECTED_INFO,
     TWO_WAY_CONNECTED_INFO,
-    KEYWORDS
+    KEYWORDS,
+    SLICE_WORDS
 )
 import magic
 from typing import Tuple
@@ -238,7 +239,7 @@ class paired_info_pattern():
         self.data["port"] = None
         self.data["phonenumber"] = None
 
-        self.check_header = {"user": False, "address": False,'AWSaccesskey':False,'AWSsecretkey':False}
+        self.check_header = {k:False for k in SLICE_WORDS}
 
     def reset_data(self):
         # 后续可以仿照下面改成递推式
@@ -248,7 +249,7 @@ class paired_info_pattern():
         self.data["address"] = None
         self.data["port"] = None
         self.data["phonenumber"] = None
-        self.check_header = {"user": False, "address": False,'AWSaccesskey':False,'AWSsecretkey':False}
+        self.check_header =  {k:False for k in SLICE_WORDS}
     def reset_headers(self):
         self.check_header.update({k: False for k, v in self.data.items()})
 
@@ -834,17 +835,24 @@ def rule_based_info_extract(text: str) -> dict:
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
+    result_pair = []
     result_dict = {}
     for key in ITEM_PROTECTION_DICT:
         item_type = PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0]
         item_content = ITEM_PROTECTION_DICT[key]
         if item_type not in INFO_PATTERN:
-            result_dict[item_type] = item_content
+            if item_type in result_dict:
+                result_pair.append(result_dict)
+                result_dict = {}
+            else:
+                result_dict[item_type] = item_content
+    if result_dict !={}:
+        result_pair.append(result_dict)
     for value in result_dict.values():
         value = "Rule based: "+value
 
     logger.debug(
-        TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_dict))
+        TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_pair))
     # logger.debug(TAG + 'rule_based_info_extract(): using paired_info_class to check valid info')
     # a_paired_info = paired_info_pattern()
     # for key, value in result_dict.items():
@@ -853,7 +861,7 @@ def rule_based_info_extract(text: str) -> dict:
     # a_paired_info.remake_data()
     # result_dict = a_paired_info.output()
     # logger.debug(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
-    return result_dict
+    return result_pair
 
 # 代码等文件的提取
 
@@ -1134,19 +1142,31 @@ def plain_text_info_extraction(text: str, RETURN_TYPE_DICT=False, FUZZ_MARK=Fals
 # info_core入口 根据输入内容的类型（表格，文本）进行不同的处理
 # flag: 0: text 1: table
 IS_CONFIG_FILE = 1
-
-
+IS_RULE_BASED = 2
+IS_TEXT = 3
+IS_PURE_KEY_VALUE=4
+IS_CODE_FILE = 5
 def begin_info_extraction(info, flag=0, file_path='') -> dict:
+    type_switch = {
+        IS_CONFIG_FILE: config_info_extract,
+        IS_RULE_BASED: rule_based_info_extract,
+        IS_TEXT: plain_text_info_extraction,
+        IS_PURE_KEY_VALUE: ocr_code_processing,
+        IS_CODE_FILE: code_info_extract
+    }
+
+
     switch = {
         'code': code_info_extract,
         'config': config_info_extract,
-        'ocr': ocr_code_processing
+        'ocr': ocr_code_processing,
     }
     logger.debug(TAG + "begin_info_extraction(): input is {}".format(info))
-    if flag == IS_CONFIG_FILE:
-        return config_info_extract(info)
     # 纯文本
     if isinstance(info, str):
+        if flag in type_switch:
+            result = type_switch[flag](info)
+            return result
         # 若文本中不存在中文和英文关键词，进行模糊提取
         new_info = info.replace("\n", "")
         file_type = determine_file_type(file_path, info)
@@ -1182,7 +1202,11 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         for item in info[1:]:
             item_to_string = "\n".join(item)
             text = text+"\n"+item_to_string
+        
         text = fix_ocr(text)
+        if flag in type_switch:
+            result = type_switch[flag](text)
+            return result
         result = begin_info_extraction(text, file_path=file_path)
         return result_manager(result, text, file_path)
 

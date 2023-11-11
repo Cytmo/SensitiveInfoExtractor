@@ -9,6 +9,8 @@ function show_usage {
     echo "  -a: Test - all files"
     echo "  -c: Clear logs"
     echo "  -d: Compare the two newest files in the output folder"
+    echo "  -s: standard test"
+    echo "  -m: multi-process test"
     echo "  -h: Show help"
     # 添加更多选项和描述
 }
@@ -20,7 +22,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # 获取用户提供的选项
-while getopts "ntacdh" option; do
+while getopts "ntacdhsm" option; do
     case "$option" in
         n)  # Test - Exclude images
             python3 main.py -f ../data -p false
@@ -54,10 +56,16 @@ while getopts "ntacdh" option; do
                 fi
             fi
             ;;
+        s)  # Show help
+            python3 main.py -f ../data -mp false -p false 1>/dev/null
+            ;;
+        m)  # Show help
+            python3 main.py -f ../data -mp false -p false 1>/dev/null
+            ;;
         h)  # Show help
             show_usage
             exit 0
-            ;;
+            ;;  
         \?) # 无效选项
             echo "Invalid option: -$OPTARG"
             exit 1

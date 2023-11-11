@@ -53,42 +53,11 @@ extension_switch_new = {
 }
 
 
-# 后缀匹配解析函数
-extension_switch = {
-    ".rar": process_rar_file,
-    ".zip": process_zip_file,
-    ".txt": extract_universal,
-    ".md": extract_direct_read,
-    ".doc": extract_doc,
-    ".ppt": extract_ppt,
-    ".dps": extract_dps,
-    ".xlsx": extract_xlsx,
-    ".wps": extract_wps,
-    ".et": extract_et,
-    ".eml": extract_eml,
-    ".png": extract_pic,
-    ".jpg": extract_pic,
-    ".pub": process_pub_file,
-    ".yml": extract_config,
-    ".xml": extract_config,
-    ".properties": extract_config,
-    ".epub": extract_universal,
-    ".csv": extract_universal,
-    ".html": extract_universal,
-    ".mp3": extract_universal,
-    ".msg": extract_universal,
-    ".odt": extract_universal,
-    ".ogg": extract_universal,
-    ".pdf": extract_universal,
-    ".ps": extract_universal,
-    ".rtf": extract_universal,
-    ".tiff": extract_universal,
-    ".wav": extract_universal,
-}
 
 
 # 按照文件类型分发各个文件
 def spilit_process_file(file, root_directory):
+
 
     # 获取文件的后缀
     # 类方法：获取文件名后缀
@@ -96,6 +65,9 @@ def spilit_process_file(file, root_directory):
     file_name = root_directory + '/' + File.get_parent_directory(file)
     logger.info(TAG+"==>开始处理文件: " + file_name)
 
+    if is_config_file(file_name, file.name):
+        extract_rule_based(file_name, file.name)
+        return
     # 后缀检测分发
     for process_function, suffix_list in extension_switch_new.items():
         if file_spilit[1] in suffix_list:
@@ -131,9 +103,6 @@ def spilit_process_file(file, root_directory):
     if is_token_file(file_name):
         return
 
-    if is_config_file(file_name, file.name):
-        extract_config_file(file_name, file.name)
-        return
 
     try:
         with open(file_name, 'r') as file:

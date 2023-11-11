@@ -79,7 +79,7 @@ class LoggerSingleton:
 
 
         self.logger.addHandler(console_handler)
-        # self.logger.addHandler(file_handler)
+        self.logger.addHandler(file_handler)
 
     def get_logger(self):
 
