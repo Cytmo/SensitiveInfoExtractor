@@ -51,14 +51,4 @@ chinese_patterns:
   - name: 工号
     regex: none
 
-  - name: 地点
-    regex: none
 
-  - name: 型号
-    regex: none
-
-  - name: 数量
-    regex: none
-
-  - name: 型号
-    regex: none
