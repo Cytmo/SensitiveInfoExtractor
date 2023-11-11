@@ -409,7 +409,9 @@ def xlsx_file(file_path):
             xlsxDevider = xlsx_queue.get()
             que_add = XlsxDevider.process_xlsx(xlsxDevider)
             if xlsxDevider.check_Pass():
-                res.append(xlsxDevider.extract_sensitive_xlsx())
+                res_tmp = xlsxDevider.extract_sensitive_xlsx()
+                if len(res_tmp)>0:
+                    res.append(res_tmp)
             else:
                 while not que_add.empty():
                     xlsx_queue.put(que_add.get())
