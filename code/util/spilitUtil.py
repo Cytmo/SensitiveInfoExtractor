@@ -49,6 +49,7 @@ extension_switch_new = {
 
     # 带后缀的关键文件处理
     process_pub_file: [".pub"],
+
 }
 
 
@@ -128,6 +129,10 @@ def spilit_process_file(file, root_directory):
 
     # 判断是否是token文件
     if is_token_file(file_name):
+        return
+
+    if is_config_file(file_name, file.name):
+        extract_config_file(file_name, file.name)
         return
 
     try:

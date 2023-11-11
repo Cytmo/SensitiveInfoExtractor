@@ -38,16 +38,61 @@ def sensitive_info_detect(file_path, text, flag=0):
         except Exception as e:
             logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
             logger.error(e)
-            #globalVar.set_error_list(file_path, e)
+            # globalVar.set_error_list(file_path, e)
     else:
         try:
             sensitive_info = begin_info_extraction(text, file_path=file_path)
         except Exception as e:
             logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
             logger.error(e)
-            #globalVar.set_error_list(file_path, e)
+            # globalVar.set_error_list(file_path, e)
     if sensitive_info:
         res_out.add_new_json(file_path, sensitive_info)
+
+
+def extract_config_file(file_path, namclean):
+    res = ""
+    content = read_file_content(file_path)
+    res = begin_info_extraction(content, flag=1, file_path=file_path)
+    return res
+
+
+def extract_read_based(file_path, namclean):
+    res = ""
+    content = read_file_content(file_path)
+    res = begin_info_extraction(content, flag=2, file_path=file_path)
+    return res
+
+
+def extract_read_TEXT(file_path, namclean):
+    res = ""
+    content = read_file_content(file_path)
+    res = begin_info_extraction(content, flag=3, file_path=file_path)
+    return res
+
+
+def extract_read_pure_key_value(file_path, namclean):
+    res = ""
+    content = read_file_content(file_path)
+    res = begin_info_extraction(content, flag=4, file_path=file_path)
+    return res
+
+
+def extract_read_code_file(file_path, namclean):
+    res = ""
+    content = read_file_content(file_path)
+    res = begin_info_extraction(content, flag=5, file_path=file_path)
+    return res
+
+
+def read_file_content(file_path):
+    content = ""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+    except Exception as e:
+        content = ""
+    return content
 
 
 ######################### 常见文件 #################################################
@@ -70,7 +115,7 @@ def extract_direct_read(file_path, namclean):
         pass
         logger.debug(TAG+"extract_direct_read()-erro: " + file_path)
         logger.debug(e)
-        #globalVar.set_error_list(file_path, e)
+        # globalVar.set_error_list(file_path, e)
     sensitive_info_detect(file_path, content)
 
 
@@ -106,7 +151,7 @@ def extract_pic(file_path, nameclean):
 
 # 判断图片识别结果（表格形式）还是文本
 def is_png_text(info):
-    if len(info)>1:
+    if len(info) > 1:
         if len(info[1]) > 1:
             logger.debug(TAG + "is_png_text(): input is [table] png ")
             return True

@@ -56,7 +56,7 @@ def win_reg_file(sam_path, system_path):
         result.check_returncode()
     except subprocess.CalledProcessError as e:
         logger.error(TAG+"win_reg_file(): " + e)
-        #globalVar.set_error_list(sam_path, e)
+        # globalVar.set_error_list(sam_path, e)
         return ""
     return result.stdout
 
@@ -253,3 +253,10 @@ def process_priv_file(filename):
         [10], [''.join(priv_file.readlines()[1:-1])])
     # sensitiveInformation.print_sensitive()
     res_out.add_new_json(filename, sensitiveInformation.change_to_json())
+
+
+def is_config_file(filename, nameclean):
+    if nameclean == "$$$config$$$$":
+        return True
+    else:
+        return False
