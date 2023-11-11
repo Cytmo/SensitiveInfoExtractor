@@ -30,29 +30,40 @@ logger = LoggerSingleton().get_logger()
 
 # 此处更换敏感信息提取api
 def sensitive_info_detect(file_path, text, flag=0):
-    sensitive_info = []
-    if flag == 1:
+    # 分割文本，每2000行为一个部分
+    lines = text.split('\n')
+    chunks = [lines[i:i + 2000] for i in range(0, len(lines), 2000)]
+
+    # if len(chunks) > 1:
+    #     print(len(chunks))
+
+    # 用于存储所有块中发现的敏感信息
+    all_sensitive_info = []
+
+    # 遍历每个文本块
+    for chunk in chunks:
+        chunk_text = '\n'.join(chunk)
         try:
-            sensitive_info = begin_info_extraction(
-                text, flag=1, file_path=file_path)
+            # 根据flag标志调用不同的处理方式
+            if flag == 1:
+                sensitive_info = begin_info_extraction(
+                    chunk_text, flag=1, file_path=file_path)
+            else:
+                sensitive_info = begin_info_extraction(
+                    chunk_text, file_path=file_path)
+
+            # 将发现的敏感信息添加到总列表中
+            if sensitive_info:
+                all_sensitive_info = all_sensitive_info + sensitive_info
+
         except Exception as e:
-            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
+            logger.error(TAG + "sensitive_info_detect()-error: " + file_path)
             logger.error(e)
             # globalVar.set_error_list(file_path, e)
-    else:
-        try:
-            sensitive_info = begin_info_extraction(text, file_path=file_path)
-        except Exception as e:
-            logger.error(TAG+"sensitive_info_detect()-erro: " + file_path)
-            logger.error(e)
-            # globalVar.set_error_list(file_path, e)
-    if sensitive_info:
-        res_out.add_new_json(file_path, sensitive_info)
 
-
-
-
-
+    # 在处理所有块之后，调用res_out.add_new_json
+    if all_sensitive_info:
+        res_out.add_new_json(file_path, all_sensitive_info)
 
 
 def extract__config(file_path, namclean):

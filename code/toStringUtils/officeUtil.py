@@ -177,6 +177,12 @@ def docx_file_info_extract(docx_path, image_dir):
             "Evaluation Only. Created with Aspose.Words. Copyright 2003-2023  Aspose  Pty", "")
         docx_text = docx_text.replace(
             "Ltd.", "")
+        docx_text = docx_text.replace(
+            "Aspose.Words.", "")
+        docx_text = docx_text.replace(
+            "Copyright 2003-2023", "")
+        docx_text = docx_text.replace(
+            "Aspose ", "")
 
         flag = True
         logger.debug(TAG+"docx_file_info_extract(): 成功设置图片占位符")
@@ -410,7 +416,7 @@ def xlsx_file(file_path):
             que_add = XlsxDevider.process_xlsx(xlsxDevider)
             if xlsxDevider.check_Pass():
                 res_tmp = xlsxDevider.extract_sensitive_xlsx()
-                if len(res_tmp)>0:
+                if len(res_tmp) > 0:
                     res.append(res_tmp)
             else:
                 while not que_add.empty():

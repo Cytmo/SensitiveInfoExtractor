@@ -52,8 +52,6 @@ extension_switch_new = {
 }
 
 
-
-
 # 按照文件类型分发各个文件
 def spilit_process_file(file, root_directory):
 
