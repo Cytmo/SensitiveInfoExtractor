@@ -50,35 +50,40 @@ def sensitive_info_detect(file_path, text, flag=0):
         res_out.add_new_json(file_path, sensitive_info)
 
 
-def extract_config_file(file_path, namclean):
+
+
+
+
+
+def extract__config(file_path, namclean):
     res = ""
     content = read_file_content(file_path)
     res = begin_info_extraction(content, flag=1, file_path=file_path)
     res_out.add_new_json(file_path, res)
 
 
-def extract_rule_based(file_path, namclean):
+def extract__rule_based(file_path, namclean):
     res = ""
     content = read_file_content(file_path)
     res = begin_info_extraction(content, flag=2, file_path=file_path)
     res_out.add_new_json(file_path, res)
 
 
-def extract_read_TEXT(file_path, namclean):
+def extract__text(file_path, namclean):
     res = ""
     content = read_file_content(file_path)
     res = begin_info_extraction(content, flag=3, file_path=file_path)
     res_out.add_new_json(file_path, res)
 
 
-def extract_read_pure_key_value(file_path, namclean):
+def extract__pure_key_value(file_path, namclean):
     res = ""
     content = read_file_content(file_path)
     res = begin_info_extraction(content, flag=4, file_path=file_path)
     res_out.add_new_json(file_path, res)
 
 
-def extract_read_code_file(file_path, namclean):
+def extract__code(file_path, namclean):
     res = ""
     content = read_file_content(file_path)
     res = begin_info_extraction(content, flag=5, file_path=file_path)

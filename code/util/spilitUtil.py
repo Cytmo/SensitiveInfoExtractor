@@ -65,9 +65,10 @@ def spilit_process_file(file, root_directory):
     file_name = root_directory + '/' + File.get_parent_directory(file)
     logger.info(TAG+"==>开始处理文件: " + file_name)
 
-    if is_config_file(file_name, file.name):
-        extract_rule_based(file_name, file.name)
-        return
+    # if is_config_file(file_name, file.name):
+    #     extract__pure_key_value(file_name, file.name)
+    #     # extract_rule_based(file_name, file.name)
+    #     return
     # 后缀检测分发
     for process_function, suffix_list in extension_switch_new.items():
         if file_spilit[1] in suffix_list:

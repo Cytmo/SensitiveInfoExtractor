@@ -829,7 +829,7 @@ def extract_paired_info(text):
     return result_pair
 
 
-def rule_based_info_extract(text: str) -> dict:
+def rule_based_info_extract(text: str) -> list:
     logger.debug(
         TAG + 'rule_based_info_extract(): Rule based processing for text')
     text, item_protection_dict1 = information_protection(text)
@@ -847,13 +847,13 @@ def rule_based_info_extract(text: str) -> dict:
     for indicator in matches:
         item_type = PLACEHOLDERS_CORRESPONDING_TYPE[indicator][0][0]
         item_content = ITEM_PROTECTION_DICT[indicator]
-        # if item_type not in INFO_PATTERN:
-        if result_dict.get(item_type) != None:
-            result_pair.append(result_dict)
-            result_dict = {}
-            result_dict[item_type] = item_content
-        else:
-            result_dict[item_type] = item_content
+        if item_type not in INFO_PATTERN:
+            if result_dict.get(item_type) != None:
+                result_pair.append(result_dict)
+                result_dict = {}
+                result_dict[item_type] = item_content
+            else:
+                result_dict[item_type] = item_content
     if result_dict != {}:
         result_pair.append(result_dict)
     # for value in result_dict.values():
@@ -861,14 +861,6 @@ def rule_based_info_extract(text: str) -> dict:
 
     logger.debug(
         TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_pair))
-    # logger.debug(TAG + 'rule_based_info_extract(): using paired_info_class to check valid info')
-    # a_paired_info = paired_info_pattern()
-    # for key, value in result_dict.items():
-    #     if key in a_paired_info.data:
-    #         a_paired_info.setter(key, value)
-    # a_paired_info.remake_data()
-    # result_dict = a_paired_info.output()
-    # logger.debug(TAG + 'rule_based_info_extract(): Rule based processing result after paired_info_class: '+str(result_dict))
     return result_pair
 
 # 代码等文件的提取
@@ -886,7 +878,6 @@ def code_info_extract(text: str) -> dict:
     # remove outer "
     lines = text.split("\n")
     new_lines = []
-
     for line in lines:
         # 去除行首和行尾的双引号
         if line.startswith('"') and line.endswith('"'):
@@ -982,7 +973,7 @@ def code_info_extract(text: str) -> dict:
     logger.debug(TAG + 'Code processing result: '+str(result_dict))
     # TODO this section is just for test, remove it later
     rule_based_info_extract_result = rule_based_info_extract(original_text)
-    result_dict.update(rule_based_info_extract_result)
+
 
     result_dict_temp = {}
     logger.debug(TAG + 'code_info_extract(): remove invalid info')
@@ -1005,7 +996,11 @@ def code_info_extract(text: str) -> dict:
     result_dict = cleaned_dict
 
 
-    return re_pair_info_extract(result_dict)
+    result = re_pair_info_extract(result_dict)
+    for item in rule_based_info_extract_result:
+        result.append(item)
+    return result
+
 # 配置文件的提取
 
 def re_pair_info_extract(result_dict: dict) -> dict:
@@ -1022,7 +1017,7 @@ def re_pair_info_extract(result_dict: dict) -> dict:
                 text += "{"+key + "} "+value+"\n"
         extract_paired_info_result = extract_paired_info(text)
         return extract_paired_info_result
-    return {}
+    return []
 
 def config_info_extract(text: str) -> dict:
     return code_info_extract(text)

@@ -256,7 +256,7 @@ def process_priv_file(filename):
 
 
 def is_config_file(filename, nameclean):
-    if nameclean == "run_regression.sh":
+    if nameclean == "our_test_file":
         return True
     else:
         return False
