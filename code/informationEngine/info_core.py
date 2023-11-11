@@ -833,23 +833,31 @@ def rule_based_info_extract(text: str) -> dict:
     logger.debug(
         TAG + 'rule_based_info_extract(): Rule based processing for text')
     text, item_protection_dict1 = information_protection(text)
+        # 定义正则表达式
+    pattern = r'\?\d+\?'
+
+    # 使用 re 模块进行匹配
+    matches = re.findall(pattern, text)
+
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
     result_pair = []
     result_dict = {}
-    for key in ITEM_PROTECTION_DICT:
-        item_type = PLACEHOLDERS_CORRESPONDING_TYPE[key][0][0]
-        item_content = ITEM_PROTECTION_DICT[key]
-        if item_type not in INFO_PATTERN:
-            if item_type in result_dict:
-                result_pair.append(result_dict)
-                result_dict = {}
-            else:
-                result_dict[item_type] = item_content
-    if result_dict !={}:
+
+    for indicator in matches:
+        item_type = PLACEHOLDERS_CORRESPONDING_TYPE[indicator][0][0]
+        item_content = ITEM_PROTECTION_DICT[indicator]
+        # if item_type not in INFO_PATTERN:
+        if result_dict.get(item_type) != None:
+            result_pair.append(result_dict)
+            result_dict = {}
+            result_dict[item_type] = item_content
+        else:
+            result_dict[item_type] = item_content
+    if result_dict != {}:
         result_pair.append(result_dict)
-    for value in result_dict.values():
-        value = "Rule based: "+value
+    # for value in result_dict.values():
+    #     value = "Rule based: "+value
 
     logger.debug(
         TAG + 'rule_based_info_extract(): Rule based processing result: '+str(result_pair))
