@@ -50,5 +50,8 @@ chinese_patterns:
 
   - name: 工号
     regex: none
+    
+  - name: 端口
+    regex: none
 
 

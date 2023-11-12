@@ -104,7 +104,7 @@ def determine_file_type(file_name, info):
     logger.debug(TAG + "determine_file_type(): info: "+str(info))
     if "carbon" in file_name:
         return "ocr"
-    if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name or is_source_code(info):
+    if file_name.endswith(tuple(CODE_FILE_EXTENSION)) or "python" in file_name or "SecExample" in file_name or is_source_code(info):
         return "code"
     elif file_name.endswith(tuple(CONFIG_FILE_EXTENSION)):
         return "config"
@@ -998,6 +998,7 @@ def code_info_extract(text: str) -> dict:
     result = re_pair_info_extract(result_dict)
     for item in rule_based_info_extract_result:
         result.append(item)
+    result = re_pair_info_extract(result)
     return result
 
 # 配置文件的提取
