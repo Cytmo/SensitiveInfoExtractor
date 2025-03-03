@@ -424,7 +424,10 @@ class XlsxDevider:
             for ind, row in use_data.iterrows():
                 nan_flag = pd.isna(row)
                 # print(row)
-                sub_result = {guss_most[index].replace('{', '').replace('}', ''):row.values[index] for index in tag_use if not nan_flag[index]}
+                str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
+                text = str_use.split(' ')
+                sub_result = {guss_most[index].replace('{', '').replace('}', ''):text[index] for index in tag_use if index<len(text) }
+                # sub_result = {guss_most[index].replace('{', '').replace('}', ''):row.values[index] for index in tag_use if not nan_flag[index]}
                 if len(sub_result)>1:
                     json_data.append(sub_result)
         # print(json_data)
@@ -453,16 +456,30 @@ class DatabaseExtractor:
             return process_bind_prase(self.data.iloc[:,0].tolist())
         #TODO 处理提取分好块中的敏感数据
         # 首行，首行校验->逐行提取
-        word_condition = [_sensitive_word_tmp.get(col_name) for col_name in self.data.columns]
-        word_index = [index for index,value in enumerate(word_condition) if value is not None]
+        # 行反向映射
+        word_condition_last=[]
+        for col_name in self.data.columns:
+            word_condition_last.append(shade_tag_sensitive(col_name))
+        
+
+        # 首行，首行校验->逐行提取
+        word_condition_key = [element if find_tag_sensitive(
+            element) is not None else None for element in self.data.columns]
+        
+        word_condition = [b if a is None else a for a, b in zip(word_condition_last, word_condition_key)]
+
+        word_index = [index for index, value in enumerate(
+            word_condition) if value is not None]
         if len(word_index) > 1:
             use_data = self.data.iloc[0:]
-            for ind,row in use_data.iterrows():
+            for ind, row in use_data.iterrows():
                 nan_flag = pd.isna(row)
-                sub_result = {word_condition[index]:row.values[index] for index in word_index if not nan_flag[index]}
-                if len(sub_result)>1:
+                sub_result = {word_condition[index]: row.values[index]
+                              for index in word_index if not nan_flag[index]}
+                if len(sub_result) > 1:
                     json_data.append(sub_result)
             return json_data
+                
         
 
         # 行模糊提取
@@ -477,7 +494,14 @@ class DatabaseExtractor:
         #     return json_data
         # self.xlsx_data = self.xlsx_data.transpose()
 
-        return begin_info_extraction(self.data.to_string(index = False,header = False))
+        str_last_in = self.data.to_string(index=False, header=False)
+        str_last_in = fix_ocr(str_last_in)
+        str_last_in = str_last_in.replace("\"", " ")
+        str_last_in = str_last_in.replace("'", " ")
+        str_last_in = str_last_in.replace("=", " ")
+        logger.debug(TAG+"testest"+str_last_in)
+        return begin_info_extraction(str_last_in)
+
 
 
     def fuzz_extract(self):
