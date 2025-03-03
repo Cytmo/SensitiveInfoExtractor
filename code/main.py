@@ -44,7 +44,7 @@ argparse.add_argument("-t", "--time", default="output/time_info.txt",
                       help="time info output file")
 
 # 是否处理非图片文件内部中的图片, 默认为true
-argparse.add_argument("-p", "--picture", default="true",
+argparse.add_argument("-p", "--picture", default="false",
                       help="process picture in non image files")
 
 # 程序运行结束后是否清空workspace缓存目录
@@ -107,7 +107,6 @@ def main():
         while not direct_controller.fileList.empty():
             # 获取一个文件File类型
             file = direct_controller.fileList.get()
-
             if multiprocess_flag:
                 # 进程池中执行，直接添加即可，超过上限的进程会等待，自动完成分配
                 process_manager.add_process(
@@ -120,7 +119,6 @@ def main():
         if multiprocess_flag:
             process_manager.close_process_pool()
             process_manager.release_process_pool()
-    # Your code here
 
 
 # #性能分析工具下的执行
@@ -170,6 +168,8 @@ logger.info(TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000))
 time_info = TAG+'程序运行时间:%s毫秒' % ((T2 - T1)*1000)
 with open(args.time, "a+") as f:
     f.write(time_info+"\n")
+
+# 记录异常
 error_list = globalVar.get_error_list()
 if error_list is not None and len(error_list) > 0:
     logger.critical(

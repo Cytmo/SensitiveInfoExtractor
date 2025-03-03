@@ -55,8 +55,8 @@ def win_reg_file(sam_path, system_path):
     try:
         result.check_returncode()
     except subprocess.CalledProcessError as e:
-        logger.error(TAG+"win_reg_file(): " + e.stderr)
-        globalVar.set_error_list(e.stderr)
+        logger.error(TAG+"win_reg_file(): " + e)
+        # globalVar.set_error_list(sam_path, e)
         return ""
     return result.stdout
 
@@ -93,7 +93,7 @@ def is_win_reg_file(file_path):
         return True
 
     if "system.hiv" in file_path or "sam/system" in file_path:
-        logger.info(TAG+"is_win_reg_file(): " + file_path)
+        logger.debug(TAG+"is_win_reg_file(): " + file_path)
 
         sam_file_path = os.path.dirname(
             file_path)+"/"+os.path.basename(file_path).replace("system", "sam")
@@ -106,7 +106,7 @@ def is_win_reg_file(file_path):
 
 # 处理win 注册表文件
 def process_win_reg_file(file_path):
-    logger.info(TAG+"process_win_reg_file: " + file_path)
+    logger.debug(TAG+"process_win_reg_file: " + file_path)
     reg_info = win_reg_file(
         file_path, file_path.replace("/system", "/sam"))
     if reg_info == "":
@@ -114,12 +114,12 @@ def process_win_reg_file(file_path):
     reg_info = reg_info.replace("\x14", "")
 
     lines = reg_info.strip().split('\n')
-    # print(lines)
+    # # print(lines)
     users = []
 
     for line in lines:
         parts = line.split(':')
-        # print("aaaaaaa"+str(parts))
+        # # print("aaaaaaa"+str(parts))
         user_info = {
             "Status": "enabled",
             "Username": "None" if parts[0].strip() == "" else parts[0].strip(),
@@ -138,7 +138,7 @@ def process_win_reg_file(file_path):
             user["Status"] = "disabled"
             if user["Username"] == "":
                 user["Username"] = "None"
-    print(users)
+    # print(users)
     reg_info_parsed = json.dumps(users, indent=4)
     file_path_tip = file_path+" "+"with " + \
         file_path.split("/")[-1].replace("system", "sam")
@@ -253,3 +253,10 @@ def process_priv_file(filename):
         [10], [''.join(priv_file.readlines()[1:-1])])
     # sensitiveInformation.print_sensitive()
     res_out.add_new_json(filename, sensitiveInformation.change_to_json())
+
+
+def is_config_file(filename, nameclean):
+    if nameclean == "our_test_file":
+        return True
+    else:
+        return False

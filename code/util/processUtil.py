@@ -42,13 +42,13 @@ class ProcessManager:
     
     # def reduce_process(self):
     #     self._process_count-=1
-    #     print(self._process_count)
+    #     # print(self._process_count)
 
 
 
 # # 示例用法
 # def process_function(arg,file_use):
-#     print("Processing:", arg)
+#     # print("Processing:", arg)
 
 # def callback_func(result):
 #     process_manager.reduce_process()
@@ -59,9 +59,9 @@ class ProcessManager:
 # process_manager.add_process(callback_func,process_function, args=("Task 2",))
 # process_manager.add_process(callback_func,process_function, args=("Task 3",))
 # num_processes = process_manager.get_process_count()
-# print("进程数量:", num_processes)
+# # print("进程数量:", num_processes)
 # num_processes = process_manager.get_process_count()
-# print("进程数量:", num_processes)
+# # print("进程数量:", num_processes)
 
 
 # process_manager.close_process_pool()

@@ -11,10 +11,10 @@ def simplify_rules(input_filename, output_filename):
         with open(input_filename, 'r') as file:
             rules_data = yaml.safe_load(file)
     except FileNotFoundError:
-        print(f"File '{input_filename}' not found.")
+        # print(f"File '{input_filename}' not found.")
         return
     except yaml.YAMLError as e:
-        print(f"Error loading YAML from '{input_filename}': {e}")
+        # print(f"Error loading YAML from '{input_filename}': {e}")
         return
 
     # 定义条件，比如包含"?"的正则项需要被删除
@@ -44,11 +44,23 @@ def simplify_rules(input_filename, output_filename):
     with open(output_filename, 'w') as file:
         yaml.dump(new_rules_data, file, default_flow_style=False)
 
-    print(f"Filtered rules saved to {output_filename}")
+    # print(f"Filtered rules saved to {output_filename}")
 
 
 # 目前只删除了带?的
 # 调用函数并传递输入和输出文件名
-input_file = '../rules-stable.yml'
-output_file = '../rules/rules_simple.yml'
-simplify_rules(input_file, output_file)
+input_file = '../rules/rules_stable.yml'
+output_file = '../rules/rules_stable_simple.yml'
+# simplify_rules(input_file, output_file)
+
+
+# 读取YAML文件
+with open(output_file, 'r') as file:
+    data = yaml.safe_load(file)
+
+# 提取并保存名称到name.txt
+with open('name.txt', 'w') as output_file:
+    for pattern in data['patterns']:
+        name = pattern['pattern']['name']
+        output_file.write(name + '\n')
+        # print(name)

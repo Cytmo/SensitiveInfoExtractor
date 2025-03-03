@@ -30,10 +30,10 @@ def match_rules(input_string, rules_file):
         # 输出匹配的规则名称和匹配的字符串
         if matches:
             for name, matched_string in matches:
-                print(f"匹配规则 '{name}'，匹配的字符串: '{matched_string}'")
+                # print(f"匹配规则 '{name}'，匹配的字符串: '{matched_string}'")
             return [name for name, _ in matches]
         else:
-            print("没有匹配到规则")
+            # print("没有匹配到规则")
             return []
     except Exception as e:
         return []
@@ -52,6 +52,6 @@ rules_file = '../rules/rules_stable_simple.yml'
 
 # 调用函数并输出匹配的规则名称
 for item in input_string:
-    print()
-    print("==>"+item)
+    # print()
+    # print("==>"+item)
     matched_rules = match_rules(item, rules_file)

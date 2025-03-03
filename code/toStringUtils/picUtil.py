@@ -16,7 +16,6 @@ logger = LoggerSingleton().get_logger()
 
 """
 picUtil: 图片OCR
-* 主流OCR: https://www.jianshu.com/p/d19dba26f275
 """
 
 
@@ -114,6 +113,8 @@ def ocr_paddleocr(file):
     for line in result:
         for x in line:
             res.append(x[1][0])
+
+    # [# print(item) for item in res]
     return res
 
 
@@ -129,7 +130,7 @@ def ocr_batch_paddle(folder_path):
 
     image_all_text = ""
     for image_path in image_paths:
-        logger.info(TAG+"ppt_and_dps_file(): "+image_path)
+        logger.debug(TAG+"ppt_and_dps_file(): "+image_path)
         image_info = ocr.ocr(image_path)
         res = []
         for line in image_info:
@@ -148,7 +149,7 @@ def ocr_batch_textract(folder_path):
 
     image_all_text = ""
     for image_path in image_paths:
-        logger.info(TAG+"ppt_and_dps_file(): "+image_path)
+        logger.debug(TAG+"ppt_and_dps_file(): "+image_path)
         image_info = ocr_textract(image_path)
         if not len(image_info) == 0:
             image_string = "\n".join(image_info)
@@ -200,7 +201,7 @@ def ocr_table_batch(folder_path):
         result = find_image_by_hash(single_pic_hash)
 
         if result == False:
-            logger.info(TAG+"ocr_table_batch() with new hash: "+image_path)
+            logger.debug(TAG+"ocr_table_batch() with new hash: "+image_path)
             img = cv2.imread(image_path)
             result = table_engine(img)
 
@@ -220,13 +221,46 @@ def ocr_table_batch(folder_path):
             image_path = [image_path]
             filtered_list.append(image_path)
             for row in table_data:
-                if row != ['']:
-                    filtered_list.append(row)
+                filtered_list.append(row)
 
-            globalVar._pic_hash[single_pic_hash] = filtered_list
-            ocr_result.append(filtered_list)
+            # 补全二维list
+            final_list = [filtered_list[0]]+pad_2d_list(filtered_list[1:])
+
+            logger.debug(TAG+"Picture result")
+            [logger.debug(data) for data in final_list]
+
+            globalVar._pic_hash[single_pic_hash] = final_list
+            ocr_result.append(final_list)
         else:
-            logger.info(TAG+"ocr_table_batch() with old hash: "+image_path)
+            logger.debug(TAG+"ocr_table_batch() with old hash: "+image_path)
             ocr_result.append(result)
 
     return ocr_result
+
+
+# 补全二维list
+def pad_2d_list(input_2d_list):
+
+    # 找到最长的行的长度
+    max_length = max(len(row) for row in input_2d_list)
+
+    # 遍历二维列表并添加空格
+    padded_list = []
+    for row in input_2d_list:
+        if len(row) < max_length:
+            # 计算需要添加的空格数量
+            num_spaces = max_length - len(row)
+            # 添加空格到当前行
+            padded_row = row + [""] * num_spaces
+            padded_list.append(padded_row)
+        else:
+            padded_list.append(row)
+
+    # 检查每列是否全为空字符串，如果不是则保留该列
+    filtered_data = [col for col in zip(
+        *padded_list) if any(col) or not all(c == "" for c in col)]
+
+    # 转置筛选后的数据，得到二维列表
+    filtered_data_transposed = [list(col) for col in zip(*filtered_data)]
+
+    return filtered_data_transposed

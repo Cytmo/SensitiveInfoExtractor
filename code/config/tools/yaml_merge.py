@@ -11,11 +11,11 @@ def merge_and_remove_duplicates(input_directory, output_file):
         for file in files:
             if file.endswith(".yaml") or file.endswith(".yml"):
                 file_path = os.path.join(root, file)
-                print("Processing file:", file_path)
+                # print("Processing file:", file_path)
                 with open(file_path, 'r') as file:
                     rules = yaml.safe_load(file)
                     if 'patterns' in rules:
-                        print("Found 'patterns' in the rules file:")
+                        # print("Found 'patterns' in the rules file:")
                         filtered_rules = [
                             rule for rule in rules['patterns'] if 'confidence' not in rule or (rule.get('confidence') == 'high')]
                         all_rules.extend(filtered_rules)

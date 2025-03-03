@@ -23,7 +23,7 @@ def universal_textract(file):
 
 # 直接读取,适用于可直接查看的文件
 def universal_file(file):
-    logger.info(TAG+"universal_file(): "+file)
+    logger.debug(TAG+"universal_file(): "+file)
     try:
         with open(file, 'r') as file:
             content = file.read()

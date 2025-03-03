@@ -1,6 +1,9 @@
 import yaml
 import multiprocessing
+from util.logUtils import LoggerSingleton
 
+TAG = "utils.globalVar.py: "
+logger = LoggerSingleton().get_logger()
 """
 globalVar: 全局变量模块, 全局且多进程共享唯一
 usage:
@@ -26,10 +29,10 @@ def _init():  # 初始化
     flag_list = multiprocessing.Manager().list()
 
 
-
-def set_error_list(value):
+def set_error_list(file_path, value):
     # 定义一个全局变量
-    error_list.append(value)
+    error_list.append([file_path, value])
+
 
 def get_error_list():
     # 获得一个全局变量，不存在则提示读取对应变量失败
@@ -49,7 +52,7 @@ def get_value(key):
     try:
         return _global_dict[key]
     except:
-        print('读取'+key+'失败\r\n')
+        logger.debug('读取'+key+'失败\r\n')
 
 
 def init_sensitive_word(yml_file_path):
