@@ -333,12 +333,116 @@ class XlsxDevider:
             for ind,row in use_data.iterrows():
                 nan_flag = pd.isna(row)
                 # print(row)
-                sub_result = {guss_most[index].replace('{', '').replace('}', ''):row.values[index] for index in tag_use if not nan_flag[index]}
+                str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
+                text = str_use.split(' ')
+                sub_result = {guss_most[index].replace('{', '').replace('}', ''):text[index] for index in tag_use if index<len(text) }
+                # sub_result = {guss_most[index].replace('{', '').replace('}', ''):row.values[index] for index in tag_use if not nan_flag[index]}
                 if len(sub_result)>1:
                     json_data.append(sub_result)
-        # print(json_data)
+        print(json_data)
         return json_data
 
+class DatabaseExtractor:
+    def __init__(self,data):
+        self.data = data
+        #可扩展：模糊类型分割
+    
+    
+    # 敏感数据提取
+    def extract_sensitive(self):
+        json_data = []
+   
+        print("处理敏感数据中，敏感数据大小为",self.data.shape)
+
+        # 单行单列的提取
+        if self.data.shape[0] < 1:
+            return json_data
+        elif self.data.shape[0]==1:
+            return process_bind_prase(self.data.iloc[0].tolist())
+        if self.data.shape[1] <1:
+            return json_data
+        elif self.data.shape[1] == 1:
+            return process_bind_prase(self.data.iloc[:,0].tolist())
+        #TODO 处理提取分好块中的敏感数据
+        # 首行，首行校验->逐行提取
+        word_condition = [_sensitive_word_tmp.get(col_name) for col_name in self.data.columns]
+        word_index = [index for index,value in enumerate(word_condition) if value is not None]
+        if len(word_index) > 1:
+            use_data = self.data.iloc[0:]
+            for ind,row in use_data.iterrows():
+                nan_flag = pd.isna(row)
+                sub_result = {word_condition[index]:row.values[index] for index in word_index if not nan_flag[index]}
+                if len(sub_result)>1:
+                    json_data.append(sub_result)
+            return json_data
+        
+
+        # 行模糊提取
+        json_data = self.fuzz_extract()
+        if len(json_data)>0:
+            return json_data
+        # self.xlsx_data = self.xlsx_data.transpose()
+
+        # # 列模糊提取
+        # json_data = self.xlsx_fuzz_extract()
+        # if len(json_data)>0:
+        #     return json_data
+        # self.xlsx_data = self.xlsx_data.transpose()
+
+        return begin_info_extraction(self.data.to_string(index = False,header = False))
+
+
+    def fuzz_extract(self):
+        json_data = []
+        # 行模糊提取
+        chinese_cols = self.data.apply(lambda col: col.apply(contains_chinese)).any()
+        chinese_columns = chinese_cols[chinese_cols].index
+        # 不剩两列以上数据直接返回
+        if not self.data.shape[1]-len(chinese_columns)>1:
+            return json_data
+        use_data = self.data.drop(chinese_columns,axis=1).reset_index(drop = True)
+        use_data.columns = list(range(0,use_data.shape[1]))
+        guss_tag_list = []
+        print(use_data)
+        for ind,row in use_data.iterrows():
+            print(row)
+            str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
+            print(str_use)
+            text = plain_text_info_extraction(str_use,False,True,True)
+            text = text.split(' ')
+            guss_tag = []
+            for i in range(len(text)-1):
+                if is_a_mark(text[i]) and not is_a_mark(text[i+1]):
+                    if text[i+1] == 'nan':
+                        guss_tag.append('')
+                    else:
+                        guss_tag.append(text[i])
+            guss_tag_list.append(guss_tag)
+        guss_most_tag = count_most_frequent_strings(guss_tag_list)
+        guss_most = [item[0] for k,item in guss_most_tag.items()]
+        guss_most_unique = list(set(guss_most))
+        tag_use = []
+        user_label_in = False
+        for index in range(len(guss_most)):
+            if guss_most[index] == "{user}" and  not user_label_in:
+                tag_use.append(index)
+                user_label_in = True
+            elif guss_most[index] != "{user}":
+                if guss_most[index] == "{password}" and  not user_label_in:
+                    continue
+                tag_use.append(index)
+        if len(guss_most_unique)>1:
+            # 模糊提取的输出
+            for ind,row in use_data.iterrows():
+                nan_flag = pd.isna(row)
+                print(row)
+                str_use = row.apply(lambda x: str(x)).str.cat(sep=' ')
+                text = str_use.split(' ')
+                sub_result = {guss_most[index].replace('{', '').replace('}', ''):text[index] for index in tag_use if index<len(text) }
+                if len(sub_result)>1:
+                    json_data.append(sub_result)
+        print(json_data)
+        return json_data
 
 # 传入pandas中dataframe类型的 2维列表
 def single_table_sensitive_extraction(data):

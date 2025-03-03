@@ -38,6 +38,9 @@ extension_switch_new = {
     # 配置文件处理
     extract_config: [".yml", ".xml", ".properties"],
 
+    # 数据库文件处理
+    extract_db:[".db"],
+
     # 代码文件处理
     extract_code_file: [
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
@@ -63,6 +66,7 @@ extension_switch = {
     ".xlsx": extract_xlsx,
     ".wps": extract_wps,
     ".et": extract_et,
+    ".db": extract_db,
     ".eml": extract_eml,
     ".png": extract_pic,
     ".jpg": extract_pic,

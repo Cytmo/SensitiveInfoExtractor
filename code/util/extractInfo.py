@@ -6,6 +6,7 @@ from toStringUtils.officeUtil import *
 from toStringUtils.picUtil import *
 from informationEngine.info_core import begin_info_extraction
 from toStringUtils.officeUtil import *
+from toStringUtils.databaseUtil import *
 
 """
 extractInfo: 文件信息读取与敏感信息提取
@@ -147,6 +148,12 @@ def extract_et(file_path, nameclean):
     os.rename(et_doc_name, file_path)
     res_out.add_new_json(file_path, text)
 
+######################### database file########################################
+# .db 数据库文件的读取和提取操作
+def extract_db(file_path, nameclean):
+    logger.info(TAG+"extract_db(): " + file_path.split("/")[-1])
+    text = db_file(file_path)
+    res_out.add_new_json(file_path, text)
 
 ######################### e-mail file ########################################
 
