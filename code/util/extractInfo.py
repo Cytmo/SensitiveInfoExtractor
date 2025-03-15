@@ -285,11 +285,32 @@ def extract_et(file_path, nameclean):
     res_out.add_new_json(file_path, text)
 
 ######################### database file########################################
-# .db 数据库文件的读取和提取操作
+# 数据库文件的读取和提取操作
 def extract_db(file_path, nameclean):
+    """处理数据库文件
+    支持的文件格式：
+    - SQLite: .db, .sqlite, .sqlite3
+    - MySQL: .sql, .myd, .myi, .frm, .ibd
+    - PostgreSQL: .sql, .dump
+    - SQL Server: .mdf, .ldf, .bak
+    - Oracle: .dmp, .dbf
+    - 通用SQL脚本: .sql
+    """
     logger.info(TAG+"extract_db(): " + file_path.split("/")[-1])
-    text = db_file(file_path)
-    res_out.add_new_json(file_path, text)
+    try:
+        text = db_file(file_path)
+        if text:
+            res_out.add_new_json(file_path, text)
+    except Exception as e:
+        logger.error(TAG+"extract_db() error: " + str(e))
+        # 尝试读取为文本文件
+        try:
+            content = read_file_content(file_path)
+            res = begin_info_extraction(content, file_path=file_path)
+            if res:
+                res_out.add_new_json(file_path, res)
+        except Exception as e2:
+            logger.error(TAG+"extract_db() fallback error: " + str(e2))
 
 ######################### code config file ################################
 
@@ -388,3 +409,101 @@ def extract_eml(file_path, nameclean):
 
     if result != {}:
         res_out.add_new_json(file_path, result)
+
+# 文件处理函数字典
+def get_extract_func(file_path):
+    # 获取文件扩展名
+    ext = os.path.splitext(file_path)[1].lower()
+    
+    # 文件扩展名到处理函数的映射
+    ext_to_func = {
+        # 文档文件
+        '.txt': extract_direct_read,
+        '.log': extract_direct_read,
+        '.md': extract_direct_read,
+        '.conf': extract_config,
+        '.config': extract_config,
+        '.ini': extract_config,
+        '.properties': extract_config,
+        '.env': extract_config,
+        '.xml': extract_config,
+        '.html': extract_direct_read,
+        '.json': extract_direct_read,
+        '.yaml': extract_direct_read,
+        '.yml': extract_direct_read,
+        
+        # 办公文档
+        '.pdf': extract_pdf,
+        '.csv': extract_csv,
+        '.doc': extract_doc,
+        '.docx': extract_docx,
+        '.wps': extract_wps,
+        '.dps': extract_dps,
+        '.ppt': extract_ppt,
+        '.pptx': extract_pptx,
+        '.xls': extract_et,
+        '.xlsx': extract_xlsx,
+        '.et': extract_et,
+        
+        # 数据库文件
+        '.db': extract_db,
+        '.sqlite': extract_db,
+        '.sqlite3': extract_db,
+        '.sql': extract_db,
+        '.myd': extract_db,
+        '.myi': extract_db,
+        '.frm': extract_db,
+        '.ibd': extract_db,
+        '.dump': extract_db,
+        '.mdf': extract_db,
+        '.ldf': extract_db,
+        '.bak': extract_db,
+        '.dmp': extract_db,
+        '.dbf': extract_db,
+        
+        # 代码文件
+        '.py': extract_code_file,
+        '.js': extract_code_file,
+        '.php': extract_code_file,
+        '.java': extract_code_file,
+        '.c': extract_code_file,
+        '.cpp': extract_code_file,
+        '.h': extract_code_file,
+        '.cs': extract_code_file,
+        '.go': extract_code_file,
+        '.rb': extract_code_file,
+        '.pl': extract_code_file,
+        '.sh': extract_code_file,
+        '.bat': extract_code_file,
+        
+        # 图像文件
+        '.jpg': extract_pic,
+        '.jpeg': extract_pic,
+        '.png': extract_pic,
+        '.gif': extract_pic,
+        '.bmp': extract_pic,
+        '.tiff': extract_pic,
+        
+        # 邮件文件
+        '.eml': extract_eml,
+        '.msg': extract_eml,
+    }
+    
+    # 返回对应的处理函数，如果没有则返回通用处理函数
+    return ext_to_func.get(ext, extract_universal)
+
+# 文件处理主函数
+def process_file(file_path, nameclean):
+    # 获取处理函数
+    extract_func = get_extract_func(file_path)
+    
+    # 调用处理函数
+    try:
+        extract_func(file_path, nameclean)
+    except Exception as e:
+        logger.error(TAG+"process_file() error: " + str(e))
+        # 尝试使用通用处理函数
+        try:
+            extract_universal(file_path, nameclean)
+        except Exception as e2:
+            logger.error(TAG+"process_file() fallback error: " + str(e2))

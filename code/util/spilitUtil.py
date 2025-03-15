@@ -58,60 +58,87 @@ extension_switch_new = {
 
 # 按照文件类型分发各个文件
 def spilit_process_file(file, root_directory):
+    """处理单个文件
+    使用文件类型检测和处理函数映射进行处理
+    """
+    try:
+        # 获取文件路径
+        file_path = os.path.join(root_directory, File.get_parent_directory(file))
+        # 获取文件名
+        file_name = file.name
+        TAG = "util.spilitUtil.py-"
+        logger.info(TAG + "spilit_process_file(): " + file_name)
+        
+        # 使用新的统一文件处理函数
+        process_file(file_path, file_name)
+        
+    except Exception as e:
+        logger.error(TAG + "spilit_process_file(): " + str(e))
+
+# 以下是旧的处理方式，保留注释以供参考
+"""
+def spilit_process_file(file, root_directory):
 
     # 获取文件的后缀
     # 类方法：获取文件名后缀
-    file_spilit = os.path.splitext(file.name)
-    file_name = root_directory + '/' + File.get_parent_directory(file)
-    logger.info(TAG+"==>开始处理文件: " + file_name)
+    filepathname = File.get_parent_directory(file)
+    filepath = os.path.join(root_directory, filepathname)
+    filename = file.name
+    TAG = "util.spilitUtil.py-"
+    logger.info(TAG+"spilit_process_file(): "+filename)
+    file_extension = os.path.splitext(filename)[1]
 
-    # if is_config_file(file_name, file.name):
-    #     extract__pure_key_value(file_name, file.name)
-    #     # extract_rule_based(file_name, file.name)
-    #     return
-    # 后缀检测分发
-    for process_function, suffix_list in extension_switch_new.items():
-        if file_spilit[1] in suffix_list:
-            process_function(file_name, file_spilit[0])
-            return
+    # 根据扩展名进入对应的处理函数
+    for func, extensions in extension_switch_new.items():
+        if file_extension in extensions:
+            func(filepath, nameclean=filename)
+            break
+    else:
+        # 默认处理（如果没有匹配到扩展名）
+        isCode = is_token_file(filepath)
+        if isCode:
+            extract_code_file(filepath, nameclean=filename)
+        else:
+            extract_universal(filepath, nameclean=filename)
+"""
 
-    # 系统关键敏感信息提取开始
-    # 判断文件是win reg 文件
-    if is_win_reg_file(file_name):
-        return
+# 系统关键敏感信息提取开始
+# 判断文件是win reg 文件
+if is_win_reg_file(file_name):
+    return
 
-    # 判断是否是passwd文件
-    if if_passwd_file(file_name, file.name):
-        process_passwd_file(file_name)
-        return
+# 判断是否是passwd文件
+if if_passwd_file(file_name, file.name):
+    process_passwd_file(file_name)
+    return
 
-    # 判断是否是shadow文件
-    if if_shadow_file(file_name, file.name):
-        process_shadow_file(file_name)
-        return
+# 判断是否是shadow文件
+if if_shadow_file(file_name, file.name):
+    process_shadow_file(file_name)
+    return
 
-    # 判断是否是公钥文件
-    if if_authorized_keys_file(file_name, file.name):
-        process_authorized_keys_file(file_name)
-        return
+# 判断是否是公钥文件
+if if_authorized_keys_file(file_name, file.name):
+    process_authorized_keys_file(file_name)
+    return
 
-    # 判断是否是私钥文件
-    if if_private_keys_file(file_name, file.name):
-        process_priv_file(file_name)
-        return
+# 判断是否是私钥文件
+if if_private_keys_file(file_name, file.name):
+    process_priv_file(file_name)
+    return
 
-    # 判断是否是token文件
-    if is_token_file(file_name):
-        return
+# 判断是否是token文件
+if is_token_file(file_name):
+    return
 
-    try:
-        with open(file_name, 'r') as file:
-            first_line = file.readline()
-            # 如果成功读取第一行数据，继续处理
-            if first_line:
-                extract_direct_read(file_name, os.path.splitext(file_name)[0])
-            else:
-                logger.debug(TAG + "=>Unsupported file format: " + file_name)
-    except Exception as e:
-        logger.debug(TAG + "=>Unsupported file format: " + file_name)
-        # globalVar.set_error_list(file_name, e, "不支持该文件类型")
+try:
+    with open(file_name, 'r') as file:
+        first_line = file.readline()
+        # 如果成功读取第一行数据，继续处理
+        if first_line:
+            extract_direct_read(file_name, os.path.splitext(file_name)[0])
+        else:
+            logger.debug(TAG + "=>Unsupported file format: " + file_name)
+except Exception as e:
+    logger.debug(TAG + "=>Unsupported file format: " + file_name)
+    # globalVar.set_error_list(file_name, e, "不支持该文件类型")
