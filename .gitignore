@@ -159,3 +159,5 @@ code/models
 time_info.txt
 data_test
 data_test copy
+code/output/*
+code/log/*

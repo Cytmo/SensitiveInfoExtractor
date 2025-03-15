@@ -18,6 +18,31 @@ logger = LoggerSingleton().get_logger()
 picUtil: 图片OCR
 """
 
+# 全局OCR引擎配置
+OCR_CONFIG = {
+    'use_gpu': False,
+    'show_log': False,
+    'lang': 'ch',
+    'max_batch_size': 1,
+    'use_angle_cls': False,  # 关闭角度检测，提高速度
+    'det': False,  # 如果只需识别文字，可关闭检测
+    'rec': True,   # 开启识别
+}
+
+# 初始化OCR引擎
+def init_ocr_engine():
+    try:
+        logger.info(TAG + "初始化OCR引擎...")
+        ocr_engine = PaddleOCR(**OCR_CONFIG)
+        logger.info(TAG + "OCR引擎初始化成功")
+        return ocr_engine
+    except Exception as e:
+        logger.error(TAG + f"OCR引擎初始化失败: {str(e)}")
+        # 返回None以便调用处进行错误处理
+        return None
+
+# 共享的OCR引擎实例
+ocr_engine = None
 
 # 读取输入目录或者输入图片的路径处理
 def read_all_pic(path, image_extensions=None):
@@ -187,55 +212,60 @@ def custom_sort_key(filename):
 # 使用百度PaddleOCR表格形式识别, 输入为包含图片路径的list
 def ocr_table_batch(folder_path):
     ocr_result = []
-    # show_log 打印识别日志
-    table_engine = PPStructure(show_log=False, layout=False,
-                               lang="ch", use_gpu=True
-                               )
+    try:
+        table_engine = PPStructure(show_log=False, layout=False,
+                                 use_gpu=False,  # 确保使用CPU
+                                 max_batch_size=1,  # 限制批处理大小
+                                 lang="ch")  # 添加语言参数
 
-    image_paths = sorted(read_all_pic(folder_path), key=custom_sort_key)
+        image_paths = sorted(read_all_pic(folder_path), key=custom_sort_key)
 
-    for image_path in image_paths:
+        for image_path in image_paths:
 
-        single_pic_hash = calculate_image_md5(image_path)
+            single_pic_hash = calculate_image_md5(image_path)
 
-        result = find_image_by_hash(single_pic_hash)
+            result = find_image_by_hash(single_pic_hash)
 
-        if result == False:
-            logger.debug(TAG+"ocr_table_batch() with new hash: "+image_path)
-            img = cv2.imread(image_path)
-            result = table_engine(img)
+            if result == False:
+                logger.debug(TAG+"ocr_table_batch() with new hash: "+image_path)
+                img = cv2.imread(image_path)
+                result = table_engine(img)
 
-            html_code = result[0]["res"]["html"]
-            soup = BeautifulSoup(html_code, 'html.parser')
+                html_code = result[0]["res"]["html"]
+                soup = BeautifulSoup(html_code, 'html.parser')
 
-            table = soup.find('table')
-            table_data = []
-            for row in table.find_all('tr'):
-                row_data = [cell.get_text(strip=True)
-                            for cell in row.find_all('td')]
-                if row_data:
-                    table_data.append(row_data)
+                table = soup.find('table')
+                table_data = []
+                for row in table.find_all('tr'):
+                    row_data = [cell.get_text(strip=True)
+                                for cell in row.find_all('td')]
+                    if row_data:
+                        table_data.append(row_data)
 
-            # 使用for循环遍历原始列表并添加非空的子列表到新列表
-            filtered_list = []
-            image_path = [image_path]
-            filtered_list.append(image_path)
-            for row in table_data:
-                filtered_list.append(row)
+                # 使用for循环遍历原始列表并添加非空的子列表到新列表
+                filtered_list = []
+                image_path = [image_path]
+                filtered_list.append(image_path)
+                for row in table_data:
+                    filtered_list.append(row)
 
-            # 补全二维list
-            final_list = [filtered_list[0]]+pad_2d_list(filtered_list[1:])
+                # 补全二维list
+                final_list = [filtered_list[0]]+pad_2d_list(filtered_list[1:])
 
-            logger.debug(TAG+"Picture result")
-            [logger.debug(data) for data in final_list]
+                logger.debug(TAG+"Picture result")
+                [logger.debug(data) for data in final_list]
 
-            globalVar._pic_hash[single_pic_hash] = final_list
-            ocr_result.append(final_list)
-        else:
-            logger.debug(TAG+"ocr_table_batch() with old hash: "+image_path)
-            ocr_result.append(result)
+                globalVar._pic_hash[single_pic_hash] = final_list
+                ocr_result.append(final_list)
+            else:
+                logger.debug(TAG+"ocr_table_batch() with old hash: "+image_path)
+                ocr_result.append(result)
 
-    return ocr_result
+        return ocr_result
+    except Exception as e:
+        logger.error(TAG + f"表格OCR处理失败: {str(e)}")
+        # 在发生错误时返回空结果，避免程序崩溃
+        return []
 
 
 # 补全二维list

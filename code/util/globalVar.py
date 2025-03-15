@@ -27,6 +27,12 @@ def _init():  # 初始化
     global flag_list
     flag_list = []
     flag_list = multiprocessing.Manager().list()
+    # 是否输出无关联的敏感信息
+    global unrelated_info_flag
+    unrelated_info_flag = False
+    # 是否启用认证信息搜索
+    global auth_search_flag
+    auth_search_flag = True
 
 
 def set_error_list(file_path, value):
@@ -70,3 +76,23 @@ def init_sensitive_word(yml_file_path):
 def get_sensitive_word():
     global _sensitive_word
     return _sensitive_word
+
+
+def set_unrelated_info_flag(flag):
+    global unrelated_info_flag
+    unrelated_info_flag = flag
+
+
+def get_unrelated_info_flag():
+    global unrelated_info_flag
+    return unrelated_info_flag
+
+
+def set_auth_search_flag(flag):
+    global auth_search_flag
+    auth_search_flag = flag
+
+
+def get_auth_search_flag():
+    global auth_search_flag
+    return auth_search_flag
