@@ -1094,6 +1094,8 @@ def ocr_code_processing(text: str) -> dict:
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
     # text = fuzz_prevention(text)
     text = text.lower()
     text = fix_ocr(text)

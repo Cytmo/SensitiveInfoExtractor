@@ -1,6 +1,6 @@
-# 安全文本检测系统
+# 隐私数据扫描工具
 
-一个用于检测文档和图像中敏感信息的工具，支持多种文件格式和检测模式。
+一个用于检测文件中隐私数据的工具，支持多种文件格式和检测模式。
 
 ## 1. 系统环境要求
 
@@ -103,12 +103,7 @@ sudo ln -s /usr/local/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
 - 系统会自动解压并扫描内部文件
 
 ### 数据库文件
-- MySQL (`.sql`, `.myd`, `.myi`, `.frm`, `.ibd`)
-- PostgreSQL (`.sql`, `.dump`)
-- SQL Server (`.mdf`, `.ldf`, `.bak`)
-- SQLite (`.db`, `.sqlite`, `.sqlite3`)
-- Oracle (`.dmp`, `.dbf`)
-- 通用SQL脚本 (`.sql`)
+- SQLite (`.db`)
 
 ### 配置和日志文件
 - 配置文件 (`.conf`, `.config`, `.ini`, `.properties`, `.env`)
@@ -137,7 +132,7 @@ sudo ln -s /usr/local/lib/libcrypto.so.1.1 /usr/lib/libcrypto.so.1.1
 ### 命令行直接运行
 执行路径应在项目代码目录下：
 ```bash
-cd security-text-detect-825/code
+cd code
 python main.py -f ../data -t output/time_info.txt
 ```
 
@@ -196,11 +191,3 @@ python run_interactive.py
 | 清理工作区 | -c, --clean | true | 程序运行结束后是否清空workspace缓存目录 |
 | 无关联敏感信息 | -ur, --unrelated | false | 是否输出不满足关联规则的敏感信息 |
 | 认证信息搜索 | -auth, --auth_search | true | 是否搜索用户名和密码相关信息 |
-
-## 4. 错误处理与注意事项
-
-- 如果脚本无法找到code目录，会显示警告信息。
-- 运行过程中出现任何错误都会被捕获并显示。
-- 您可以随时按下Ctrl+C中断脚本执行。
-- 确保您已经安装了所有必要的依赖项。
-- 处理大型文件或大量文件时，可能需要增加系统资源限制。
