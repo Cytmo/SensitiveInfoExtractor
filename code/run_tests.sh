@@ -45,7 +45,6 @@ while getopts "ntacdhsm" option; do
             if [ ${#files[@]} -lt 2 ]; then
                 echo "There are less than 2 files in the output folder."
             else
-                # 执行比较操作，这里用diff作为示例，你可以根据实际需求修改
                 echo "Comparing ${files[0]} and ${files[1]}..."
                 diff "${files[0]}" "${files[1]}"
                 result=$?
