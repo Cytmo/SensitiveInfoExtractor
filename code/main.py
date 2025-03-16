@@ -1,3 +1,4 @@
+from toStringUtils.databaseUtil import sql_conn
 from util.resultUtil import ResOut
 from util import globalVar
 from util import processUtil
@@ -118,6 +119,7 @@ process_manager = processUtil.ProcessManager()
 
 ################################## main() #####################################
 def main():
+    # res_out.add_new_json('sql conn',sql_conn())
     # 逐个根目录执行
     while not globalVar.root_folder_list.empty():
         # 取出第一个根目录

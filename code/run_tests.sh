@@ -11,6 +11,7 @@ function show_usage {
     echo "  -d: Compare the two newest files in the output folder"
     echo "  -s: standard test"
     echo "  -m: multi-process test"
+    echo "  -db: data-base conn"
     echo "  -h: Show help"
     # 添加更多选项和描述
 }

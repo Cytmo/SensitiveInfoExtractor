@@ -13,6 +13,9 @@ from toStringUtils.picUtil import *
 from util.extractInfo import *
 from toStringUtils.universalUtil import *
 
+#数据库直连
+import mysql.connector
+
 # 日志模块
 from util.logUtils import LoggerSingleton
 TAG = "toStringUtils.databaseUtil.py-"
@@ -69,6 +72,256 @@ def db_file(file_path):
     except Exception as e:
         logger.error(TAG+f"SQLite数据库处理错误: {str(e)}")
         return f"数据库文件处理错误: {str(e)}"
+
+
+def sql_conn():
+    """
+    处理SQL数据库连接
+    """
+    try:
+        # 数据库连接信息
+        db_config = {
+            'user': 'root',    # 替换为你的MySQL用户名
+            'password': '123456',  # 替换为你的MySQL密码
+            'host': 'localhost',        # 数据库主机地址
+            'port':3307
+        }
+
+        # 连接到MySQL服务器
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        logger.info("连接到MySQL服务器成功！")
+
+        # 获取所有数据库的名称
+        cursor.execute("SHOW DATABASES;")
+        databases = [item[0] for item in cursor.fetchall()]
+        logger.info("可用的数据库：{}".format( databases))
+        # result_text = f"SQL数据库文件: {db_config}\n"
+        # 存储所有数据库和表的DataFrame
+        all_dataframes = {}
+        sensitive_info = []
+
+        # 遍历每个数据库
+        for db_name in databases:
+            logger.info(f"\n正在处理数据库：{db_name}")
+            
+            # 跳过系统数据库（如mysql、information_schema、performance_schema等）
+            if db_name in ['mysql', 'information_schema', 'performance_schema', 'sys']:
+                logger.info(f"跳过系统数据库：{db_name}")
+                continue
+
+            # 切换到当前数据库
+            cursor.execute(f"USE {db_name}")
+
+            # 获取当前数据库中的所有表
+            cursor.execute("SHOW TABLES;")
+            tables = [item[0] for item in cursor.fetchall()]
+            logger.info("数据库 {} 中的表：{}".format(db_name, tables))
+
+            # 为当前数据库创建一个字典来存储表的DataFrame
+            all_dataframes[db_name] = {}
+
+            # 遍历每个表
+            for table in tables:
+                logger.info(f"正在处理表：{table}")
+                # result_text += f"表名: {table}\n"
+                query = f"SELECT * FROM {table};"
+                try:
+                    df = pd.read_sql(query, conn)
+                    logger.info(f"表 {table} 已成功读取为DataFrame，行数：{len(df)}")
+                    table_result = DatabaseExtractor(df).extract_sensitive()
+                    if table_result:
+                        sensitive_info.append(table_result)
+
+                except Exception as e:
+                    logger.info(f"读取表 {table} 时出错：{e}")
+
+        # 关闭数据库连接
+        cursor.close()
+        conn.close()
+        logger.info("数据库连接已关闭。")
+        return  sensitive_info
+    except Exception as e:
+        logger.error(TAG+f"SQLite数据库处理错误: {str(e)}")
+        return f"数据库文件处理错误: {str(e)}"
+
+import psycopg2
+def postgresql_conn():
+    """
+    处理PostgreSQL数据库连接
+    """
+    try:
+        # 数据库连接信息
+        db_config = {
+            'user': 'your_username',    # 替换为你的PostgreSQL用户名
+            'password': 'your_password',  # 替换为你的PostgreSQL密码
+            'host': 'localhost',        # 数据库主机地址
+            'port': '5432',            # PostgreSQL默认端口
+            'database': 'your_database'  # 替换为你的数据库名称
+        }
+
+        # 连接到PostgreSQL数据库
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor()
+
+        logger.info("连接到PostgreSQL服务器成功！")
+
+        # 获取所有数据库的名称（PostgreSQL中通常直接获取所有表，因为数据库切换不像MySQL那样频繁）
+        # 这里假设我们只处理一个数据库，直接获取当前数据库中的所有表
+        cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
+        tables = [item[0] for item in cursor.fetchall()]
+        logger.info("可用的表：{}".format(tables))
+
+        # 存储所有表的DataFrame
+        all_dataframes = {}
+        sensitive_info = []
+
+        # 遍历每个表
+        for table in tables:
+            logger.info(f"正在处理表：{table}")
+            query = f"SELECT * FROM {table};"
+            try:
+                df = pd.read_sql(query, conn)
+                logger.info(f"表 {table} 已成功读取为DataFrame，行数：{len(df)}")
+                table_result = DatabaseExtractor(df).extract_sensitive()
+                if table_result:
+                    sensitive_info.append(table_result)
+            except Exception as e:
+                logger.error(f"读取表 {table} 时出错：{e}")
+
+        # 关闭数据库连接
+        cursor.close()
+        conn.close()
+        logger.info("数据库连接已关闭。")
+        return sensitive_info
+    except Exception as e:
+        logger.error("PostgreSQL数据库处理错误: {}".format(str(e)))
+        return f"数据库处理错误: {str(e)}"
+
+import cx_Oracle
+def oracle_conn():
+    """
+    处理Oracle数据库连接
+    """
+    try:
+        # 数据库连接信息
+        db_config = {
+            'user': 'your_username',    # 替换为你的Oracle用户名
+            'password': 'your_password',  # 替换为你的Oracle密码
+            'dsn': 'localhost:1521/your_database'  # 替换为你的Oracle DSN
+        }
+
+        # 连接到Oracle数据库
+        conn = cx_Oracle.connect(**db_config)
+        cursor = conn.cursor()
+
+        logger.info("连接到Oracle服务器成功！")
+
+        # 获取所有表的名称（Oracle中需要指定用户）
+        cursor.execute("SELECT table_name FROM user_tables")
+        tables = [item[0] for item in cursor.fetchall()]
+        logger.info("可用的表：{}".format(tables))
+
+        # 存储所有表的DataFrame
+        all_dataframes = {}
+        sensitive_info = []
+
+        # 遍历每个表
+        for table in tables:
+            logger.info(f"正在处理表：{table}")
+            query = f"SELECT * FROM {table};"
+            try:
+                df = pd.read_sql(query, conn)
+                logger.info(f"表 {table} 已成功读取为DataFrame，行数：{len(df)}")
+                table_result = DatabaseExtractor(df).extract_sensitive()
+                if table_result:
+                    sensitive_info.append(table_result)
+            except Exception as e:
+                logger.error(f"读取表 {table} 时出错：{e}")
+
+        # 关闭数据库连接
+        cursor.close()
+        conn.close()
+        logger.info("数据库连接已关闭。")
+        return sensitive_info
+    except Exception as e:
+        logger.error("Oracle数据库处理错误: {}".format(str(e)))
+        return f"数据库处理错误: {str(e)}"
+
+import pyodbc
+def sqlserver_conn():
+    """
+    处理SQL Server数据库连接
+    """
+    try:
+        # 数据库连接信息
+        db_config = {
+            'driver': '{ODBC Driver 17 for SQL Server}',  # SQL Server驱动程序
+            'server': 'localhost',                       # 数据库服务器地址
+            'database': 'master',                        # 初始数据库（用于列出所有数据库）
+            'user': 'your_username',                    # 替换为你的SQL Server用户名
+            'password': 'your_password',                # 替换为你的SQL Server密码
+            'port': '1433'                             # SQL Server默认端口
+        }
+
+        # 连接到SQL Server服务器
+        conn_str = f"DRIVER={db_config['driver']};SERVER={db_config['server']},{db_config['port']};DATABASE={db_config['database']};UID={db_config['user']};PWD={db_config['password']}"
+        conn = pyodbc.connect(conn_str)
+        cursor = conn.cursor()
+
+        logger.info("连接到SQL Server服务器成功！")
+
+        # 获取所有数据库的名称
+        cursor.execute("SELECT name FROM sys.databases")
+        databases = [item[0] for item in cursor.fetchall()]
+        logger.info("可用的数据库：{}".format(databases))
+
+        # 存储所有数据库和表的DataFrame
+        all_dataframes = {}
+        sensitive_info = []
+
+        # 遍历每个数据库
+        for db_name in databases:
+            logger.info(f"\n正在处理数据库：{db_name}")
+            
+            # 跳过系统数据库（如master、model、msdb、tempdb）
+            if db_name in ['master', 'model', 'msdb', 'tempdb']:
+                logger.info(f"跳过系统数据库：{db_name}")
+                continue
+
+            # 切换到当前数据库
+            cursor.execute(f"USE {db_name}")
+
+            # 获取当前数据库中的所有表
+            cursor.execute("SELECT name FROM sys.tables")
+            tables = [item[0] for item in cursor.fetchall()]
+            logger.info(f"数据库 {db_name} 中的表：{tables}")
+
+            # 为当前数据库创建一个字典来存储表的DataFrame
+            all_dataframes[db_name] = {}
+
+            # 遍历每个表
+            for table in tables:
+                logger.info(f"正在处理表：{table}")
+                query = f"SELECT * FROM {table};"
+                try:
+                    df = pd.read_sql(query, conn)
+                    logger.info(f"表 {table} 已成功读取为DataFrame，行数：{len(df)}")
+                    table_result = DatabaseExtractor(df).extract_sensitive()
+                    if table_result:
+                        sensitive_info.append(table_result)
+                except Exception as e:
+                    logger.error(f"读取表 {table} 时出错：{e}")
+
+        # 关闭数据库连接
+        cursor.close()
+        conn.close()
+        logger.info("数据库连接已关闭。")
+        return sensitive_info
+    except Exception as e:
+        logger.error("mysql server数据库处理错误: {}".format(str(e)))
+        return f"数据库处理错误: {str(e)}"
 
 def sql_file(file_path):
     """
