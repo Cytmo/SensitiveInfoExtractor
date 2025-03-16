@@ -11,7 +11,6 @@ import argparse
 import subprocess
 import cProfile
 from util import globalVar
-
 """
 main: 主程序执行文件
 usage:
@@ -51,6 +50,14 @@ argparse.add_argument("-p", "--picture", default="false",
 argparse.add_argument("-c", "--clean", default="true",
                       help="clean the workspace dir in the end")
 
+# 是否输出无关联的敏感信息
+argparse.add_argument("-ur", "--unrelated", default="false",
+                      help="output unrelated sensitive information")
+
+# 是否启用认证信息搜索
+argparse.add_argument("-auth", "--auth_search", default="true",
+                      help="enable authentication info (username/password) search mode")
+
 
 # 输入扫描的路径
 args = argparse.parse_args()
@@ -72,6 +79,22 @@ if args.picture == "true":
 else:
     logger.info(TAG+"==>(默认)处理非图片文件内部中的图片！[添加 '-p false' 可取消]")
     globalVar.flag_list.append(False)
+
+# 是否输出无关联的敏感信息
+if args.unrelated == "true":
+    logger.info(TAG+"==>输出无关联的敏感信息！")
+    globalVar.set_unrelated_info_flag(True)
+else:
+    logger.info(TAG+"==>(默认)不输出无关联的敏感信息！[添加 '-ur true' 可开启]")
+    globalVar.set_unrelated_info_flag(False)
+
+# 是否启用认证信息搜索
+if args.auth_search == "true":
+    logger.info(TAG+"==>(默认)启用认证信息搜索！")
+    globalVar.set_auth_search_flag(True)
+else:
+    logger.info(TAG+"==>关闭认证信息搜索！[添加 '-auth false' 可关闭]")
+    globalVar.set_auth_search_flag(False)
 
 
 # 进程处理函数

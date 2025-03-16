@@ -287,9 +287,25 @@ def extract_et(file_path, nameclean):
 ######################### database file########################################
 # .db 数据库文件的读取和提取操作
 def extract_db(file_path, nameclean):
+    """
+    处理数据库文件并提取其中的文本内容
+    支持多种数据库格式: SQLite, MySQL, PostgreSQL, SQL Server, Oracle等
+    """
     logger.info(TAG+"extract_db(): " + file_path.split("/")[-1])
-    text = db_file(file_path)
+    
+    # 使用get_database_handler函数获取适合当前数据库文件类型的处理函数
+    from toStringUtils.databaseUtil import get_database_handler
+    
+    # 获取适合的处理函数
+    db_handler = get_database_handler(file_path)
+    
+    # 处理数据库文件
+    text = db_handler(file_path)
+    
+    # 添加到结果中
     res_out.add_new_json(file_path, text)
+    
+    return text
 
 ######################### code config file ################################
 

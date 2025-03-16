@@ -1,4 +1,9 @@
 import yaml
+import os
+
+# 获取当前文件所在目录的绝对路径
+CONFIG_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # This dictionary will store placeholders and their corresponding types
 PLACEHOLDERS_CORRESPONDING_TYPE = {}
 # 保存易混淆内容的位置 infomaion protection
@@ -95,9 +100,19 @@ xxxxxxxxxxxx={
 }
 
 # 读取YAML文件
-with open('config/rules-stable.yml', 'r') as yaml_file:
+with open(os.path.join(CONFIG_DIR, 'rules-stable.yml'), 'r') as yaml_file:
     SENSITIVE_INFO_PATTERN = yaml.safe_load(yaml_file)
     for pattern in SENSITIVE_INFO_PATTERN['patterns']:
+        name = pattern['pattern']['name'].strip().replace(" ",'')
+        REPLACED_KEYWORDS_LIST.append("{"+name+"}")
+
+# 读取个人信息正则表达式YAML文件
+with open(os.path.join(CONFIG_DIR, 'personal_info_patterns.yml'), 'r') as yaml_file:
+    PERSONAL_INFO_PATTERN = yaml.safe_load(yaml_file)
+    # 将个人信息模式添加到SENSITIVE_INFO_PATTERN中
+    SENSITIVE_INFO_PATTERN['patterns'].extend(PERSONAL_INFO_PATTERN['patterns'])
+    # 更新替换关键字列表
+    for pattern in PERSONAL_INFO_PATTERN['patterns']:
         name = pattern['pattern']['name'].strip().replace(" ",'')
         REPLACED_KEYWORDS_LIST.append("{"+name+"}")
 

@@ -270,6 +270,13 @@ class paired_info_pattern():
                 self.check_header[k] = True
 
     def remake_data(self):
+        # 获取unrelated_info_flag，确定是否输出无关联敏感信息
+        allow_unrelated = globalVar.get_unrelated_info_flag()
+        
+        # 如果允许输出无关联敏感信息，则直接返回，不进行依赖整合
+        if allow_unrelated:
+            return
+        
         # 依赖整合
         for k, v in ONE_WAY_CONNECTED_INFO.items():
             if self.data.get(v) == None and self.data.get(k) != None:
@@ -327,21 +334,31 @@ class paired_info_pattern():
     def check_result_validity(self):
         result = {}
         data_tmp = self.data.copy()
-        # 依赖整合
-        for k, v in ONE_WAY_CONNECTED_INFO.items():
-            if data_tmp.get(v) == None and data_tmp.get(k) != None:
-                data_tmp[k] = None
+        
+        # 获取unrelated_info_flag，确定是否输出无关联敏感信息
+        allow_unrelated = globalVar.get_unrelated_info_flag()
+        
+        # 如果允许输出无关联敏感信息，则直接跳过依赖检查
+        if not allow_unrelated:
+            # 依赖整合
+            for k, v in ONE_WAY_CONNECTED_INFO.items():
+                if data_tmp.get(v) == None and data_tmp.get(k) != None:
+                    data_tmp[k] = None
 
-        # 对称整合
-        for k, v in TWO_WAY_CONNECTED_INFO.items():
-            if data_tmp.get(v) == None and data_tmp.get(k) != None:
-                data_tmp[k] = None
-            if data_tmp.get(v) != None and data_tmp.get(k) == None:
-                data_tmp[v] = None
+            # 对称整合
+            for k, v in TWO_WAY_CONNECTED_INFO.items():
+                if data_tmp.get(v) == None and data_tmp.get(k) != None:
+                    data_tmp[k] = None
+                if data_tmp.get(v) != None and data_tmp.get(k) == None:
+                    data_tmp[v] = None
+                
         for key in data_tmp:
             if data_tmp[key] != None:
                 result[key] = data_tmp[key]
-        if len(result) < 2:
+            
+        # 如果允许输出无关联敏感信息，只要有1个字段就可以
+        min_fields = 1 if allow_unrelated else 2
+        if len(result) < min_fields:
             return False
         return True
 
@@ -383,7 +400,13 @@ class paired_info_pattern():
         for key in self.data:
             if self.data[key] != None:
                 result[key] = self.data[key]
-        if len(result) < 2:
+            
+        # 获取unrelated_info_flag，确定是否输出无关联敏感信息
+        allow_unrelated = globalVar.get_unrelated_info_flag()
+        
+        # 如果允许输出无关联敏感信息，只要有1个字段就可以
+        min_fields = 1 if allow_unrelated else 2
+        if len(result) < min_fields:
             return {}
         # check if result have all needed attributes
         # TODO() 可能要修改
@@ -391,7 +414,7 @@ class paired_info_pattern():
         #     if key not in result:
         #         result[key] = None
         self.reset_data()
-    
+
         self.result_set.append(result)
 
     def getter(self, name: str):
@@ -745,12 +768,24 @@ def extract_paired_info(text):
     result_pair = []
     a_paired_info = paired_info_pattern()
     text = text.split()
+    
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
 
+    # 如果禁用认证信息搜索，直接使用rule_based_info_extract处理
+    if not auth_search_enabled:
+        # 对于禁用认证信息搜索模式，直接使用正则表达式提取所有匹配项
+        text_str = " ".join(text)
+        return rule_based_info_extract(text_str)
+
+    # 以下是认证信息搜索模式的处理逻辑
     for i in range(len(text)-1):
         text_i_striped = text[i].strip()
+        
         # 密码不会最先出现
         if text_i_striped == "{password}" and a_paired_info.is_None():
             continue
+            
         # TODO change to is a mark
         if is_a_mark(text_i_striped) and not is_a_mark(text[i+1]):
             logger.debug(TAG+"extract_paired_info(): current paired info data"+str(a_paired_info.data))
@@ -843,6 +878,20 @@ def rule_based_info_extract(text: str) -> list:
     result_pair = []
     result_dict = {}
 
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
+    
+    # 如果禁用认证信息搜索，直接提取所有匹配项作为独立结果
+    if not auth_search_enabled:
+        for indicator in matches:
+            item_type = PLACEHOLDERS_CORRESPONDING_TYPE[indicator][0][0]
+            item_content = ITEM_PROTECTION_DICT[indicator]
+            result_dict = {item_type: item_content}
+            result_pair.append(result_dict)
+        logger.debug(TAG + 'rule_based_info_extract(): Direct regex match result: '+str(result_pair))
+        return result_pair
+        
+    # 认证信息搜索模式下的处理逻辑
     for indicator in matches:
         item_type = PLACEHOLDERS_CORRESPONDING_TYPE[indicator][0][0]
         item_content = ITEM_PROTECTION_DICT[indicator]
@@ -871,9 +920,21 @@ def code_info_extract(text: str) -> dict:
     text, item_protection_dict1 = information_protection(text)
     global ITEM_PROTECTION_DICT
     ITEM_PROTECTION_DICT = item_protection_dict1
+    
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
+    
+    # 如果禁用认证信息搜索，直接使用rule_based_info_extract处理
+    if not auth_search_enabled:
+        logger.debug(TAG + 'code_info_extract(): auth_search_enabled is False, using rule_based_info_extract')
+        return rule_based_info_extract(original_text)
+    
     text = prevent_eng_words_interference(text)
     text = text.lower()
     text = text.replace("'", '"')
+    
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
     # remove outer "
     lines = text.split("\n")
     new_lines = []
@@ -961,6 +1022,11 @@ def code_info_extract(text: str) -> dict:
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
             key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
         ):
+            # 如果禁用认证信息搜索，跳过用户名和密码相关关键词
+            if not auth_search_enabled:
+                if any(key in words_list[i] for key in ["user", "password", "pass", "username"]):
+                    continue
+                    
             logger.debug(TAG + 'Extract: '+words_list[i]+" "+words_list[i+1])
             if words_list[i+1] in ITEM_PROTECTION_DICT:
                 result_dict[words_list[i]
@@ -1081,6 +1147,11 @@ def ocr_code_processing(text: str) -> dict:
         if any(key in words_list[i] for key in SPECIAL_KEYWORDS_LIST) and not any(
             key in words_list[i + 1] for key in SPECIAL_KEYWORDS_LIST
         ):
+            # 如果禁用认证信息搜索，跳过用户名和密码相关关键词
+            if not auth_search_enabled:
+                if any(key in words_list[i] for key in ["user", "password", "pass", "username"]):
+                    continue
+                    
             logger.debug(TAG + 'Extract: '+words_list[i]+" "+words_list[i+1])
 
             result_dict[words_list[i]] = words_list[i + 1]
@@ -1158,6 +1229,8 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         IS_CODE_FILE: code_info_extract
     }
 
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
 
     switch = {
         'code': code_info_extract,
@@ -1165,6 +1238,25 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         'ocr': ocr_code_processing,
     }
     logger.debug(TAG + "begin_info_extraction(): input is {}".format(info))
+    
+    # 如果禁用认证信息搜索，在所有情况下直接使用rule_based_info_extract
+    if not auth_search_enabled:
+        logger.debug(TAG + "begin_info_extraction(): auth_search_enabled is False, using rule_based_info_extract directly")
+        # 纯文本情况
+        if isinstance(info, str):
+            result = rule_based_info_extract(info)
+            return result
+        # 表格情况
+        elif isinstance(info, list):
+            text = ""
+            for item in info[1:]:
+                item_to_string = "\n".join(item)
+                text = text+"\n"+item_to_string
+            text = fix_ocr(text)
+            result = rule_based_info_extract(text)
+            return result
+    
+    # 以下是认证信息搜索模式的处理逻辑
     # 纯文本
     if isinstance(info, str):
         if flag in type_switch:
@@ -1207,6 +1299,7 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
             text = text+"\n"+item_to_string
         
         text = fix_ocr(text)
+        
         if flag in type_switch:
             result = type_switch[flag](text)
             return result
@@ -1214,10 +1307,20 @@ def begin_info_extraction(info, flag=0, file_path='') -> dict:
         return result_manager(result, text, file_path)
 
 
-def result_filter(result,VALID_RESULT_THRESHOLD=2) -> dict:
+def result_filter(result, VALID_RESULT_THRESHOLD=2) -> dict:
     if result == [] or result == {}:
         logger.debug(TAG + 'result_filter(): skip empty result')
         return result
+    
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
+    
+    # 如果禁用认证信息搜索，直接返回原始结果，不进行过滤
+    if not auth_search_enabled:
+        logger.debug(TAG + "result_filter(): auth_search_enabled is False, skip filtering")
+        return result
+        
+    # 以下是认证信息搜索模式下的过滤逻辑
     logger.debug(TAG + "result_filter(): extract result: {}".format(str(result)))
     if isinstance(result, dict):
     # if IS_CODE_OR_CONFIG or isinstance(result, dict):
@@ -1245,6 +1348,19 @@ def result_filter(result,VALID_RESULT_THRESHOLD=2) -> dict:
 # 在常规提取失败后，使用特殊方法提取信息
 def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
     logger.debug(TAG + "result_manager(): extract result: {}".format(str(result)))
+    
+    # 获取认证信息搜索标志
+    auth_search_enabled = globalVar.get_auth_search_flag()
+    
+    # 如果禁用认证信息搜索，跳过所有复杂处理，直接返回结果
+    if not auth_search_enabled:
+        logger.debug(TAG + "result_manager(): auth_search_enabled is False, skipping complex processing")
+        # 如果结果为空，尝试使用rule_based_info_extract
+        if not result:
+            return rule_based_info_extract(info)
+        return result
+    
+    # 以下是认证信息搜索模式下的处理逻辑
     result = result_filter(result)
     # result = re_pair_info_extract(result)
     # file_extension = file_path.split(".")[-1]
@@ -1268,7 +1384,7 @@ def result_manager(result,info,file_path,IS_CODE_OR_CONFIG=False) -> dict:
             result = plain_text_info_extraction(info, FUZZ_MARK=True)
             logger.debug(
                 TAG + "result_manager(): fuzz_extract result: {}".format(str(result)))
-    result = result_filter(result)
+        result = result_filter(result)
     # result = re_pair_info_extract(result)
     return result
 

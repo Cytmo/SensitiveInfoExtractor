@@ -39,16 +39,28 @@ extension_switch_new = {
     extract_config: [".yml", ".xml", ".properties"],
 
     # 数据库文件处理
-    extract_db:[".db"],
+    extract_db:[
+        # SQLite数据库文件
+        ".db", ".sqlite", ".sqlite3",
+        # MySQL相关文件
+        ".frm", ".myd", ".myi", ".ibd",
+        # SQL Server相关文件
+        ".mdf", ".ldf", ".bak",
+        # Oracle相关文件
+        ".dmp", ".dbf",
+        # PostgreSQL相关文件
+        ".dump",
+        # SQL脚本文件
+        ".sql"
+    ],
 
     # 代码文件处理
     extract_code_file: [
         '.py', '.java', '.c', '.cpp', '.hpp', '.js', '.html', '.css', '.rb',
-        '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh', '.sql',
+        '.php', '.swift', '.kt', '.go', '.rs', '.ts', '.pl', '.sh',
         '.json', '.xml', '.m', '.r', '.dart', '.scala', '.vb', '.lua', '.coffee',
         '.ps1', 'Dockerfile', '.toml', '.h', '.kt', '.js', '.wxss', '.wxml', '.html', '.php'
     ],
-
 
     # 带后缀的关键文件处理
     process_pub_file: [".pub"],

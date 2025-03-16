@@ -31,6 +31,7 @@ def match_rules(input_string, rules_file):
         if matches:
             for name, matched_string in matches:
                 # print(f"匹配规则 '{name}'，匹配的字符串: '{matched_string}'")
+                pass  # 添加一个pass语句来避免空代码块
             return [name for name, _ in matches]
         else:
             # print("没有匹配到规则")
